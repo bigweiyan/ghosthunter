@@ -15,9 +15,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".UserInterface" />
-        <activity android:name=".Communication" />
-        <activity android:name=".GameLogic"></activity>
+        <activity android:name=".UserInterface"
+            android:label="User Interface"
+            android:configChanges="keyboard|keyboardHidden|orientation"/>
+        <activity android:name=".Communication"
+            android:label="Communication"
+            android:configChanges="keyboard|keyboardHidden|orientation"/>
+        <activity android:name=".GameLogic"
+            android:configChanges="keyboard|keyboardHidden|orientation"
+            android:label="Game Logic"></activity>
     </application>
 
 </manifest>
