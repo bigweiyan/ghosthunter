@@ -8,7 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 public class MainActivity extends ListActivity {
-    String tests[] = {"Communication","GameLogic","UserInterface"};
+    String tests[] = {"master.foxhunter.Communication","game.FoxHunter","master.foxhunter.UserInterface"};
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setListAdapter(new ArrayAdapter<>(this,
@@ -21,7 +21,7 @@ public class MainActivity extends ListActivity {
         String testName = tests[position];
         try{
             @SuppressWarnings("rawtypes")
-            Class clazz = Class.forName("com.hunter.master.foxhunter"+testName);
+            Class clazz = Class.forName("com.hunter."+testName);
             Intent intent = new Intent(this,clazz);
             startActivity(intent);
         }catch(ClassNotFoundException e){
