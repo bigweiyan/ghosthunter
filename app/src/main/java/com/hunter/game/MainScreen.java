@@ -1,11 +1,15 @@
 package com.hunter.game;
 
 import com.wxyz.framework.Game;
+import com.wxyz.framework.Input;
 import com.wxyz.framework.gl.Camera2D;
 import com.wxyz.framework.gl.SpriteBatcher;
-import com.wxyz.framework.gl.Texture;
-import com.wxyz.framework.gl.TextureRegion;
+import com.wxyz.framework.gl.math.OverlapTest;
+import com.wxyz.framework.gl.math.Rectangle;
+import com.wxyz.framework.gl.math.Vector2;
 import com.wxyz.framework.impl.GLScreen;
+
+import java.util.List;
 
 import javax.microedition.khronos.opengles.GL10;
 
@@ -14,20 +18,68 @@ import javax.microedition.khronos.opengles.GL10;
  */
 
 public class MainScreen extends GLScreen {
-    Camera2D camera;
-    SpriteBatcher batcher;
-    Texture mainPage;
-    TextureRegion mainPageRegion;
+    private Camera2D camera;
+    private SpriteBatcher batcher;
+    private Rectangle upButton;
+    private boolean upPressed;
+    private boolean downPressed;
+    private Rectangle downButton;
+    private Vector2 touchPos;
+    int mode;
+    private static final int MODE_NONE = 0;
+    private static final int MODE_BATTLE = 1;
+    private static final int MODE_TEAM = 2;
     public MainScreen(Game game) {
         super(game);
         camera = new Camera2D(glGraphics, 1080, 1920);
-        batcher = new SpriteBatcher(glGraphics, 2);
+        batcher = new SpriteBatcher(glGraphics, 10);
+        touchPos = new Vector2();
+
+        upButton = new Rectangle(278, 394, 524, 164);
+        upPressed = false;
+        downButton = new Rectangle(278, 160, 524, 164);
+        downPressed = false;
+        mode = MODE_NONE;
     }
 
     @Override
     public void update(float deltaTime) {
         game.getInput().getKeyEvents();
-        game.getInput().getTouchEvents();
+        List<Input.TouchEvent> events =  game.getInput().getTouchEvents();
+        int len = events.size();
+
+        for (int i = 0; i < len; i++) {
+            Input.TouchEvent event = events.get(i);
+            touchPos.set(event.x,event.y);
+            camera.touchToWorld(touchPos);
+
+            if (event.type == Input.TouchEvent.TOUCH_UP) {
+                if (OverlapTest.pointInRectangle(upButton, touchPos)) {
+                    if (mode == MODE_NONE) mode = MODE_BATTLE;
+                    else if (mode == MODE_BATTLE) mode = MODE_NONE;
+                    upPressed = false;
+                }else if (OverlapTest.pointInRectangle(downButton, touchPos)) {
+                    //if (mode == MODE_NONE) mode = MODE_TEAM;
+                    //else if (mode == MODE_TEAM) mode = MODE_NONE;
+                    downPressed = false;
+                }else {
+                    mode = MODE_NONE;
+                }
+            }
+
+            if (event.type == Input.TouchEvent.TOUCH_DRAGGED
+                    || event.type == Input.TouchEvent.TOUCH_DOWN) {
+
+                if (OverlapTest.pointInRectangle(upButton, touchPos)) {
+                    upPressed = true;
+                }else if (OverlapTest.pointInRectangle(downButton, touchPos)) {
+                    downPressed = true;
+                }else {
+                    upPressed = false;
+                    downPressed = false;
+                }
+            }
+        }
     }
 
     @Override
@@ -38,20 +90,40 @@ public class MainScreen extends GLScreen {
 
         gl.glEnable(GL10.GL_TEXTURE_2D);
 
-        batcher.beginBatch(mainPage);
-        batcher.drawSprite(540, 960, 1080, 1920, mainPageRegion);
+        batcher.beginBatch(Assets.main_page);
+        batcher.drawSprite(540, 960, 1080, 1920, Assets.page_region);
         batcher.endBatch();
+
+        gl.glEnable(GL10.GL_BLEND);
+        gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
+
+        if (mode == MODE_NONE) {
+            batcher.beginBatch(Assets.main_page);
+            batcher.drawSprite(540, 242, 524, 164,
+                    downPressed?Assets.main_team_button_pressed:Assets.main_team_button_released);
+            batcher.drawSprite(540, 476, 524, 164,
+                    upPressed?Assets.main_battle_button_pressed:Assets.main_battle_button_released);
+            batcher.endBatch();
+        } else if (mode == MODE_BATTLE){
+            batcher.beginBatch(Assets.battle_main_page);
+            batcher.drawSprite(540, 960, 1080, 1920, Assets.page_region);
+            batcher.drawSprite(540, 242, 524, 164,
+                    downPressed?Assets.main_team_button_pressed:Assets.main_team_button_released);
+            batcher.drawSprite(540, 476, 524, 164,
+                    upPressed?Assets.main_battle_button_pressed:Assets.main_battle_button_released);
+            batcher.endBatch();
+        }
+
+        gl.glDisable(GL10.GL_BLEND);
+
     }
 
     @Override
     public void pause() {
-        mainPage.dispose();
     }
 
     @Override
     public void resume() {
-        mainPage = Assets.main_page;
-        mainPageRegion = Assets.page_region;
     }
 
     @Override
