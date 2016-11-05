@@ -32,5 +32,7 @@ public class Assets {
 
     public static void reload(){
         main_page.reload();
+        battle_main_page.reload();
+        team_main_page.reload();
     }
 }

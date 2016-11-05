@@ -1,5 +1,8 @@
 package com.hunter.game;
 
+import android.content.Intent;
+import android.view.KeyEvent;
+
 import com.wxyz.framework.Game;
 import com.wxyz.framework.Input;
 import com.wxyz.framework.gl.Camera2D;
@@ -44,7 +47,7 @@ public class MainScreen extends GLScreen {
 
     @Override
     public void update(float deltaTime) {
-        game.getInput().getKeyEvents();
+        List<Input.KeyEvent> keyEvents = game.getInput().getKeyEvents();
         List<Input.TouchEvent> events =  game.getInput().getTouchEvents();
         int len = events.size();
 
@@ -57,21 +60,29 @@ public class MainScreen extends GLScreen {
                 if (OverlapTest.pointInRectangle(upButton, touchPos)) {
                     if (mode == MODE_NONE) mode = MODE_BATTLE;
                     else if (mode == MODE_BATTLE) {
-                        // TODO 加入对话框，选择房间号和名字
-                        mode = MODE_NONE;
+                        Intent intent = new Intent();
+                        intent.putExtra("mode",EnterRoom.MODE_BATTLE);
+                        intent.setClass(glGame, com.hunter.game.EnterRoom.class);
+                        glGame.startActivity(intent);
                     } else if (mode == MODE_TEAM) {
-                        // TODO 连接到创建房间界面
-                        mode = MODE_NONE;
+                        Intent intent = new Intent();
+                        intent.putExtra("mode",EnterRoom.MODE_TEAM);
+                        intent.setClass(glGame, com.hunter.game.EnterRoom.class);
+                        glGame.startActivity(intent);
                     }
                     upPressed = false;
                 }else if (OverlapTest.pointInRectangle(downButton, touchPos)) {
                     if (mode == MODE_NONE) mode = MODE_TEAM;
                     else if (mode == MODE_BATTLE) {
-                        // TODO 加入对话框，选择队伍、房间号和名字
-                        mode = MODE_NONE;
+                        Intent intent = new Intent();
+                        intent.putExtra("mode",RoomSetting.MODE_BATTLE);
+                        intent.setClass(glGame, com.hunter.game.RoomSetting.class);
+                        glGame.startActivity(intent);
                     } else if (mode == MODE_TEAM) {
-                        // TODO 连接到创建房间界面
-                        mode = MODE_NONE;
+                        Intent intent = new Intent();
+                        intent.putExtra("mode", RoomSetting.MODE_TEAM);
+                        intent.setClass(glGame, com.hunter.game.RoomSetting.class);
+                        glGame.startActivity(intent);
                     }
                     downPressed = false;
                 }else {
@@ -89,6 +100,20 @@ public class MainScreen extends GLScreen {
                 }else {
                     upPressed = false;
                     downPressed = false;
+                }
+            }
+        }
+
+        len = keyEvents.size();
+        for (int i = 0; i < len; i++) {
+            Input.KeyEvent event = keyEvents.get(i);
+            if (event.type == Input.KeyEvent.KEY_UP) {
+                if (event.keyCode == KeyEvent.KEYCODE_BACK) {
+                    if (mode == MODE_NONE) {
+                        glGame.finish();
+                    }else{
+                        mode = MODE_NONE;
+                    }
                 }
             }
         }
