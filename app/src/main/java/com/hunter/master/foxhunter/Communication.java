@@ -9,9 +9,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.wxyz.framework.Input;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -37,43 +41,110 @@ public class Communication extends AppCompatActivity {
                 Log.d("lzj",input);
                 textView.setText(input);
 
-                try
-                {
-
-                    Log.d("lzj","0");
-                    //URL url = new URL("http://192.168.191.1:8080/lab2/");
-                    URL url = new URL ("http://www.baidu.com");
-                    URLConnection urlconnection = url.openConnection();
-                    HttpURLConnection connection = (HttpURLConnection)urlconnection;
-
-                    Log.d("lzj","1");
-                    connection.setRequestMethod("GET");
-                    connection.setReadTimeout(30000);
-                    connection.setConnectTimeout(30000);
-                    Log.d("lzj","1.5");
-                    if(connection==null)
-                        Log.d("lzj","null");
-                    connection.connect();
-
-                    Log.d("lzj","2");
-
-                    InputStream get = connection.getInputStream();
-                    Log.d("lzj","3");
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(get));
-                    StringBuilder response = new StringBuilder();
-                    String line;
-                    while((line = reader.readLine()) != null){
-                        response.append(line);
-                        Log.d("lzj",line);
+                new Thread(new Runnable() {
+                    public void run() {
+                        //getHttp();
+                        postHTTP();
                     }
+                }).start();
 
-                    textView.setText(response);
-                }
-                catch(Exception e)
-                {
-                    Log.d("lzj","NETWORK ERROR");
-                }
+                Log.d("lzj","Thread end");
             }
         });
+    }
+
+    public void postHTTP()
+    {
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("12321");
+        try
+        {
+            URL url = new URL("http://10.0.2.2:8080/lab2/");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+            connection.setDoOutput(true);
+
+            Log.d("lzj", connection.getResponseCode() + "");
+
+            connection.setRequestMethod("POST");
+
+            Log.d("lzj","post");
+
+            try
+            {
+
+                byte[] bytes = buffer.toString().getBytes();
+
+                System.out.println(bytes);
+
+                Log.d("lzj","0");
+
+                connection.getOutputStream().write(bytes);
+
+                Log.d("lzj","1");
+
+                InputStream inputStream = connection.getInputStream();
+
+
+                Log.d("lzj","2");
+
+
+                Log.d("lzj","ret="+inputStream.toString());
+
+
+            }
+            catch (Exception e)
+            {
+                Log.d("lzj","error");
+            }
+
+        }
+        catch (Exception e)
+        {
+            Log.d("lzj","ERROR");
+        }
+    }
+
+    public void getHttp()
+    {
+        InputStream inputStream = null;
+        InputStreamReader inputStreamReader = null;
+        BufferedReader reader = null;
+        StringBuffer resultBuffer = new StringBuffer();
+        String tempLine = null;
+        try
+        {
+            URL url = new URL("http://10.0.2.2:8080/lab2/");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+            Log.d("lzj",connection.getResponseCode()+"");
+
+            try
+            {
+                inputStream = connection.getInputStream();
+                inputStreamReader = new InputStreamReader(inputStream);
+                reader = new BufferedReader(inputStreamReader);
+
+                while ((tempLine = reader.readLine()) != null)
+                {
+                    resultBuffer.append(tempLine);
+                }
+                Log.d("lzj", resultBuffer.toString());
+
+            }
+            catch (Exception e)
+            {
+                Log.d("lzj", "Connection ERROR");
+
+            }
+            connection.disconnect();
+
+        }
+        catch(Exception e)
+        {
+            Log.d("lzj", "error");
+        }
     }
 }

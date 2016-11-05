@@ -23,13 +23,11 @@ public class MainActivity extends ListActivity {
         super.onListItemClick(list, view, position, id);
         String testName = tests[position];
         try{
-            Log.d("lzj",testName);
             @SuppressWarnings("rawtypes")
             Class clazz = Class.forName("com.hunter.master.foxhunter."+testName);
             Intent intent = new Intent(this,clazz);
             startActivity(intent);
         }catch(ClassNotFoundException e){
-            Log.d("lzj","ERROR");
             e.printStackTrace();
         }
     }
