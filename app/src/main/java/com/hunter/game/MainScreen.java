@@ -56,11 +56,23 @@ public class MainScreen extends GLScreen {
             if (event.type == Input.TouchEvent.TOUCH_UP) {
                 if (OverlapTest.pointInRectangle(upButton, touchPos)) {
                     if (mode == MODE_NONE) mode = MODE_BATTLE;
-                    else if (mode == MODE_BATTLE) mode = MODE_NONE;
+                    else if (mode == MODE_BATTLE) {
+                        // TODO 加入对话框，选择房间号和名字
+                        mode = MODE_NONE;
+                    } else if (mode == MODE_TEAM) {
+                        // TODO 连接到创建房间界面
+                        mode = MODE_NONE;
+                    }
                     upPressed = false;
                 }else if (OverlapTest.pointInRectangle(downButton, touchPos)) {
-                    //if (mode == MODE_NONE) mode = MODE_TEAM;
-                    //else if (mode == MODE_TEAM) mode = MODE_NONE;
+                    if (mode == MODE_NONE) mode = MODE_TEAM;
+                    else if (mode == MODE_BATTLE) {
+                        // TODO 加入对话框，选择队伍、房间号和名字
+                        mode = MODE_NONE;
+                    } else if (mode == MODE_TEAM) {
+                        // TODO 连接到创建房间界面
+                        mode = MODE_NONE;
+                    }
                     downPressed = false;
                 }else {
                     mode = MODE_NONE;
@@ -104,8 +116,16 @@ public class MainScreen extends GLScreen {
             batcher.drawSprite(540, 476, 524, 164,
                     upPressed?Assets.main_battle_button_pressed:Assets.main_battle_button_released);
             batcher.endBatch();
-        } else if (mode == MODE_BATTLE){
+        } else if (mode == MODE_BATTLE) {
             batcher.beginBatch(Assets.battle_main_page);
+            batcher.drawSprite(540, 960, 1080, 1920, Assets.page_region);
+            batcher.drawSprite(540, 242, 524, 164,
+                    downPressed?Assets.main_team_button_pressed:Assets.main_team_button_released);
+            batcher.drawSprite(540, 476, 524, 164,
+                    upPressed?Assets.main_battle_button_pressed:Assets.main_battle_button_released);
+            batcher.endBatch();
+        } else if (mode == MODE_TEAM) {
+            batcher.beginBatch(Assets.team_main_page);
             batcher.drawSprite(540, 960, 1080, 1920, Assets.page_region);
             batcher.drawSprite(540, 242, 524, 164,
                     downPressed?Assets.main_team_button_pressed:Assets.main_team_button_released);
