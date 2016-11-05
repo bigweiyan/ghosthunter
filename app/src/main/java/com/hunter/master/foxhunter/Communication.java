@@ -9,9 +9,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.wxyz.framework.Input;
+
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
@@ -39,55 +43,108 @@ public class Communication extends AppCompatActivity {
 
                 new Thread(new Runnable() {
                     public void run() {
-                        getHttp(); //发送文本内容到Web服务器
+                        //getHttp();
+                        postHTTP();
                     }
-                }).start(); // 开启线程
+                }).start();
 
-                /*try {
-
-                    Log.d("lzj", "0");
-                    //URL url = new URL("http://192.168.191.1:8080/lab2/");
-                }
-                catch(Exception e)
-                {
-                    Log.d("lzj","try error");
-                }
-                */
-
+                Log.d("lzj","Thread end");
             }
         });
     }
 
-    public void getHttp()
+    public void postHTTP()
     {
-        String result = "123";
-        try{
-            URL url = new URL ("http://www.baidu.com");
-            Log.d("lzj","1");
-
+        StringBuffer buffer = new StringBuffer();
+        buffer.append("12321");
+        try
+        {
+            URL url = new URL("http://10.0.2.2:8080/lab2/");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
-            Log.d("lzj","2");
+            connection.setDoOutput(true);
 
-            InputStreamReader in = new InputStreamReader(
-                    connection.getInputStream()); // 获得读取的内容
-            Log.d("lzj","3");
-            BufferedReader buffer = new BufferedReader(in); // 获取输入流对象
-            Log.d("lzj","4");
-            String inputLine = null;
-            //通过循环逐行读取输入流中的内容
-            while ((inputLine = buffer.readLine()) != null) {
-                result += inputLine + "\n";
+            Log.d("lzj", connection.getResponseCode() + "");
+
+            connection.setRequestMethod("POST");
+
+            Log.d("lzj","post");
+
+            try
+            {
+
+                byte[] bytes = buffer.toString().getBytes();
+
+                System.out.println(bytes);
+
+                Log.d("lzj","0");
+
+                connection.getOutputStream().write(bytes);
+
+                Log.d("lzj","1");
+
+                InputStream inputStream = connection.getInputStream();
+
+
+                Log.d("lzj","2");
+
+
+                Log.d("lzj","ret="+inputStream.toString());
+
 
             }
-            Log.d("lzj","5");
-            Log.d("lzj",result);
-            textView.setText(result);
-            Log.d("lzj","6");
+            catch (Exception e)
+            {
+                Log.d("lzj","error");
+            }
+
+        }
+        catch (Exception e)
+        {
+            Log.d("lzj","ERROR");
+        }
+    }
+
+    public void getHttp()
+    {
+        InputStream inputStream = null;
+        InputStreamReader inputStreamReader = null;
+        BufferedReader reader = null;
+        StringBuffer resultBuffer = new StringBuffer();
+        String tempLine = null;
+        try
+        {
+            URL url = new URL("http://10.0.2.2:8080/lab2/");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+            connection.setDoInput(true);
+            connection.setDoOutput(true);
+            Log.d("lzj",connection.getResponseCode()+"");
+
+            try
+            {
+                inputStream = connection.getInputStream();
+                inputStreamReader = new InputStreamReader(inputStream);
+                reader = new BufferedReader(inputStreamReader);
+
+                while ((tempLine = reader.readLine()) != null)
+                {
+                    resultBuffer.append(tempLine);
+                }
+                Log.d("lzj", resultBuffer.toString());
+
+            }
+            catch (Exception e)
+            {
+                Log.d("lzj", "Connection ERROR");
+
+            }
+            connection.disconnect();
+
         }
         catch(Exception e)
         {
-            Log.d("lzj","NETWORK ERROR");
+            Log.d("lzj", "error");
         }
     }
 }
