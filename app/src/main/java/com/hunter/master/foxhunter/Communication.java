@@ -37,43 +37,57 @@ public class Communication extends AppCompatActivity {
                 Log.d("lzj",input);
                 textView.setText(input);
 
-                try
-                {
-
-                    Log.d("lzj","0");
-                    //URL url = new URL("http://192.168.191.1:8080/lab2/");
-                    URL url = new URL ("http://www.baidu.com");
-                    URLConnection urlconnection = url.openConnection();
-                    HttpURLConnection connection = (HttpURLConnection)urlconnection;
-
-                    Log.d("lzj","1");
-                    connection.setRequestMethod("GET");
-                    connection.setReadTimeout(30000);
-                    connection.setConnectTimeout(30000);
-                    Log.d("lzj","1.5");
-                    if(connection==null)
-                        Log.d("lzj","null");
-                    connection.connect();
-
-                    Log.d("lzj","2");
-
-                    InputStream get = connection.getInputStream();
-                    Log.d("lzj","3");
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(get));
-                    StringBuilder response = new StringBuilder();
-                    String line;
-                    while((line = reader.readLine()) != null){
-                        response.append(line);
-                        Log.d("lzj",line);
+                new Thread(new Runnable() {
+                    public void run() {
+                        getHttp(); //发送文本内容到Web服务器
                     }
+                }).start(); // 开启线程
 
-                    textView.setText(response);
+                /*try {
+
+                    Log.d("lzj", "0");
+                    //URL url = new URL("http://192.168.191.1:8080/lab2/");
                 }
                 catch(Exception e)
                 {
-                    Log.d("lzj","NETWORK ERROR");
+                    Log.d("lzj","try error");
                 }
+                */
+
             }
         });
+    }
+
+    public void getHttp()
+    {
+        String result = "123";
+        try{
+            URL url = new URL ("http://www.baidu.com");
+            Log.d("lzj","1");
+
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+            Log.d("lzj","2");
+
+            InputStreamReader in = new InputStreamReader(
+                    connection.getInputStream()); // 获得读取的内容
+            Log.d("lzj","3");
+            BufferedReader buffer = new BufferedReader(in); // 获取输入流对象
+            Log.d("lzj","4");
+            String inputLine = null;
+            //通过循环逐行读取输入流中的内容
+            while ((inputLine = buffer.readLine()) != null) {
+                result += inputLine + "\n";
+
+            }
+            Log.d("lzj","5");
+            Log.d("lzj",result);
+            textView.setText(result);
+            Log.d("lzj","6");
+        }
+        catch(Exception e)
+        {
+            Log.d("lzj","NETWORK ERROR");
+        }
     }
 }
