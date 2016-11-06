@@ -35,7 +35,7 @@
             android:name="com.hunter.game.RoomSetting"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_room_setting"
-            android:theme="@style/FullscreenTheme" />
+            android:theme="@style/FullscreenTheme"/>
         <activity
             android:name="com.hunter.game.EnterRoom"
             android:configChanges="orientation|keyboardHidden|screenSize"

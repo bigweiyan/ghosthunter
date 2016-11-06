@@ -1,9 +1,8 @@
 <resources>
     <string name="app_name">FoxHunter</string>
 
-    <string name="title_activity_room_setting">RoomSetting</string>
-    <string name="dummy_button">Dummy Button</string>
+    <string name="title_activity_room_setting">房间设置</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
 
-    <string name="title_activity_enter_room">EnterRoom</string>
+    <string name="title_activity_enter_room">加入房间</string>
 </resources>
