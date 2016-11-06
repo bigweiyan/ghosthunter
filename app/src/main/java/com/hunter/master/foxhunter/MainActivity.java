@@ -12,7 +12,7 @@ import java.lang.String;
 public class MainActivity extends ListActivity {
     String tests[] = {"Communication","GameLogic","UserInterface"};
     public void onCreate(Bundle savedInstanceState){
-        Log.d("lzj","mainstart");
+        Log.d("lzj","main start");
         super.onCreate(savedInstanceState);
         setListAdapter(new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_1,tests));
