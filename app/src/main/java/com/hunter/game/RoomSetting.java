@@ -1,180 +1,145 @@
 package com.hunter.game;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.view.MotionEvent;
+import android.text.method.ScrollingMovementMethod;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.hunter.master.foxhunter.R;
 
+import java.util.ArrayList;
+
 /**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
+ * 房间设置界面.
  */
 public class RoomSetting extends AppCompatActivity {
-    /**
-     * Whether or not the system UI should be auto-hidden after
-     * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
-     */
-    private static final boolean AUTO_HIDE = true;
 
     /**
-     * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
-     * user interaction before hiding the system UI.
+     * 团队模式.
      */
-    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-
     public static final int MODE_TEAM = 0;
+    /**
+     * 混战模式.
+     */
     public static final int MODE_BATTLE = 1;
+    /**
+     * 游戏当前运行的模式.
+     */
     private int mode;
 
-    /**
-     * Some older devices needs a small delay between UI widget updates
-     * and a change of the status and navigation bar.
-     */
-    private static final int UI_ANIMATION_DELAY = 300;
-    private final Handler mHideHandler = new Handler();
     private View mContentView;
-    private final Runnable mHidePart2Runnable = new Runnable() {
-        @SuppressLint("InlinedApi")
-        @Override
-        public void run() {
-            // Delayed removal of status and navigation bar
 
-            // Note that some of these constants are new as of API 16 (Jelly Bean)
-            // and API 19 (KitKat). It is safe to use them, as they are inlined
-            // at compile-time and do nothing on earlier devices.
-            mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-        }
-    };
-    private View mControlsView;
-    private final Runnable mShowPart2Runnable = new Runnable() {
-        @Override
-        public void run() {
-            // Delayed display of UI elements
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.show();
-            }
-            mControlsView.setVisibility(View.VISIBLE);
-        }
-    };
-    private boolean mVisible;
-    private final Runnable mHideRunnable = new Runnable() {
-        @Override
-        public void run() {
-            hide();
-        }
-    };
-    /**
-     * Touch listener to use for in-layout UI controls to delay hiding the
-     * system UI. This is to prevent the jarring behavior of controls going away
-     * while interacting with activity UI.
-     */
-    private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (AUTO_HIDE) {
-                delayedHide(AUTO_HIDE_DELAY_MILLIS);
-            }
-            return false;
-        }
-    };
+    private TextView signalListText;
+    private ArrayList<String> signals;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
         mode = intent.getIntExtra("mode",MODE_BATTLE);
-        setContentView(R.layout.activity_room_setting);
 
-        mVisible = true;
-        mControlsView = findViewById(R.id.fullscreen_content_controls);
-        mContentView = findViewById(R.id.fullscreen_content);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        setContentView(R.layout.activity_room_setting);
+        mContentView = findViewById(R.id.createRoomLabel);
+        signalListText = (TextView)findViewById(R.id.signalListText);
+        signalListText.setMovementMethod(ScrollingMovementMethod.getInstance());
+        signals = new ArrayList<>();
+
         switch (mode) {
             case MODE_BATTLE:
-                ((TextView)mContentView).setText("混战模式");
+                ((TextView)mContentView).setText("混战模式 创建房间>房间设置");
                 break;
             case MODE_TEAM:
-                ((TextView)mContentView).setText("团队模式");
+                ((TextView)mContentView).setText("团队模式 创建房间>房间设置");
                 break;
             default:
+                ((TextView)mContentView).setText("创建房间>房间设置");
         }
 
-        // Set up the user interaction to manually show or hide the system UI.
-        mContentView.setOnClickListener(new View.OnClickListener() {
+        Button addSignal = (Button)(findViewById(R.id.addSignal));
+        Button clear = (Button)(findViewById(R.id.clearSignal));
+        Button removeLast = (Button)(findViewById(R.id.popSignal));
+        Button back = (Button)(findViewById(R.id.settingBack));
+        Button moveOn = (Button)(findViewById(R.id.settingForward));
+        addSignal.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                toggle();
+            public void onClick(View v) {
+                // TODO: 2016/11/12 连接GPS协议 
+                signals.add("line");
+                showSignals();
+            }
+        });
+        clear.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                signals.clear();
+                showSignals();
+            }
+        });
+        removeLast.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (signals.size() == 0) return;
+                signals.remove(signals.size()-1);
+                showSignals();
+            }
+        });
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+        moveOn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                createGame();
             }
         });
 
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
     }
 
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-
-        // Trigger the initial hide() shortly after the activity has been
-        // created, to briefly hint to the user that UI controls
-        // are available.
-        delayedHide(100);
-    }
-
-    private void toggle() {
-        if (mVisible) {
-            hide();
-        } else {
-            show();
+    private void showSignals() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < signals.size(); i++){
+            sb.append(signals.get(i)+"\n");
         }
+        signalListText.setText(sb.toString());
     }
 
-    private void hide() {
-        // Hide UI first
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.hide();
+    private void createGame() {
+        EditText hostnameET = (EditText)findViewById(R.id.hostNameInput);
+        String hostname = hostnameET.getText().toString();
+        signals.add(hostname);
+
+        CheckBox useItemCB = (CheckBox)findViewById(R.id.useItemCheck);
+        boolean useItem = useItemCB.isChecked();
+        signals.add(useItem?"使用道具":"禁用道具");
+
+        CheckBox autoReadyCB = (CheckBox)findViewById(R.id.autoReadyCheck);
+        boolean autoReady = autoReadyCB.isChecked();
+        signals.add(autoReady?"自动准备":"手动准备");
+
+        switch (mode) {
+            case MODE_BATTLE:
+                signals.add("混战模式");
+                break;
+            case MODE_TEAM:
+                signals.add("团队模式");
+                break;
         }
-        mControlsView.setVisibility(View.GONE);
-        mVisible = false;
-
-        // Schedule a runnable to remove the status and navigation bar after a delay
-        mHideHandler.removeCallbacks(mShowPart2Runnable);
-        mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
-    }
-
-    @SuppressLint("InlinedApi")
-    private void show() {
-        // Show the system bar
-        mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        mVisible = true;
-
-        // Schedule a runnable to display UI elements after a delay
-        mHideHandler.removeCallbacks(mHidePart2Runnable);
-        mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
-    }
-
-    /**
-     * Schedules a call to hide() in [delay] milliseconds, canceling any
-     * previously scheduled calls.
-     */
-    private void delayedHide(int delayMillis) {
-        mHideHandler.removeCallbacks(mHideRunnable);
-        mHideHandler.postDelayed(mHideRunnable, delayMillis);
+        
+        showSignals();
+        // TODO: 2016/11/12 连接通讯协议，转入WaitRoom 
     }
 }

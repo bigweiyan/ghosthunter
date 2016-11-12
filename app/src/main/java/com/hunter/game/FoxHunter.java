@@ -9,7 +9,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
- * Created by weiyan on 2016/10/29.
+ * 游戏主屏幕.
  */
 
 public class FoxHunter extends GLGame {

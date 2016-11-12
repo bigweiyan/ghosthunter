@@ -5,6 +5,7 @@ import com.wxyz.framework.gl.TextureRegion;
 import com.wxyz.framework.impl.GLGame;
 
 /**
+ * 存放游戏使用的图片资源的索引
  * Created by weiyan on 2016/10/29.
  */
 
