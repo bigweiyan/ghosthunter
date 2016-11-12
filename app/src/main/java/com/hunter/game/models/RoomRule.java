@@ -3,6 +3,7 @@ package com.hunter.game.models;
 import java.util.ArrayList;
 
 /**
+ * 游戏规则的封装.
  * Created by weiyan on 2016/11/12.
  */
 

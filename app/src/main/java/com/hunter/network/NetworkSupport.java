@@ -6,6 +6,7 @@ import com.hunter.game.models.Signal;
 import java.util.ArrayList;
 
 /**
+ * 网络接口.
  * Created by weiyan on 2016/11/12.
  */
 
@@ -50,7 +51,7 @@ public interface NetworkSupport {
     public ArrayList<String> getMembersBlue(int roomNumber) throws  NetworkException;
 
     /**
-     * 得到红方队员的列表（团队模式），即列表2.
+     * 得到红方队员的列表（团队模式）/所有玩家的列表（混战模式），即列表2.
      * @param roomNumber 房间号码
      * @return 红方队员列表
      * @throws NetworkException
@@ -67,9 +68,10 @@ public interface NetworkSupport {
 
     /**
      * 发出准备/取消准备信号。成功则返回是\否，失败则抛出异常
+     * @param roomNumber 发出信号玩家所在的房间
      * @param playerName 发出信号的玩家
      * @return 是：准备 否：取消准备
      * @throws NetworkException
      */
-    public boolean gameReady(String playerName) throws NetworkException;
+    public boolean gameReady(int roomNumber, String playerName) throws NetworkException;
 }

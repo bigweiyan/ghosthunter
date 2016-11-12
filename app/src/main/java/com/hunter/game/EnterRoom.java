@@ -8,13 +8,14 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
 
 import com.hunter.master.foxhunter.R;
 
 /**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
+ * 加入房间界面.
  */
 public class EnterRoom extends AppCompatActivity {
     public static final int MODE_TEAM = 0;
@@ -31,7 +32,6 @@ public class EnterRoom extends AppCompatActivity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
         setContentView(R.layout.activity_enter_room);
         mContentView = (TextView) findViewById(R.id.enterRoomLabel);
         switch (mode) {
@@ -59,17 +59,25 @@ public class EnterRoom extends AppCompatActivity {
                 String playerName = playerET.getText().toString();
                 EditText roomNumberET = (EditText)findViewById(R.id.roomNumberInput);
                 String roomNumber = roomNumberET.getText().toString();
-                joinGame(playerName,roomNumber);
+                boolean isBlue = ((RadioButton)findViewById(R.id.setBlueTeam)).isChecked();
+                joinGame(playerName,roomNumber,isBlue);
             }
         });
+        RadioGroup teamChoice = (RadioGroup)findViewById(R.id.enterRoomRadioGroup);
+        if (mode == MODE_BATTLE) {
+            teamChoice.setVisibility(View.INVISIBLE);
+        }
     }
 
-    private void joinGame(String playerName, String roomNumber) {
+    private void joinGame(String playerName, String roomNumber, boolean isBlue) {
         if ("".equals(playerName) || "".equals(roomNumber)){
             mContentView.setText("Error");
         }else {
             Intent intent = new Intent();
             intent.setClass(this, WaitRoom.class);
+            intent.putExtra("roomNumber",Integer.parseInt(roomNumber));
+            intent.putExtra("playerName",playerName);
+            intent.putExtra("isBlue",isBlue);
             this.startActivity(intent);
         }
     }

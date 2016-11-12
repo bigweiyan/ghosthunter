@@ -1,6 +1,7 @@
 package com.hunter.network;
 
 /**
+ * 网络异常的封装.
  * Created by weiyan on 2016/11/12.
  */
 

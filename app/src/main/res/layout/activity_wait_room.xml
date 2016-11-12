@@ -9,6 +9,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:layout_marginLeft="@dimen/activity_vertical_margin"
         android:layout_marginRight="@dimen/activity_vertical_margin"
         android:orientation="vertical">
@@ -46,32 +47,37 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="游戏规则"
+            android:text="@string/game_rule"
             style="@style/SettingLabel"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="团队模式"
+            android:id="@+id/waitMode"
             style="@style/RuleLabel"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="信号源个数：7"
+            android:id="@+id/waitSignals"
             style="@style/RuleLabel"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="道具：开启"
+            android:id="@+id/waitItem"
             style="@style/RuleLabel"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="房间编号：1234"
+            android:id="@+id/waitRoomNumber"
             style="@style/RuleLabel"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="游戏结束方式：超过60min或者一方收集到4个信号源"
+            android:text="@string/gameOver1"
+            android:id="@+id/waitGameEnd"
             style="@style/RuleLabel"/>
     </LinearLayout>
     <LinearLayout
@@ -81,12 +87,18 @@
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="退出房间"
+            style="?android:attr/buttonBarButtonStyle"
+            android:textColor="#000000"
+            android:text="@string/quitRoom"
+            android:id="@+id/waitQuitRoom"
             android:layout_weight="1"/>
         <Button
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="游戏准备"
+            style="?android:attr/buttonBarButtonStyle"
+            android:textColor="#000000"
+            android:text="@string/gameReady"
+            android:id="@+id/waitGameReady"
             android:layout_weight="1"/>
     </LinearLayout>
 </RelativeLayout>

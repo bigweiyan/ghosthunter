@@ -17,8 +17,7 @@ import com.hunter.master.foxhunter.R;
 import java.util.ArrayList;
 
 /**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
+ * 房间设置界面.
  */
 public class RoomSetting extends AppCompatActivity {
 
@@ -75,6 +74,7 @@ public class RoomSetting extends AppCompatActivity {
         addSignal.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // TODO: 2016/11/12 连接GPS协议 
                 signals.add("line");
                 showSignals();
             }
@@ -138,7 +138,8 @@ public class RoomSetting extends AppCompatActivity {
                 signals.add("团队模式");
                 break;
         }
-
+        
         showSignals();
+        // TODO: 2016/11/12 连接通讯协议，转入WaitRoom 
     }
 }

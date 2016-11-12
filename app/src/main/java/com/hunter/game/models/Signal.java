@@ -1,6 +1,7 @@
 package com.hunter.game.models;
 
 /**
+ * 信号源对象的封装.
  * Created by weiyan on 2016/11/12.
  */
 
@@ -19,10 +20,22 @@ public class Signal {
     /**
      * 经度.
      */
-    public double longtitude;
+    public double longitude;
 
     /**
      * 频率.
      */
-    public int frequnce;
+    public int frequency;
+
+    public Signal(double latitude, double longitude, int frequency) {
+        this.frequency = frequency;
+        this.latitude = latitude;
+        this.longitude = longitude;
+    }
+
+    public Signal() {
+        this.latitude = 0;
+        this.longitude = 0;
+        this.frequency = 1;
+    }
 }
