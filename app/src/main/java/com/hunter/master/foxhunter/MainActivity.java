@@ -10,7 +10,7 @@ import android.widget.ListView;
 import java.lang.String;
 
 public class MainActivity extends ListActivity {
-    String tests[] = {"Communication","GameLogic","UserInterface"};
+    String tests[] = {"master.foxhunter.Communication","game.FoxHunter","master.foxhunter.UserInterface"};
     public void onCreate(Bundle savedInstanceState){
         Log.d("lzj","main start");
         super.onCreate(savedInstanceState);
@@ -24,7 +24,11 @@ public class MainActivity extends ListActivity {
         String testName = tests[position];
         try{
             @SuppressWarnings("rawtypes")
+<<<<<<< HEAD
             Class clazz = Class.forName("com.hunter.master.foxhunter."+testName);
+=======
+            Class clazz = Class.forName("com.hunter."+testName);
+>>>>>>> wy/weiyan
             Intent intent = new Intent(this,clazz);
             startActivity(intent);
         }catch(ClassNotFoundException e){

@@ -41,8 +41,8 @@ public abstract class AndroidGame extends Activity implements Game {
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		boolean isLandscape = getResources().getConfiguration().orientation==Configuration.ORIENTATION_LANDSCAPE;
-		int frameBufferWidth = isLandscape ? 960:540;//这里修改默认分辨率
-		int frameBufferHeight = isLandscape ? 540:960;
+		int frameBufferWidth = isLandscape ? 1920:1080;//这里修改默认分辨率
+		int frameBufferHeight = isLandscape ? 1080:1920;
 		//这里新建了一个屏幕大小的帧缓冲区，以其作为画布，并在Graphics类中完成绘画
 		Bitmap frameBuffer = Bitmap.createBitmap(frameBufferWidth, frameBufferHeight, Config.RGB_565);
 		
@@ -56,6 +56,7 @@ public abstract class AndroidGame extends Activity implements Game {
 		fileIO = new AndroidFileIO(this);//wy略作修改
 		audio = new AndroidAudio(this);
 		input = new AndroidInput(this, renderView, scaleX, scaleY);
+		//这里对画布进行缩放以适配屏幕
 		screen = getStartScreen();
 		setContentView(renderView);
 		
