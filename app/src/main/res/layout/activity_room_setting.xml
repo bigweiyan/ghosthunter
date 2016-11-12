@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     style="@style/noTitle"
     tools:context="com.hunter.game.RoomSetting">
     <LinearLayout
@@ -13,7 +12,6 @@
         android:layout_marginRight="@dimen/activity_vertical_margin"
         android:orientation="vertical">
         <TextView
-            android:text="创建房间>游戏设置"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/createRoomLabel"/>
@@ -51,6 +49,22 @@
             android:layout_height="wrap_content"
             android:text="信号源列表"
             style="@style/SettingLabel"/>
+
+        <TextView
+            android:id="@+id/signalListText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20sp"
+            android:lines="6"
+            android:scrollbars="vertical"/>
+
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_alignParentBottom="true">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -92,4 +106,5 @@
                 android:id="@+id/settingForward"/>
         </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+
+</RelativeLayout>

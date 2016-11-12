@@ -5,4 +5,5 @@
     <string name="dummy_content">DUMMY\nCONTENT</string>
 
     <string name="title_activity_enter_room">加入房间</string>
+    <string name="title_activity_wait_room">游戏房间</string>
 </resources>
