@@ -12,6 +12,7 @@
         android:layout_marginRight="@dimen/activity_vertical_margin"
         android:orientation="vertical">
         <TextView
+            android:text="创建房间"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/createRoomLabel"/>
