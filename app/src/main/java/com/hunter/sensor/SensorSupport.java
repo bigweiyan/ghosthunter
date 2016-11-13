@@ -6,12 +6,24 @@ package com.hunter.sensor;
  */
 
 public interface SensorSupport {
+    /**
+     * 没有传感器可以使用.
+     */
+    public static final int NO_START = 0;
+    /**
+     * 传感器正在初始化.
+     */
+    public static final int BUSY = 1;
+    /**
+     * 传感器准备就绪.
+     */
+    public static final int OK = 2;
 
     /**
      * 检查是否可以获得位置数据.
-     * @return true：可以获得;false：无法获得.
+     * @return 参见静态变量NO_START,BUSY,OK.
      */
-    public boolean checkSensor();
+    public int checkSensor();
 
     /**
      * 得到经度.

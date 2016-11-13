@@ -15,17 +15,19 @@ public class SensorExample implements SensorSupport {
     }
 
     @Override
-    public boolean checkSensor() {
-        return true;
+    public int checkSensor() {
+        return SensorSupport.OK;
     }
 
     @Override
-    public double getLongitude() {
+    public double getLongitude() throws SensorException {
+
         return rand.nextDouble()*180;
     }
 
     @Override
     public double getLatitude() {
+
         return rand.nextDouble()*180;
     }
 

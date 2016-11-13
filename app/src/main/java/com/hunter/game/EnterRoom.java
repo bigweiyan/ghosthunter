@@ -111,6 +111,7 @@ public class EnterRoom extends AppCompatActivity {
             intent.putExtra("playerName",playerName);
             intent.putExtra("isBlue",isBlue);
             this.startActivity(intent);
+            finish();
         }
     }
 
