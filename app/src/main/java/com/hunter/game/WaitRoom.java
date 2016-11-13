@@ -25,6 +25,7 @@ public class WaitRoom extends AppCompatActivity {
     private RoomRule rule;
     private int roomNumber;
     private String playerName;
+    private String hostName;
     private ArrayList<String> playerNameRed;
     private ArrayList<String> playerNameBlue;
     private TextView playerListRed;
@@ -75,6 +76,20 @@ public class WaitRoom extends AppCompatActivity {
             rule = ne.getRoomRule(roomNumber);
             playerNameRed = ne.getMembersRed(roomNumber);
             playerNameBlue = ne.getMembersBlue(roomNumber);
+            hostName = ne.getHostName(roomNumber);
+            for(int i = 0; i < playerNameRed.size(); i++) {
+                if (playerNameRed.get(i).equals(playerName)) {
+                    playerNameRed.set(i,playerName+"(您)");
+                }
+            }
+            for(int i = 0; i < playerNameBlue.size(); i++) {
+                if (playerNameBlue.get(i).equals(playerName)) {
+                    playerNameBlue.set(i,playerName+"(您)");
+                }
+            }
+            if (hostName.equals(playerName)) {
+                hostName = hostName + "(您)";
+            }
         }catch (NetworkException e){
             Tools.showDialog(this,"网络异常",e.getMessage());
         }
@@ -124,11 +139,11 @@ public class WaitRoom extends AppCompatActivity {
 
         switch (rule.mode) {
             case RoomRule.MODE_BATTLE:
-                mode.setText(R.string.battleMode);
+                mode.setText("混战模式 房主："+hostName);
                 endCondition.setText(R.string.gameOver1);
                 break;
             case RoomRule.MODE_TEAM:
-                mode.setText(R.string.teamMode);
+                mode.setText("团队模式 房主："+hostName);
                 endCondition.setText(R.string.gameOver2);
                 break;
         }

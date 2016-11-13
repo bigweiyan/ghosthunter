@@ -74,4 +74,12 @@ public interface NetworkSupport {
      * @throws NetworkException
      */
     public boolean gameReady(int roomNumber, String playerName) throws NetworkException;
+
+    /**
+     * 查询房主.
+     * @param roomNumber 房间号码
+     * @return 房主昵称
+     * @throws NetworkException
+     */
+    public String getHostName(int roomNumber) throws NetworkException;
 }

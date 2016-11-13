@@ -92,4 +92,9 @@ public class NetworkExample implements NetworkSupport{
             return true;
         }
     }
+
+    @Override
+    public String getHostName(int roomNumber) throws NetworkException {
+        return "Host";
+    }
 }
