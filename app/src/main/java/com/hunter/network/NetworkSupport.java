@@ -2,6 +2,7 @@ package com.hunter.network;
 
 import com.hunter.game.models.RoomRule;
 import com.hunter.game.models.Signal;
+import com.hunter.master.foxhunter.R;
 
 import java.util.ArrayList;
 
@@ -11,6 +12,7 @@ import java.util.ArrayList;
  */
 
 public interface NetworkSupport {
+
     /**
      * 检测是否有网络.
      * @return 是：有网络 否：无网络

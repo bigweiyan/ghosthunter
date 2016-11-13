@@ -16,7 +16,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
 
+import com.hunter.network.NetworkImplement;
 
 public class Communication extends AppCompatActivity {
 
@@ -57,11 +60,13 @@ public class Communication extends AppCompatActivity {
                 Log.d("lzj",input);
                 //textView.setText(input);
 
+                final NetworkImplement network = new NetworkImplement();
 
                 new Thread(new Runnable() {
                     public void run() {
                         //getHttp();
-                        testPHP();
+                        //testPHP();
+                        Log.d("lzj", network.checkLink()+"");
                     }
                 }).start();
 

@@ -24,11 +24,9 @@ public class MainActivity extends ListActivity {
         String testName = tests[position];
         try{
             @SuppressWarnings("rawtypes")
-<<<<<<< HEAD
-            Class clazz = Class.forName("com.hunter.master.foxhunter."+testName);
-=======
+
             Class clazz = Class.forName("com.hunter."+testName);
->>>>>>> wy/weiyan
+
             Intent intent = new Intent(this,clazz);
             startActivity(intent);
         }catch(ClassNotFoundException e){
