@@ -60,7 +60,7 @@ public class WaitRoom extends AppCompatActivity {
             } catch (NetworkException e) {
                 Tools.showDialog(WaitRoom.this,"网络异常",e.getMessage());
             }
-
+            mHandler.postDelayed(timerTask,1000);
         }
     };
 
