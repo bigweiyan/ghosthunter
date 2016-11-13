@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.hunter.game.models.RoomRule;
+import com.hunter.game.models.Tools;
 import com.hunter.master.foxhunter.R;
 import com.hunter.network.NetworkExample;
 import com.hunter.network.NetworkException;
@@ -24,6 +25,7 @@ public class WaitRoom extends AppCompatActivity {
     private RoomRule rule;
     private int roomNumber;
     private String playerName;
+    private String hostName;
     private ArrayList<String> playerNameRed;
     private ArrayList<String> playerNameBlue;
     private TextView playerListRed;
@@ -74,9 +76,22 @@ public class WaitRoom extends AppCompatActivity {
             rule = ne.getRoomRule(roomNumber);
             playerNameRed = ne.getMembersRed(roomNumber);
             playerNameBlue = ne.getMembersBlue(roomNumber);
+            hostName = ne.getHostName(roomNumber);
+            for(int i = 0; i < playerNameRed.size(); i++) {
+                if (playerNameRed.get(i).equals(playerName)) {
+                    playerNameRed.set(i,playerName+"(您)");
+                }
+            }
+            for(int i = 0; i < playerNameBlue.size(); i++) {
+                if (playerNameBlue.get(i).equals(playerName)) {
+                    playerNameBlue.set(i,playerName+"(您)");
+                }
+            }
+            if (hostName.equals(playerName)) {
+                hostName = hostName + "(您)";
+            }
         }catch (NetworkException e){
-            e.printStackTrace();
-            finish();
+            Tools.showDialog(this,"网络异常",e.getMessage());
         }
         setPlayerList();
         setRulesTV();
@@ -88,12 +103,13 @@ public class WaitRoom extends AppCompatActivity {
                 try {
                     ready = ne.gameReady(roomNumber, playerName);
                 }catch (NetworkException e){
-                    e.printStackTrace();
+                    Tools.showDialog(WaitRoom.this,"网络异常",e.getMessage());
+                    return;
                 }
                 if (ready) {
-                    readyButton.setText("取消准备");
+                    readyButton.setText(R.string.cancelReady);
                 }else {
-                    readyButton.setText("准备");
+                    readyButton.setText(R.string.gameReady);
                 }
             }
         });
@@ -106,7 +122,9 @@ public class WaitRoom extends AppCompatActivity {
             sb.append(playerNameRed.get(i)).append('\n');
         }
         playerListRed.setText(sb.toString());
-        playerListRed.setTextColor(getResources().getColor(R.color.color_red));
+        if(rule != null && rule.mode == RoomRule.MODE_TEAM) {
+            playerListRed.setTextColor(getResources().getColor(R.color.color_red));
+        }
 
         sb = new StringBuilder();
         for (int i = 0; i < playerNameBlue.size(); i++) {
@@ -117,13 +135,15 @@ public class WaitRoom extends AppCompatActivity {
     }
 
     private void setRulesTV() {
+        if (rule == null) return;
+
         switch (rule.mode) {
             case RoomRule.MODE_BATTLE:
-                mode.setText(R.string.battleMode);
+                mode.setText("混战模式 房主："+hostName);
                 endCondition.setText(R.string.gameOver1);
                 break;
             case RoomRule.MODE_TEAM:
-                mode.setText(R.string.teamMode);
+                mode.setText("团队模式 房主："+hostName);
                 endCondition.setText(R.string.gameOver2);
                 break;
         }
