@@ -11,6 +11,7 @@ import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.ArrayList;
+import java.util.Properties;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 
@@ -38,18 +39,20 @@ public class NetworkImplement implements NetworkSupport
             Class.forName(driver);
             Log.d("lzj","driver ok");
 
-            String url="jdbc:mysql://10.0.2.2:3306/foxhunter";
-            String username = "root";
-            String password = "foxhunter";
+            String url="jdbc:mysql://10.0.2.2:3306/foxhunter?user=root&password=foxhunter";
 
-            Log.d("lzj",url+username+password);
+            Log.d("lzj",url);
 
-            DriverManager.setLoginTimeout(1);
-            Log.d("lzj","settime");
-            Connection connection = DriverManager.getConnection(url,username,password);
-            Log.d("lzj","settimessss");
-            DriverManager.setLoginTimeout(2);
-            Log.d("lzj","settime2");
+
+            Properties properties = new Properties();
+            properties.put("connectTimeout", "3000");
+
+            // this cannot set time_out
+            //Connection connection = DriverManager.getConnection(url,username,password,properties);
+
+            //try new way to getConnection
+            Connection connection = DriverManager.getConnection(url,properties);
+
 
             Log.d("lzj","Connection OK!");
             // ...
