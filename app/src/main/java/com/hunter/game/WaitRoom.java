@@ -10,6 +10,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.hunter.game.models.RoomRule;
+import com.hunter.game.models.Tools;
 import com.hunter.master.foxhunter.R;
 import com.hunter.network.NetworkExample;
 import com.hunter.network.NetworkException;
@@ -75,8 +76,7 @@ public class WaitRoom extends AppCompatActivity {
             playerNameRed = ne.getMembersRed(roomNumber);
             playerNameBlue = ne.getMembersBlue(roomNumber);
         }catch (NetworkException e){
-            e.printStackTrace();
-            finish();
+            Tools.showDialog(this,"网络异常",e.getMessage());
         }
         setPlayerList();
         setRulesTV();
@@ -88,12 +88,12 @@ public class WaitRoom extends AppCompatActivity {
                 try {
                     ready = ne.gameReady(roomNumber, playerName);
                 }catch (NetworkException e){
-                    e.printStackTrace();
+                    Tools.showDialog(WaitRoom.this,"网络异常",e.getMessage());
                 }
                 if (ready) {
-                    readyButton.setText("取消准备");
+                    readyButton.setText(R.string.cancelReady);
                 }else {
-                    readyButton.setText("准备");
+                    readyButton.setText(R.string.gameReady);
                 }
             }
         });
@@ -106,7 +106,9 @@ public class WaitRoom extends AppCompatActivity {
             sb.append(playerNameRed.get(i)).append('\n');
         }
         playerListRed.setText(sb.toString());
-        playerListRed.setTextColor(getResources().getColor(R.color.color_red));
+        if(rule != null && rule.mode == RoomRule.MODE_TEAM) {
+            playerListRed.setTextColor(getResources().getColor(R.color.color_red));
+        }
 
         sb = new StringBuilder();
         for (int i = 0; i < playerNameBlue.size(); i++) {
@@ -117,6 +119,8 @@ public class WaitRoom extends AppCompatActivity {
     }
 
     private void setRulesTV() {
+        if (rule == null) return;
+
         switch (rule.mode) {
             case RoomRule.MODE_BATTLE:
                 mode.setText(R.string.battleMode);

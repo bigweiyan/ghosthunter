@@ -12,6 +12,7 @@
     <string name="redTeam">红队</string>
     <string name="blueTeam">蓝队</string>
     <string name="gameReady">游戏准备</string>
+    <string name="cancelReady">取消准备</string>
     <string name="quitRoom">退出房间</string>
     <string name="teamMode">团队模式</string>
     <string name="battleMode">混战模式</string>
