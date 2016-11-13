@@ -12,7 +12,15 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.hunter.game.models.Signal;
+import com.hunter.game.models.Tools;
 import com.hunter.master.foxhunter.R;
+import com.hunter.network.NetworkExample;
+import com.hunter.network.NetworkException;
+import com.hunter.network.NetworkSupport;
+import com.hunter.sensor.SensorExample;
+import com.hunter.sensor.SensorException;
+import com.hunter.sensor.SensorSupport;
 
 import java.util.ArrayList;
 
@@ -37,14 +45,19 @@ public class RoomSetting extends AppCompatActivity {
     private View mContentView;
 
     private TextView signalListText;
-    private ArrayList<String> signals;
-
+    private ArrayList<String> signalText;
+    private ArrayList<Signal> signals;
+    private SensorSupport ss;
+    private NetworkSupport ns;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
         mode = intent.getIntExtra("mode",MODE_BATTLE);
+
+        ss = new SensorExample();
+        ns = new NetworkExample();
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -54,6 +67,7 @@ public class RoomSetting extends AppCompatActivity {
         signalListText = (TextView)findViewById(R.id.signalListText);
         signalListText.setMovementMethod(ScrollingMovementMethod.getInstance());
         signals = new ArrayList<>();
+        signalText = new ArrayList<>();
 
         switch (mode) {
             case MODE_BATTLE:
@@ -74,23 +88,32 @@ public class RoomSetting extends AppCompatActivity {
         addSignal.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // TODO: 2016/11/12 连接GPS协议 
-                signals.add("line");
+                // TODO: 2016/11/12 连接GPS协议
+                try {
+                    double lat = ss.getLatitude();
+                    double lon = ss.getLongitude();
+                    int dir = ss.getDirection();
+                    signals.add(new Signal(lat,lon,dir));
+                    signalText.add("信号源：纬度"+lat+" 经度:"+lon);
+                }catch (SensorException e) {
+                    Tools.showDialog(RoomSetting.this,"传感器异常",e.getMessage());
+                }
+
                 showSignals();
             }
         });
         clear.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                signals.clear();
+                signalText.clear();
                 showSignals();
             }
         });
         removeLast.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (signals.size() == 0) return;
-                signals.remove(signals.size()-1);
+                if (signalText.size() == 0) return;
+                signalText.remove(signalText.size()-1);
                 showSignals();
             }
         });
@@ -111,8 +134,8 @@ public class RoomSetting extends AppCompatActivity {
 
     private void showSignals() {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < signals.size(); i++){
-            sb.append(signals.get(i)+"\n");
+        for (int i = 0; i < signalText.size(); i++){
+            sb.append(signalText.get(i)).append('\n');
         }
         signalListText.setText(sb.toString());
     }
@@ -120,26 +143,43 @@ public class RoomSetting extends AppCompatActivity {
     private void createGame() {
         EditText hostnameET = (EditText)findViewById(R.id.hostNameInput);
         String hostname = hostnameET.getText().toString();
-        signals.add(hostname);
+        if(!Tools.checkAlpha(hostname)) {
+            Tools.showDialog(this,"输入错误","昵称请输入英文或数字");
+            return;
+        }
+        signalText.add(hostname);
 
         CheckBox useItemCB = (CheckBox)findViewById(R.id.useItemCheck);
         boolean useItem = useItemCB.isChecked();
-        signals.add(useItem?"使用道具":"禁用道具");
+        signalText.add(useItem?"使用道具":"禁用道具");
 
         CheckBox autoReadyCB = (CheckBox)findViewById(R.id.autoReadyCheck);
         boolean autoReady = autoReadyCB.isChecked();
-        signals.add(autoReady?"自动准备":"手动准备");
+        signalText.add(autoReady?"自动准备":"手动准备");
 
         switch (mode) {
             case MODE_BATTLE:
-                signals.add("混战模式");
+                signalText.add("混战模式");
                 break;
             case MODE_TEAM:
-                signals.add("团队模式");
+                signalText.add("团队模式");
                 break;
         }
         
         showSignals();
-        // TODO: 2016/11/12 连接通讯协议，转入WaitRoom 
+        int roomNumber = 0;
+        try {
+            roomNumber = ns.createRoom(mode,hostname,useItem,autoReady,signals);
+        } catch (NetworkException e) {
+            Tools.showDialog(this,"网络异常",e.getMessage());
+            return;
+        }
+        Intent intent = new Intent();
+        intent.setClass(this, WaitRoom.class);
+        intent.putExtra("roomNumber",roomNumber);
+        intent.putExtra("playerName",hostname);
+        intent.putExtra("isBlue",false);
+        this.startActivity(intent);
+        // TODO: 2016/11/12 连接通讯协议，转入WaitRoom
     }
 }

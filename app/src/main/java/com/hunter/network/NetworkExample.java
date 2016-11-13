@@ -84,7 +84,12 @@ public class NetworkExample implements NetworkSupport{
 
     @Override
     public boolean gameReady(int roomNumber, String playerName) throws NetworkException {
-        if (ready) return false;
-        else return true;
+        if (ready) {
+            ready = !ready;
+            return false;
+        }else{
+            ready = !ready;
+            return true;
+        }
     }
 }
