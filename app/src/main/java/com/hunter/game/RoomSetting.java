@@ -172,15 +172,14 @@ public class RoomSetting extends AppCompatActivity {
             roomNumber = ns.createRoom(mode,hostname,useItem,autoReady,signals);
         } catch (NetworkException e) {
             Tools.showDialog(this,"网络异常",e.getMessage());
+            return;
         }
-        if (roomNumber != 0) {
-            Intent intent = new Intent();
-            intent.setClass(this, WaitRoom.class);
-            intent.putExtra("roomNumber",roomNumber);
-            intent.putExtra("playerName",hostname);
-            intent.putExtra("isBlue",false);
-            this.startActivity(intent);
-        }
-        // TODO: 2016/11/12 连接通讯协议，转入WaitRoom 
+        Intent intent = new Intent();
+        intent.setClass(this, WaitRoom.class);
+        intent.putExtra("roomNumber",roomNumber);
+        intent.putExtra("playerName",hostname);
+        intent.putExtra("isBlue",false);
+        this.startActivity(intent);
+        // TODO: 2016/11/12 连接通讯协议，转入WaitRoom
     }
 }

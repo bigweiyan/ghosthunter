@@ -89,6 +89,7 @@ public class WaitRoom extends AppCompatActivity {
                     ready = ne.gameReady(roomNumber, playerName);
                 }catch (NetworkException e){
                     Tools.showDialog(WaitRoom.this,"网络异常",e.getMessage());
+                    return;
                 }
                 if (ready) {
                     readyButton.setText(R.string.cancelReady);
