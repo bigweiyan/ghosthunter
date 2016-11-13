@@ -180,6 +180,7 @@ public class RoomSetting extends AppCompatActivity {
         intent.putExtra("playerName",hostname);
         intent.putExtra("isBlue",false);
         this.startActivity(intent);
+        finish();
         // TODO: 2016/11/12 连接通讯协议，转入WaitRoom
     }
 }
