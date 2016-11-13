@@ -27,8 +27,13 @@ public class WaitRoom extends AppCompatActivity {
     private int roomNumber;
     private String playerName;
     private String hostName;
+    private boolean isHost;
     private ArrayList<String> playerNameRed;
     private ArrayList<String> playerNameBlue;
+
+    private NetworkExample ne;
+
+
     private TextView playerListRed;
     private TextView playerListBlue;
     private TextView mode;
@@ -37,7 +42,6 @@ public class WaitRoom extends AppCompatActivity {
     private TextView roomNumberTV;
     private TextView endCondition;
     private Button readyButton;
-    private NetworkExample ne;
 
     private Handler mHandler = new Handler();
     private Runnable timerTask = new Runnable() {
@@ -71,6 +75,7 @@ public class WaitRoom extends AppCompatActivity {
         Intent intent = getIntent();
         roomNumber = intent.getIntExtra("roomNumber",0);
         playerName = intent.getStringExtra("playerName");
+        isHost = intent.getBooleanExtra("isHost",false);
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
