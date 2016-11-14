@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
 
 import static java.net.HttpURLConnection.HTTP_OK;
 
@@ -24,12 +25,12 @@ import static java.net.HttpURLConnection.HTTP_OK;
 
 public class NetworkImplement implements NetworkSupport
 {
-    final String SEVER = "10.0.2.2";
+    final private String SEVER = "10.0.2.2";
     //final String SEVER = "172.17.25.216";
-    final String DRIVER="com.mysql.jdbc.Driver";
-    final String URL="jdbc:mysql://"+SEVER+"/foxhunter?user=root&password=foxhunter";
+    final private String DRIVER="com.mysql.jdbc.Driver";
+    final private String URL="jdbc:mysql://"+SEVER+"/foxhunter?user=root&password=foxhunter";
 
-    final int TIME_OUT = 3000;
+    final private String TIME_OUT = "3000";
 
 
     private Connection getConnection()
@@ -40,7 +41,7 @@ public class NetworkImplement implements NetworkSupport
             Log.d("getConnection","driver ok");
 
             Properties properties = new Properties();
-            properties.put("connectTimeout", "3000");
+            properties.put("connectTimeout", TIME_OUT);
 
             // this cannot set time_out
             //Connection connection = DriverManager.getConnection(url,username,password,properties);
@@ -117,24 +118,38 @@ public class NetworkImplement implements NetworkSupport
                     for(Signal signal:signals)
                     {
                         String signalInsert = "insert into signal values("+roomID+","+signal.longitude+","+signal.latitude+","+signal.frequency+");";
-                        Log.d("createRoom",signalInsert);
+                        //Log.d("createRoom",signalInsert);
                         if(stmt.executeUpdate(signalInsert)!=1)
+                        {
+                            rst.close();
+                            stmt.close();
+                            connection.close();
                             throw new NetworkException(NetworkException.UNKNOWN);
+                        }
                     }
+                    rst.close();
+                    stmt.close();
+                    connection.close();
                     return roomID;
                 }
                 else
                 {
+                    rst.close();
+                    stmt.close();
+                    connection.close();
                     throw new NetworkException(NetworkException.UNKNOWN);
                 }
             }
             else
             {
+                stmt.close();
+                connection.close();
                 throw new NetworkException(NetworkException.UNKNOWN);
             }
         }
         catch (Exception e)
         {
+            Log.d("createRoom","catch exception "+e);
             throw new NetworkException(NetworkException.UNKNOWN);
         }
     }
@@ -151,7 +166,63 @@ public class NetworkImplement implements NetworkSupport
      */
     public boolean checkIn(int roomNumber, String playerName, boolean isBlue) throws NetworkException
     {
-        return true;
+        Connection connection = getConnection();
+        if(connection==null)
+        {
+            Log.d("checkIn", "TIME OUT");
+            throw new NetworkException(NetworkException.TIME_OUT);
+        }
+
+        final int iIsBlue = isBlue?1:0;
+
+        try
+        {
+            Statement stmt = connection.createStatement();
+
+            String roomQuery = "select * from room where roomid="+roomNumber+";";
+            ResultSet roomRst = stmt.executeQuery(roomQuery);
+            if(!roomRst.next())
+            {
+                roomRst.close();
+                stmt.close();
+                connection.close();
+                throw new NetworkException(NetworkException.WRONG_NUM);
+            }
+
+            String userQuery = "select * from user where roomid="+roomNumber+" and username='"+playerName+"';";
+            ResultSet userRst = stmt.executeQuery(userQuery);
+            if(userRst.next())
+            {
+                userRst.close();
+                stmt.close();
+                connection.close();
+                throw new NetworkException(NetworkException.SAME_NAME);
+            }
+
+            String userUpdate = "insert into user values("+roomNumber+",'"+playerName+"',"+iIsBlue+","+"0);";
+            if(stmt.executeUpdate(userUpdate)==1)
+            {
+                stmt.close();
+                connection.close();
+                return true;
+            }
+            else
+            {
+                stmt.close();
+                connection.close();
+                return false;
+            }
+        }
+        catch (NetworkException e)
+        {
+            Log.d("checkIn","Network Exception "+e);
+            throw e;
+        }
+        catch (Exception e)
+        {
+            Log.d("checkIn","other Exception "+e);
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
     }
 
 
@@ -165,7 +236,51 @@ public class NetworkImplement implements NetworkSupport
      */
     public boolean checkOut(int roomNumber, String playerName) throws NetworkException
     {
-        return true;
+        Connection connection = getConnection();
+        if(connection==null)
+        {
+            Log.d("checkOut", "TIME OUT");
+            throw new NetworkException(NetworkException.TIME_OUT);
+        }
+
+        try
+        {
+            Statement stmt = connection.createStatement();
+
+            String roomQuery = "select * from room where roomid="+roomNumber+";";
+            ResultSet roomRst = stmt.executeQuery(roomQuery);
+            if(!roomRst.next())
+            {
+                roomRst.close();
+                stmt.close();
+                connection.close();
+                throw new NetworkException(NetworkException.WRONG_NUM);
+            }
+
+            String userUpdate = "delete from user where roomid="+roomNumber+" and username='"+playerName+"';";
+            if(stmt.executeUpdate(userUpdate)==1)
+            {
+                stmt.close();
+                connection.close();
+                return true;
+            }
+            else
+            {
+                stmt.close();
+                connection.close();
+                return false;
+            }
+        }
+        catch (NetworkException e)
+        {
+            Log.d("checkOut","Network Exception "+e);
+            throw e;
+        }
+        catch (Exception e)
+        {
+            Log.d("checkOut","other Exception "+e);
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
     }
 
 

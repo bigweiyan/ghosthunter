@@ -26,10 +26,11 @@ import com.hunter.network.NetworkImplement;
 
 public class Communication extends AppCompatActivity {
 
-    private Button button;
-    private EditText editText;
+    private Button button1,button2;
+    private EditText editText1, editText2,editText3;
     private TextView textView;
-    String input = "";
+    String id = "", name = "";
+
     Handler handler = new Handler()
     {
         @Override
@@ -52,16 +53,19 @@ public class Communication extends AppCompatActivity {
         Log.d("Communication","oncreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_communication);
-        button = (Button) findViewById(R.id.button);
-        editText = (EditText)findViewById(R.id.editText);
+        button1 = (Button) findViewById(R.id.button);
+        button2 = (Button) findViewById(R.id.button2);
+        editText1 = (EditText)findViewById(R.id.editText);
+        editText2 = (EditText)findViewById(R.id.editText2);
+        editText3 = (EditText)findViewById(R.id.editText3);
+
         textView = (TextView)findViewById(R.id.textView);
 
-        button.setOnClickListener(new View.OnClickListener() {
+        button1.setOnClickListener(new View.OnClickListener()
+        {
             @Override
-            public void onClick(View v) {
-                input = editText.getText().toString();
-                Log.d("Communication",input);
-                //textView.setText(input);
+            public void onClick(View v)
+            {
 
                 final NetworkImplement network = new NetworkImplement();
 
@@ -70,13 +74,43 @@ public class Communication extends AppCompatActivity {
                     {
                         try
                         {
-                            ArrayList<Signal> al = new ArrayList<Signal>();
-                            al.add(new Signal(1.111111111,2.222222222,3));
-                            al.add(new Signal(3.111111111,4.222222222,5));
+                            boolean isBlue;
+                            if(editText3.getText().toString().equals("0"))
+                                isBlue=false;
+                            else
+                                isBlue=true;
+                            Log.d("Communication",network.checkIn(Integer.parseInt(editText1.getText().toString()),editText2.getText().toString(),isBlue)+"");
                         }
                         catch (Exception e)
                         {
-                            Log.d("Communication","exception!!!");
+                            Log.d("Communication","exception!!!"+e);
+                        }
+                    }
+                }).start();
+
+                Log.d("Communication","Thread end");
+            }
+        });
+
+
+        button2.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+
+                final NetworkImplement network = new NetworkImplement();
+
+                new Thread(new Runnable() {
+                    public void run()
+                    {
+                        try
+                        {
+                            Log.d("Communication",network.checkOut(Integer.parseInt(editText1.getText().toString()),editText2.getText().toString())+"");
+                        }
+                        catch (Exception e)
+                        {
+                            Log.d("Communication","exception!!!"+e);
                         }
                     }
                 }).start();
