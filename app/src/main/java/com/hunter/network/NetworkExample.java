@@ -40,6 +40,11 @@ public class NetworkExample implements NetworkSupport{
     }
 
     @Override
+    public boolean checkOut(int roomNumber, String playerName) throws NetworkException {
+        return true;
+    }
+
+    @Override
     public ArrayList<String> getMembersBlue(int roomNumber) throws NetworkException {
         requests++;
         ArrayList<String> list = new ArrayList<>();
@@ -102,6 +107,15 @@ public class NetworkExample implements NetworkSupport{
         }else{
             ready = !ready;
             return true;
+        }
+    }
+
+    @Override
+    public int getGameState(int roomNumber) throws NetworkException {
+        if (requests < 10){
+            return NetworkSupport.NOT_READY_YET;
+        } else{
+            return NetworkSupport.START;
         }
     }
 

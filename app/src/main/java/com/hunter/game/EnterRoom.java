@@ -110,6 +110,7 @@ public class EnterRoom extends AppCompatActivity {
             intent.putExtra("roomNumber",roomNumber);
             intent.putExtra("playerName",playerName);
             intent.putExtra("isBlue",isBlue);
+            intent.putExtra("isHost",false);
             this.startActivity(intent);
             finish();
         }

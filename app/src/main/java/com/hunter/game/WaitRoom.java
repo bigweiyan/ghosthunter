@@ -10,6 +10,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.hunter.game.models.GameState;
 import com.hunter.game.models.RoomRule;
 import com.hunter.game.models.Tools;
 import com.hunter.master.foxhunter.R;
@@ -27,8 +28,14 @@ public class WaitRoom extends AppCompatActivity {
     private int roomNumber;
     private String playerName;
     private String hostName;
+    private boolean isHost;
+    private int gameState;
     private ArrayList<String> playerNameRed;
     private ArrayList<String> playerNameBlue;
+
+    private NetworkExample ne;
+
+
     private TextView playerListRed;
     private TextView playerListBlue;
     private TextView mode;
@@ -37,7 +44,6 @@ public class WaitRoom extends AppCompatActivity {
     private TextView roomNumberTV;
     private TextView endCondition;
     private Button readyButton;
-    private NetworkExample ne;
 
     private Handler mHandler = new Handler();
     private Runnable timerTask = new Runnable() {
@@ -46,6 +52,7 @@ public class WaitRoom extends AppCompatActivity {
             try {
                 playerNameRed = ne.getMembersRed(roomNumber);
                 playerNameBlue = ne.getMembersBlue(roomNumber);
+                gameState = ne.getGameState(roomNumber);
                 for(int i = 0; i < playerNameRed.size(); i++) {
                     if (playerNameRed.get(i).equals(playerName)) {
                         playerNameRed.set(i,playerName+"(您)");
@@ -60,6 +67,13 @@ public class WaitRoom extends AppCompatActivity {
             } catch (NetworkException e) {
                 Tools.showDialog(WaitRoom.this,"网络异常",e.getMessage());
             }
+            if (gameState == GameState.START && !isHost) {
+                Intent intent = new Intent();
+                intent.setFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
+                intent.setClass(WaitRoom.this,FoxHunter.class);
+                WaitRoom.this.startActivity(intent);
+                WaitRoom.this.finish();
+            }
             mHandler.postDelayed(timerTask,1000);
         }
     };
@@ -71,6 +85,7 @@ public class WaitRoom extends AppCompatActivity {
         Intent intent = getIntent();
         roomNumber = intent.getIntExtra("roomNumber",0);
         playerName = intent.getStringExtra("playerName");
+        isHost = intent.getBooleanExtra("isHost",false);
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
