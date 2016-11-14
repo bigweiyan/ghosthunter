@@ -10,6 +10,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -22,9 +24,44 @@ import static java.net.HttpURLConnection.HTTP_OK;
 
 public class NetworkImplement implements NetworkSupport
 {
-    final String VirtuabBox_SEVER = "http://10.0.2.2/";
-    final String SEVER = "http://172.17.25.216/";
+    final String SEVER = "10.0.2.2";
+    //final String SEVER = "172.17.25.216";
+    final String DRIVER="com.mysql.jdbc.Driver";
+    final String URL="jdbc:mysql://"+SEVER+"/foxhunter?user=root&password=foxhunter";
+
     final int TIME_OUT = 3000;
+
+
+    private Connection getConnection()
+    {
+        try
+        {
+            Class.forName(DRIVER);
+            Log.d("getConnection","driver ok");
+
+            Properties properties = new Properties();
+            properties.put("connectTimeout", "3000");
+
+            // this cannot set time_out
+            //Connection connection = DriverManager.getConnection(url,username,password,properties);
+
+
+            Log.d("getConnection","SET properties ok");
+
+            //try new way to getConnection
+            Connection connection = DriverManager.getConnection(URL,properties);
+
+
+            Log.d("getConnection","Connection OK!");
+
+            return connection;
+        }
+        catch (Exception e)
+        {
+            Log.d("getConnection","Connection ERROR!");
+            return null;
+        }
+    }
 
 
     /**
@@ -33,58 +70,10 @@ public class NetworkImplement implements NetworkSupport
      */
     public boolean checkLink()
     {
-        try
-        {
-            String driver="com.mysql.jdbc.Driver";
-            Class.forName(driver);
-            Log.d("lzj","driver ok");
-
-            String url="jdbc:mysql://10.0.2.2:3306/foxhunter?user=root&password=foxhunter";
-
-            Log.d("lzj",url);
-
-
-            Properties properties = new Properties();
-            properties.put("connectTimeout", "3000");
-
-            // this cannot set time_out
-            //Connection connection = DriverManager.getConnection(url,username,password,properties);
-
-            //try new way to getConnection
-            Connection connection = DriverManager.getConnection(url,properties);
-
-
-            Log.d("lzj","Connection OK!");
-            // ...
+        if(getConnection()==null)
+            return false;
+        else
             return true;
-        }
-        catch (Exception e)
-        {
-            Log.d("lzj","Connection ERROR!");
-            return false;
-        }
-
-        /*      apache sever
-        try
-        {
-            URL url = new URL(SEVER);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-            connection.setConnectTimeout(TIME_OUT);
-            connection.connect();
-
-            int result = connection.getResponseCode();
-
-            if(result == HTTP_OK)
-                return true;
-            else
-                return false;
-        }
-        catch(Exception e)
-        {
-            return false;
-        }
-        */
     }
 
     /**
@@ -100,8 +89,56 @@ public class NetworkImplement implements NetworkSupport
     public int createRoom(int mode, String hostName, boolean useItem,
                           boolean autoReady, ArrayList<Signal> signals) throws NetworkException
     {
-        return 0;
+        Connection connection = getConnection();
+        if(connection==null)
+        {
+            Log.d("createRoom", "TIME OUT");
+            throw new NetworkException(NetworkException.TIME_OUT);
+        }
+
+        final int iUseItem = useItem?1:0;
+        final int iAutoReady = autoReady?1:0;
+
+        try
+        {
+            Statement stmt = connection.createStatement();
+            String roomCreate = "insert into room values(null," + mode + ",'" + hostName + "'," + iUseItem + "," + iAutoReady + "," + NOT_READY_YET + ");";
+
+            Log.d("createRoom", roomCreate);
+
+            if (stmt.executeUpdate(roomCreate) == 1)
+            {
+                String roomIDQuery = "select max(roomid) from room;";
+                ResultSet rst = stmt.executeQuery(roomIDQuery);
+                Log.d("createRoom",roomIDQuery);
+                if(rst.next())
+                {
+                    final int roomID = rst.getInt("max(roomid)");
+                    for(Signal signal:signals)
+                    {
+                        String signalInsert = "insert into signal values("+roomID+","+signal.longitude+","+signal.latitude+","+signal.frequency+");";
+                        Log.d("createRoom",signalInsert);
+                        if(stmt.executeUpdate(signalInsert)!=1)
+                            throw new NetworkException(NetworkException.UNKNOWN);
+                    }
+                    return roomID;
+                }
+                else
+                {
+                    throw new NetworkException(NetworkException.UNKNOWN);
+                }
+            }
+            else
+            {
+                throw new NetworkException(NetworkException.UNKNOWN);
+            }
+        }
+        catch (Exception e)
+        {
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
     }
+
 
     /**
      * 加入已创建的房间。加入成功时返回true，否则抛出异常NetworkException，在异常中标明错误类型.
@@ -116,6 +153,22 @@ public class NetworkImplement implements NetworkSupport
     {
         return true;
     }
+
+
+    /**
+     * 离开已创建的房间。离开成功时返回true，否则抛出异常，在异常中标明错误类型.
+     * <p>如果未发生异常但没有离开成功，则返回false
+     * @param roomNumber 房间号
+     * @param playerName 玩家昵称
+     * @return 是否退出成功
+     * @throws NetworkException
+     */
+    public boolean checkOut(int roomNumber, String playerName) throws NetworkException
+    {
+        return true;
+    }
+
+
 
     /**
      * 得到蓝方队员的列表（团队模式），即列表1.
@@ -160,6 +213,31 @@ public class NetworkImplement implements NetworkSupport
     public boolean gameReady(int roomNumber, String playerName) throws NetworkException
     {
         throw new NetworkException(NetworkException.TIME_OUT);
+    }
+
+
+
+    /**
+     * 房主发出开始游戏信号
+     * @param roomNumber 待查房间号
+     * @return 游戏是否开始，开始则返回true，如果未全准备好，返回false，有异常抛出
+     * @throws NetworkException
+     */
+    public boolean gameStart(int roomNumber) throws NetworkException
+    {
+        return true;
+    }
+
+
+    /**
+     * 当前游戏的状态.
+     * @param roomNumber 待查房间号
+     * @return 游戏状态，详见接口变量
+     * @throws NetworkException
+     */
+    public int getGameState(int roomNumber) throws NetworkException
+    {
+        return 0;
     }
 
     /**

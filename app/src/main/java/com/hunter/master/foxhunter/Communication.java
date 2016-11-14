@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.view.menu.ExpandedMenuView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -18,7 +19,9 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.util.ArrayList;
 
+import com.hunter.game.models.Signal;
 import com.hunter.network.NetworkImplement;
 
 public class Communication extends AppCompatActivity {
@@ -46,7 +49,7 @@ public class Communication extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("lzj","oncreate");
+        Log.d("Communication","oncreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_communication);
         button = (Button) findViewById(R.id.button);
@@ -57,24 +60,33 @@ public class Communication extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 input = editText.getText().toString();
-                Log.d("lzj",input);
+                Log.d("Communication",input);
                 //textView.setText(input);
 
                 final NetworkImplement network = new NetworkImplement();
 
                 new Thread(new Runnable() {
-                    public void run() {
-                        //getHttp();
-                        //testPHP();
-                        Log.d("lzj", network.checkLink()+"");
+                    public void run()
+                    {
+                        try
+                        {
+                            ArrayList<Signal> al = new ArrayList<Signal>();
+                            al.add(new Signal(1.111111111,2.222222222,3));
+                            al.add(new Signal(3.111111111,4.222222222,5));
+                        }
+                        catch (Exception e)
+                        {
+                            Log.d("Communication","exception!!!");
+                        }
                     }
                 }).start();
 
-                Log.d("lzj","Thread end");
+                Log.d("Communication","Thread end");
             }
         });
     }
 
+    /*  Communication whit apache-php sever
     public void testPHP()
     {
         try
@@ -121,50 +133,6 @@ public class Communication extends AppCompatActivity {
         {
             Log.d("lzj","ERROR");
         }
-
     }
-
-
-    public void getHttp()
-    {
-        InputStream inputStream = null;
-        InputStreamReader inputStreamReader = null;
-        BufferedReader reader = null;
-        StringBuffer resultBuffer = new StringBuffer();
-        String tempLine = null;
-        try
-        {
-            URL url = new URL("http://10.0.2.2:8080/lab2/");
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
-            connection.setDoInput(true);
-            connection.setDoOutput(true);
-            Log.d("lzj",connection.getResponseCode()+"");
-
-            try
-            {
-                inputStream = connection.getInputStream();
-                inputStreamReader = new InputStreamReader(inputStream);
-                reader = new BufferedReader(inputStreamReader);
-
-                while ((tempLine = reader.readLine()) != null)
-                {
-                    resultBuffer.append(tempLine);
-                }
-                Log.d("lzj", resultBuffer.toString());
-
-            }
-            catch (Exception e)
-            {
-                Log.d("lzj", "Connection ERROR");
-
-            }
-            connection.disconnect();
-
-        }
-        catch(Exception e)
-        {
-            Log.d("lzj", "error");
-        }
-    }
+    */
 }

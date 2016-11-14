@@ -12,7 +12,13 @@ import java.util.ArrayList;
 
 public class NetworkExample implements NetworkSupport{
 
-    private boolean ready = false;
+    private boolean ready;
+    private int requests;
+
+    public NetworkExample() {
+        ready = false;
+        requests = 0;
+    }
 
     @Override
     public boolean checkLink() {
@@ -34,12 +40,20 @@ public class NetworkExample implements NetworkSupport{
     }
 
     @Override
+    public boolean checkOut(int roomNumber, String playerName) throws NetworkException {
+        return true;
+    }
+
+    @Override
     public ArrayList<String> getMembersBlue(int roomNumber) throws NetworkException {
+        requests++;
         ArrayList<String> list = new ArrayList<>();
         if (roomNumber == 1234) {
             list.add("Mike");
-            list.add("Jack");
-            list.add("John");
+            if (requests > 2)
+                list.add("Jack");
+            if (requests > 3)
+                list.add("John");
         }
         return list;
     }
@@ -47,9 +61,12 @@ public class NetworkExample implements NetworkSupport{
     @Override
     public ArrayList<String> getMembersRed(int roomNumber) throws NetworkException {
         ArrayList<String> list = new ArrayList<>();
-        list.add("Sam");
-        list.add("kevin");
-        list.add("Ted");
+        if (requests > 1)
+            list.add("Sam");
+        if (requests > 4)
+            list.add("kevin");
+        if (requests > 5)
+            list.add("Ted");
         return list;
     }
 
@@ -91,6 +108,21 @@ public class NetworkExample implements NetworkSupport{
             ready = !ready;
             return true;
         }
+    }
+
+    @Override
+    public int getGameState(int roomNumber) throws NetworkException {
+        if (requests < 10){
+            return NetworkSupport.NOT_READY_YET;
+        } else{
+            return NetworkSupport.START;
+        }
+    }
+
+    @Override
+    public boolean gameStart(int roomNumber) throws NetworkException
+    {
+        return true;
     }
 
     @Override

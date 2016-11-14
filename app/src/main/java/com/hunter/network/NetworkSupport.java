@@ -14,6 +14,28 @@ import java.util.ArrayList;
 public interface NetworkSupport {
 
     /**
+     * 没有这个游戏房间.
+     */
+    public static final int NO_SUCH_ROOM = 0;
+    /**
+     * 房间建立，未全部准备.
+     */
+    public static final int NOT_READY_YET = 1;
+    /**
+     * 房间建立且全部准备.
+     */
+    public static final int READY_TO_START = 2;
+    /**
+     * 游戏开始.
+     */
+    public static final int START = 3;
+    /**
+     * 游戏结束.
+     */
+    public static final int GAME_OVER = 4;
+
+
+    /**
      * 检测是否有网络.
      * @return 是：有网络 否：无网络
      */
@@ -53,6 +75,17 @@ public interface NetworkSupport {
     public ArrayList<String> getMembersBlue(int roomNumber) throws  NetworkException;
 
     /**
+     * 离开已创建的房间。离开成功时返回true，否则抛出异常，在异常中标明错误类型.
+     * <p>如果未发生异常但没有离开成功，则返回false
+     * @param roomNumber 房间号
+     * @param playerName 玩家昵称
+     * @return 是否退出成功
+     * @throws NetworkException
+     */
+    public boolean checkOut(int roomNumber, String playerName) throws NetworkException;
+
+
+    /**
      * 得到红方队员的列表（团队模式）/所有玩家的列表（混战模式），即列表2.
      * @param roomNumber 房间号码
      * @return 红方队员列表
@@ -76,6 +109,22 @@ public interface NetworkSupport {
      * @throws NetworkException
      */
     public boolean gameReady(int roomNumber, String playerName) throws NetworkException;
+
+    /**
+     * 房主发出开始游戏信号
+     * @param roomNumber 待查房间号
+     * @return 游戏是否开始，开始则返回true，如果未全准备好，返回false，有异常抛出
+     * @throws NetworkException
+     */
+    public boolean gameStart(int roomNumber) throws NetworkException;
+
+    /**
+     * 修改当前游戏的状态.
+     * @param roomNumber 待查房间号
+     * @return 游戏状态，详见接口变量
+     * @throws NetworkException
+     */
+    public int getGameState(int roomNumber) throws NetworkException;
 
     /**
      * 查询房主.
