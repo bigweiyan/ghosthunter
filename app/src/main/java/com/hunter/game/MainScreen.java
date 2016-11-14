@@ -17,6 +17,7 @@ import java.util.List;
 import javax.microedition.khronos.opengles.GL10;
 
 /**
+ * 游戏主屏幕.
  * Created by weiyan on 2016/10/29.
  */
 
