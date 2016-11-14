@@ -63,6 +63,9 @@ public class GameState {
 
     public GameState(int gameState,int signalNumber) {
         this.gameState = gameState;
+        isSearchButtonWake = true;
+        presentFreq = Signal.FREQ_1;
+        workingItems = new ArrayList<>();
         isSignalsFound = new ArrayList<>();
         for (int i = 0; i < signalNumber; i++) {
             isSignalsFound.add(false);

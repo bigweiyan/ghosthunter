@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.hunter.game.models.GameState;
 import com.hunter.game.models.RoomRule;
+import com.hunter.game.models.Signal;
 import com.hunter.network.NetworkExample;
 import com.hunter.network.NetworkException;
 import com.hunter.network.NetworkSupport;
@@ -33,6 +34,7 @@ public class GameScreen extends GLScreen {
     private Vector2 touchPos;
 
     private Circle searchButton;
+    private Circle freqButton;
 
     private GameState state;
     private RoomRule rule;
@@ -55,6 +57,8 @@ public class GameScreen extends GLScreen {
 
         buttonState = BUTTON_UP;
         searchButton = new Circle(710,894,314);
+        freqButton = new Circle(204,1128,224);
+
         state = new GameState(GameState.START,0);
         rule = new RoomRule(false,false,((HuntGame)game).mode);
         roomNumber = ((HuntGame)game).roomNumber;
@@ -70,7 +74,7 @@ public class GameScreen extends GLScreen {
         if (onLoad) {
             try {
                 rule = ns.getRoomRule(roomNumber);
-                //onLoad = false;
+                onLoad = false;
             } catch (NetworkException e) {
                 e.printStackTrace();
             }
@@ -90,17 +94,24 @@ public class GameScreen extends GLScreen {
             if (event.type == Input.TouchEvent.TOUCH_DRAGGED
                     || event.type == Input.TouchEvent.TOUCH_DOWN) {
                 if (OverlapTest.pointInCircle(searchButton,touchPos)) {
-                    buttonState = BUTTON_DOWN;
+                    if (state.isSearchButtonWake) buttonState = BUTTON_DOWN;
                 } else {
-                    buttonState = BUTTON_UP;
+                    if (state.isSearchButtonWake) buttonState = BUTTON_UP;
                 }
             }
 
             if (event.type == Input.TouchEvent.TOUCH_UP) {
                 if (OverlapTest.pointInCircle(searchButton,touchPos)) {
                     buttonState = BUTTON_BUSY;
+                    // TODO: 2016/11/14 dealSearch
                 } else {
-                    buttonState = BUTTON_UP;
+                    if (state.isSearchButtonWake) buttonState = BUTTON_UP;
+                }
+
+                if (OverlapTest.pointInCircle(freqButton,touchPos)) {
+                    // TODO: 2016/11/14 dealFreq
+                    state.presentFreq ++;
+                    if(state.presentFreq > Signal.FREQ_6) state.presentFreq = Signal.FREQ_1;
                 }
             }
             Log.d("Touch","Event!"+event.x +" "+ event.y);
@@ -133,6 +144,8 @@ public class GameScreen extends GLScreen {
         if (onLoad) {
             batcher.drawSprite(540,960,1080,128,GameAssets.connecting);
         }
+        batcher.drawSprite(204,1128,224,224,
+                420 - 60.0f*state.presentFreq,GameAssets.frequency_pointer);
         batcher.endBatch();
 
         gl.glDisable(GL10.GL_BLEND);
