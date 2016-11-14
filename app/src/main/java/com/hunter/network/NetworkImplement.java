@@ -32,7 +32,10 @@ public class NetworkImplement implements NetworkSupport
 
     final private String TIME_OUT = "3000";
 
-
+    /**
+     * 建立数据库链接
+     * @return 未连接返回null，否则返回Connection
+     */
     private Connection getConnection()
     {
         try
@@ -188,6 +191,7 @@ public class NetworkImplement implements NetworkSupport
                 connection.close();
                 throw new NetworkException(NetworkException.WRONG_NUM);
             }
+            roomRst.close();
 
             String userQuery = "select * from user where roomid="+roomNumber+" and username='"+playerName+"';";
             ResultSet userRst = stmt.executeQuery(userQuery);
@@ -198,6 +202,7 @@ public class NetworkImplement implements NetworkSupport
                 connection.close();
                 throw new NetworkException(NetworkException.SAME_NAME);
             }
+            userRst.close();
 
             String userUpdate = "insert into user values("+roomNumber+",'"+playerName+"',"+iIsBlue+","+"0);";
             if(stmt.executeUpdate(userUpdate)==1)
@@ -256,6 +261,7 @@ public class NetworkImplement implements NetworkSupport
                 connection.close();
                 throw new NetworkException(NetworkException.WRONG_NUM);
             }
+            roomRst.close();
 
             String userUpdate = "delete from user where roomid="+roomNumber+" and username='"+playerName+"';";
             if(stmt.executeUpdate(userUpdate)==1)
@@ -293,7 +299,51 @@ public class NetworkImplement implements NetworkSupport
      */
     public ArrayList<String> getMembersBlue(int roomNumber) throws  NetworkException
     {
-        throw new NetworkException(NetworkException.TIME_OUT);
+        Connection connection = getConnection();
+        if(connection==null)
+        {
+            Log.d("getMembersBlue", "TIME OUT");
+            throw new NetworkException(NetworkException.TIME_OUT);
+        }
+
+        try
+        {
+            Statement stmt = connection.createStatement();
+
+            String roomQuery = "select * from room where roomid="+roomNumber+";";
+            ResultSet roomRst = stmt.executeQuery(roomQuery);
+            if(!roomRst.next())
+            {
+                roomRst.close();
+                stmt.close();
+                connection.close();
+                throw new NetworkException(NetworkException.WRONG_NUM);
+            }
+            roomRst.close();
+
+            ArrayList<String> arrayList = new ArrayList<>();
+            String userQuery = "select * from user where roomid="+roomNumber+" and isblue=1;";
+            ResultSet rst = stmt.executeQuery(userQuery);
+
+            while(rst.next())
+            {
+                arrayList.add(rst.getString("username"));
+            }
+            rst.close();
+            stmt.close();
+            connection.close();
+            return arrayList;
+        }
+        catch (NetworkException e)
+        {
+            Log.d("getMembersBlue","Network Exception "+e);
+            throw e;
+        }
+        catch (Exception e)
+        {
+            Log.d("getMembersBlue","other Exception "+e);
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
     }
 
     /**
@@ -304,7 +354,51 @@ public class NetworkImplement implements NetworkSupport
      */
     public ArrayList<String> getMembersRed(int roomNumber) throws  NetworkException
     {
-        throw new NetworkException(NetworkException.TIME_OUT);
+        Connection connection = getConnection();
+        if(connection==null)
+        {
+            Log.d("getMembersRed", "TIME OUT");
+            throw new NetworkException(NetworkException.TIME_OUT);
+        }
+
+        try
+        {
+            Statement stmt = connection.createStatement();
+
+            String roomQuery = "select * from room where roomid="+roomNumber+";";
+            ResultSet roomRst = stmt.executeQuery(roomQuery);
+            if(!roomRst.next())
+            {
+                roomRst.close();
+                stmt.close();
+                connection.close();
+                throw new NetworkException(NetworkException.WRONG_NUM);
+            }
+            roomRst.close();
+
+            ArrayList<String> arrayList = new ArrayList<String>();
+            String userQuery = "select * from user where roomid="+roomNumber+" and isblue=0;";
+            ResultSet rst = stmt.executeQuery(userQuery);
+
+            while(rst.next())
+            {
+                arrayList.add(rst.getString("username"));
+            }
+            rst.close();
+            stmt.close();
+            connection.close();
+            return arrayList;
+        }
+        catch (NetworkException e)
+        {
+            Log.d("getMembersRed","Network Exception "+e);
+            throw e;
+        }
+        catch (Exception e)
+        {
+            Log.d("getMembersRed","other Exception "+e);
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
     }
 
     /**

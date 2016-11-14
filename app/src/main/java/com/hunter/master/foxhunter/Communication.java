@@ -26,7 +26,7 @@ import com.hunter.network.NetworkImplement;
 
 public class Communication extends AppCompatActivity {
 
-    private Button button1,button2;
+    private Button button1,button2,getblue,getred;
     private EditText editText1, editText2,editText3;
     private TextView textView;
     String id = "", name = "";
@@ -55,6 +55,8 @@ public class Communication extends AppCompatActivity {
         setContentView(R.layout.activity_communication);
         button1 = (Button) findViewById(R.id.button);
         button2 = (Button) findViewById(R.id.button2);
+        getblue = (Button)findViewById(R.id.getBlue);
+        getred  = (Button)findViewById(R.id.getRed);
         editText1 = (EditText)findViewById(R.id.editText);
         editText2 = (EditText)findViewById(R.id.editText2);
         editText3 = (EditText)findViewById(R.id.editText3);
@@ -118,6 +120,60 @@ public class Communication extends AppCompatActivity {
                 Log.d("Communication","Thread end");
             }
         });
+
+
+        getblue.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+
+                final NetworkImplement network = new NetworkImplement();
+
+                new Thread(new Runnable() {
+                    public void run()
+                    {
+                        try
+                        {
+                            Log.d("Communication",network.getMembersBlue(Integer.parseInt(editText1.getText().toString()))+"");
+                        }
+                        catch (Exception e)
+                        {
+                            Log.d("Communication","exception!!!"+e);
+                        }
+                    }
+                }).start();
+
+                Log.d("Communication","Thread end");
+            }
+        });
+
+        getred.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+
+                final NetworkImplement network = new NetworkImplement();
+
+                new Thread(new Runnable() {
+                    public void run()
+                    {
+                        try
+                        {
+                            Log.d("Communication",network.getMembersRed(Integer.parseInt(editText1.getText().toString()))+"");
+                        }
+                        catch (Exception e)
+                        {
+                            Log.d("Communication","exception!!!"+e);
+                        }
+                    }
+                }).start();
+
+                Log.d("Communication","Thread end");
+            }
+        });
+
     }
 
     /*  Communication whit apache-php sever
