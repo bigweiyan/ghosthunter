@@ -1,6 +1,11 @@
 package com.gps;
 
 import android.content.Context;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorListener;
+import android.hardware.SensorManager;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.TextView;
@@ -9,26 +14,98 @@ import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
+import com.hunter.sensor.SensorException;
+import com.hunter.sensor.SensorSupport;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
+
+import static android.content.ContentValues.TAG;
+import static android.content.Context.SENSOR_SERVICE;
 
 /**
  * Created by BG2CYR on 2016/11/5.
  */
 
-public class LOC_IF {
+public class Sensor_If implements SensorSupport {
     private Context con;
     private AMapLocationClient locationClient = null;
     private AMapLocationClientOption locationOption = new AMapLocationClientOption();
     private TextView tvResult=null;
-    public LOC_IF(Context con)
+    private SensorManager sm;
+    private Sensor aSensor,mSensor;
+    private float Oridata;
+    float[] magneticFieldValues,accelerometerValues;
+    private static final String TAG = "sensor";
+    private  void calculateOrientation() {
+        float[] values = new float[3];
+        float[] R = new float[9];
+        SensorManager.getRotationMatrix(R, null, accelerometerValues, magneticFieldValues);
+        SensorManager.getOrientation(R, values);
+
+        // 要经过一次数据格式的转换，转换为度
+        values[0] = (float) Math.toDegrees(values[0]);
+        Oridata=values[0];
+        Log.i(TAG, values[0]+"");
+        //values[1] = (float) Math.toDegrees(values[1]);
+        //values[2] = (float) Math.toDegrees(values[2]);
+
+        if(values[0] >= -5 && values[0] < 5){
+            Log.i(TAG, "正北");
+        }
+        else if(values[0] >= 5 && values[0] < 85){
+            Log.i(TAG, "东北");
+        }
+        else if(values[0] >= 85 && values[0] <=95){
+            Log.i(TAG, "正东");
+        }
+        else if(values[0] >= 95 && values[0] <175){
+            Log.i(TAG, "东南");
+        }
+        else if((values[0] >= 175 && values[0] <= 180) || (values[0]) >= -180 && values[0] < -175){
+            Log.i(TAG, "正南");
+        }
+        else if(values[0] >= -175 && values[0] <-95){
+            Log.i(TAG, "西南");
+        }
+        else if(values[0] >= -95 && values[0] < -85){
+            Log.i(TAG, "正西");
+        }
+        else if(values[0] >= -85 && values[0] <-5){
+            Log.i(TAG, "西北");
+        }
+    }
+    private SensorEventListener slistener= new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent sensorEvent) {
+
+            if (sensorEvent.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD)
+                magneticFieldValues = sensorEvent.values;
+            if (sensorEvent.sensor.getType() == Sensor.TYPE_ACCELEROMETER)
+                accelerometerValues = sensorEvent.values;
+            calculateOrientation();
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int i) {
+
+        }
+    };
+    public Sensor_If(Context con)
     {
         this.con=con;
         initLocation();
+        sm = (SensorManager) con.getSystemService(SENSOR_SERVICE);
+        aSensor = sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mSensor = sm.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+        sm.registerListener(slistener,aSensor,SensorManager.SENSOR_DELAY_FASTEST);
+        sm.registerListener(slistener,mSensor,SensorManager.SENSOR_DELAY_FASTEST);
+        calculateOrientation();
     }
     //数据区
     //基本数据
+    final int nogps=100;
+    int typenum=999;
     public String fullData="";
     public String type="";
     public double Longtitude=0.0;
@@ -58,7 +135,7 @@ public class LOC_IF {
         //errCode等于0代表定位成功，其他的为定位失败，具体的可以参照官网定位错误码说明
         if(location.getErrorCode() == 0){
             sb.append("定位成功" + "\n");
-            int typenum=location.getLocationType();
+            typenum=location.getLocationType();
 
             switch (typenum)
             {
@@ -115,6 +192,7 @@ public class LOC_IF {
             }
         } else {
             //定位失败
+            typenum=nogps;
             sb.append("定位失败" + "\n");
             sb.append("错误码:" + location.getErrorCode() + "\n");
             sb.append("错误信息:" + location.getErrorInfo() + "\n");
@@ -263,5 +341,29 @@ public class LOC_IF {
             sdf.applyPattern(strPattern);
         }
         return sdf == null ? "NULL" : sdf.format(l);
+    }
+
+    @Override
+    public int checkSensor() {
+        if(typenum==nogps)
+            return 0;
+        if(typenum==999||typenum==0)
+            return 1;
+        return 2;
+    }
+
+    @Override
+    public double getLongitude() throws SensorException {
+        return this.Longtitude;
+    }
+
+    @Override
+    public double getLatitude() throws SensorException {
+        return this.Latitude;
+    }
+
+    @Override
+    public int getDirection() throws SensorException {
+        return (int)Oridata;
     }
 }
