@@ -8,7 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 public class MainActivity extends ListActivity {
-    String tests[] = {"master.foxhunter.Communication","game.FoxHunter","master.foxhunter.UserInterface"};
+    String tests[] = {"master.foxhunter.Communication","game.FoxHunter","master.foxhunter.UserInterface","master.foxhunter.GameLogic"};
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setListAdapter(new ArrayAdapter<>(this,

@@ -12,6 +12,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.gps.Sensor_If;
 import com.hunter.game.models.Signal;
 import com.hunter.game.models.Tools;
 import com.hunter.master.foxhunter.R;
@@ -56,9 +57,8 @@ public class RoomSetting extends AppCompatActivity {
         Intent intent = getIntent();
         mode = intent.getIntExtra("mode",MODE_BATTLE);
 
-        ss = new SensorExample();
+        ss = new Sensor_If(getApplicationContext());
         ns = new NetworkExample();
-
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);

@@ -21,4 +21,14 @@
         android:layout_marginStart="21dp"
         android:layout_marginTop="14dp"
         android:id="@+id/loctext" />
+
+    <TextView
+        android:text="TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignRight="@+id/loctext"
+        android:layout_alignEnd="@+id/loctext"
+        android:layout_marginBottom="40dp"
+        android:id="@+id/dirText" />
 </RelativeLayout>

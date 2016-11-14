@@ -48,6 +48,10 @@
             android:configChanges="keyboard|keyboardHidden|orientation"
             android:label="User Interface" />
         <activity
+            android:name=".GameLogic"
+            android:configChanges="keyboard|keyboardHidden|orientation"
+            android:label="User Interface" />
+        <activity
             android:name=".Communication"
             android:configChanges="keyboard|keyboardHidden|orientation"
             android:label="Communication" />

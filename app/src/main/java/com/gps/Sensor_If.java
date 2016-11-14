@@ -31,11 +31,11 @@ public class Sensor_If implements SensorSupport {
     private Context con;
     private AMapLocationClient locationClient = null;
     private AMapLocationClientOption locationOption = new AMapLocationClientOption();
-    private TextView tvResult=null;
+    private TextView tvResult=null,dirResult=null;
     private SensorManager sm;
     private Sensor aSensor,mSensor;
     private float Oridata;
-    float[] magneticFieldValues,accelerometerValues;
+    float[] magneticFieldValues=new float[3],accelerometerValues=new float[3];
     private static final String TAG = "sensor";
     private  void calculateOrientation() {
         float[] values = new float[3];
@@ -49,7 +49,10 @@ public class Sensor_If implements SensorSupport {
         Log.i(TAG, values[0]+"");
         //values[1] = (float) Math.toDegrees(values[1]);
         //values[2] = (float) Math.toDegrees(values[2]);
-
+        if(dirResult!=null)
+        {
+            dirResult.setText(""+(int)Oridata);
+        }
         if(values[0] >= -5 && values[0] < 5){
             Log.i(TAG, "正北");
         }
@@ -95,12 +98,13 @@ public class Sensor_If implements SensorSupport {
     {
         this.con=con;
         initLocation();
+
         sm = (SensorManager) con.getSystemService(SENSOR_SERVICE);
         aSensor = sm.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         mSensor = sm.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         sm.registerListener(slistener,aSensor,SensorManager.SENSOR_DELAY_FASTEST);
         sm.registerListener(slistener,mSensor,SensorManager.SENSOR_DELAY_FASTEST);
-        calculateOrientation();
+        this.startLocation();
     }
     //数据区
     //基本数据
@@ -201,9 +205,13 @@ public class Sensor_If implements SensorSupport {
         sb.append("回调时间: " + formatUTC(System.currentTimeMillis(), "yyyy-MM-dd HH:mm:ss") + "\n");
         return sb.toString();
     }
-    public void setShowID(TextView id)
+    public void setShowlocID(TextView id)
     {
         this.tvResult=id;
+    }
+    public void setShowDirectionID(TextView id)
+    {
+        this.dirResult=id;
     }
     public void initLocation(){
         //初始化client
