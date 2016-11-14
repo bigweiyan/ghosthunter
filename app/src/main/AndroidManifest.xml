@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.hunter.master.foxhunter">
-<<<<<<< HEAD
     <!--用于进行网络定位-->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"></uses-permission>
     <!--用于访问GPS定位-->
@@ -22,12 +21,11 @@
     <!--用于申请调用A-GPS模块-->
     <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS"></uses-permission>
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
-=======
+
 
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
->>>>>>> 2f4a4516614fcba694cb5c350f759abfe9d47a94
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"

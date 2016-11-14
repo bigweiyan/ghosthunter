@@ -174,7 +174,7 @@ public class LOC_IF {
          * 设置是否优先返回GPS定位结果，如果30秒内GPS没有返回定位结果则进行网络定位
          * 注意：只有在高精度模式下的单次定位有效，其他方式无效
          */
-        locationOption.setGpsFirst(false);
+        locationOption.setGpsFirst(false);//实际发布时改为true
         // 设置是否开启缓存
         locationOption.setLocationCacheEnable(false);
         //设置是否等待设备wifi刷新，如果设置为true,会自动变为单次定位，持续定位时不要使用
