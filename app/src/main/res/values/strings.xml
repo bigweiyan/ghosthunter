@@ -1,3 +1,22 @@
 <resources>
     <string name="app_name">FoxHunter</string>
+
+    <string name="title_activity_room_setting">房间设置</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+
+    <string name="title_activity_enter_room">加入房间</string>
+    <string name="title_activity_wait_room">游戏房间</string>
+    <string name="game_rule">游戏规则</string>
+    <string name="forward">确定</string>
+    <string name="backward">返回</string>
+    <string name="redTeam">红队</string>
+    <string name="blueTeam">蓝队</string>
+    <string name="gameReady">游戏准备</string>
+    <string name="cancelReady">取消准备</string>
+    <string name="quitRoom">退出房间</string>
+    <string name="teamMode">团队模式</string>
+    <string name="battleMode">混战模式</string>
+    <string name="gameOver1">游戏结束方式：时间到达60分钟</string>
+    <string name="gameOver2">游戏结束方式：有一个队伍拿到半数以上信号源</string>
+
 </resources>
