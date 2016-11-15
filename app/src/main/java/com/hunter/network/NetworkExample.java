@@ -51,9 +51,9 @@ public class NetworkExample implements NetworkSupport{
         if (roomNumber == 1234) {
             list.add("Mike");
             if (requests > 2)
-            list.add("Jack");
+                list.add("Jack");
             if (requests > 3)
-            list.add("John");
+                list.add("John");
         }
         return list;
     }
@@ -62,11 +62,11 @@ public class NetworkExample implements NetworkSupport{
     public ArrayList<String> getMembersRed(int roomNumber) throws NetworkException {
         ArrayList<String> list = new ArrayList<>();
         if (requests > 1)
-        list.add("Sam");
+            list.add("Sam");
         if (requests > 4)
-        list.add("kevin");
+            list.add("kevin");
         if (requests > 5)
-        list.add("Ted");
+            list.add("Ted");
         return list;
     }
 
@@ -117,6 +117,12 @@ public class NetworkExample implements NetworkSupport{
         } else{
             return NetworkSupport.START;
         }
+    }
+
+    @Override
+    public boolean gameStart(int roomNumber) throws NetworkException
+    {
+        return true;
     }
 
     @Override
