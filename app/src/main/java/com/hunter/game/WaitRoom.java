@@ -70,7 +70,11 @@ public class WaitRoom extends AppCompatActivity {
             if (gameState == GameState.START && !isHost) {
                 Intent intent = new Intent();
                 intent.setFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
-                intent.setClass(WaitRoom.this,FoxHunter.class);
+                intent.putExtra("name",playerName);
+                intent.putExtra("mode",rule.mode);
+                intent.putExtra("roomNumber",roomNumber);
+
+                intent.setClass(WaitRoom.this,HuntGame.class);
                 WaitRoom.this.startActivity(intent);
                 WaitRoom.this.finish();
             }
