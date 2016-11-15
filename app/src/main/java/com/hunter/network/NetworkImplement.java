@@ -4,19 +4,13 @@ import android.util.Log;
 
 import com.hunter.game.models.RoomRule;
 import com.hunter.game.models.Signal;
-import com.hunter.network.NetworkExample;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Properties;
-import java.util.concurrent.ExecutionException;
-
-import static java.net.HttpURLConnection.HTTP_OK;
 
 /**
  * 网络类的实现
@@ -424,7 +418,7 @@ public class NetworkImplement implements NetworkSupport
             ResultSet roomRst = stmt.executeQuery(roomQuery);
             if (roomRst.next())
             {
-                RoomRule roomRule = new RoomRule();
+                RoomRule roomRule = new RoomRule(false,false,RoomRule.MODE_TEAM);
                 roomRule.mode=roomRst.getInt("mode");
                 roomRule.useItem=roomRst.getBoolean("useitem");
                 roomRule.autoReady=roomRst.getBoolean("autoready");
