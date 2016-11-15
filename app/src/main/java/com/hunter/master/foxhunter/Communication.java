@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.ArrayList;
 
+import com.hunter.game.models.RoomRule;
 import com.hunter.game.models.Signal;
 import com.hunter.network.NetworkImplement;
 
@@ -135,7 +136,8 @@ public class Communication extends AppCompatActivity {
                     {
                         try
                         {
-                            Log.d("Communication",network.getMembersBlue(Integer.parseInt(editText1.getText().toString()))+"");
+                            Log.d("Communication",network.gameStart(Integer.parseInt(editText1.getText().toString()))+"");
+
                         }
                         catch (Exception e)
                         {
@@ -161,7 +163,7 @@ public class Communication extends AppCompatActivity {
                     {
                         try
                         {
-                            Log.d("Communication",network.getMembersRed(Integer.parseInt(editText1.getText().toString()))+"");
+                            Log.d("Communication",""+network.setGameState(Integer.parseInt(editText1.getText().toString()),Integer.parseInt(editText3.getText().toString())));
                         }
                         catch (Exception e)
                         {
