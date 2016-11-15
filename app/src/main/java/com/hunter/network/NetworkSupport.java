@@ -34,7 +34,6 @@ public interface NetworkSupport {
      */
     public static final int GAME_OVER = 4;
 
-
     /**
      * 检测是否有网络.
      * @return 是：有网络 否：无网络
@@ -119,7 +118,7 @@ public interface NetworkSupport {
     public boolean gameStart(int roomNumber) throws NetworkException;
 
     /**
-     * 修改当前游戏的状态.
+     * 当前游戏的状态.
      * @param roomNumber 待查房间号
      * @return 游戏状态，详见接口变量
      * @throws NetworkException

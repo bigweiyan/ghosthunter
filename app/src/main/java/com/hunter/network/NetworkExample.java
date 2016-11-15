@@ -72,7 +72,7 @@ public class NetworkExample implements NetworkSupport{
 
     @Override
     public RoomRule getRoomRule(int roomNumber) throws NetworkException {
-        RoomRule rule = new RoomRule();
+        RoomRule rule = new RoomRule(false,false,RoomRule.MODE_TEAM);
         if (roomNumber == 1234) {
             rule.useItem = false;
             rule.mode = RoomRule.MODE_TEAM;

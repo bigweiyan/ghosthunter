@@ -10,7 +10,7 @@ import android.widget.ListView;
 import java.lang.String;
 
 public class MainActivity extends ListActivity {
-    String tests[] = {"master.foxhunter.Communication","game.FoxHunter","master.foxhunter.UserInterface"};
+    String tests[] = {"master.foxhunter.Communication","game.FoxHunter","master.foxhunter.UserInterface","master.foxhunter.GameLogic"};
     public void onCreate(Bundle savedInstanceState){
         Log.d("lzj","main start");
         super.onCreate(savedInstanceState);
