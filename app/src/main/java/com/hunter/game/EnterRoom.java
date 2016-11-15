@@ -12,12 +12,12 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 
+import com.gps.Sensor_If;
 import com.hunter.game.models.Tools;
 import com.hunter.master.foxhunter.R;
-import com.hunter.network.NetworkExample;
 import com.hunter.network.NetworkException;
+import com.hunter.network.NetworkImplement;
 import com.hunter.network.NetworkSupport;
-import com.hunter.sensor.SensorExample;
 import com.hunter.sensor.SensorSupport;
 
 /**
@@ -37,8 +37,8 @@ public class EnterRoom extends AppCompatActivity {
         Intent intent = getIntent();
         mode = intent.getIntExtra("mode",MODE_BATTLE);
         
-        ns = new NetworkExample();
-        ss = new SensorExample();
+        ns = new NetworkImplement();
+        ss = new Sensor_If(getApplicationContext());
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -95,16 +95,18 @@ public class EnterRoom extends AppCompatActivity {
             return;
         }
 
+        boolean result;
         if ("".equals(playerName) || "".equals(roomNumber)){
             Tools.showDialog(this, "输入错误","请填写您的昵称和要加入的房间号");
             return;
         }else {
             try {
-                ns.checkIn(roomNumber,playerName,isBlue);
+                result = ns.checkIn(roomNumber,playerName,isBlue);
             }catch (NetworkException e) {
                 Tools.showDialog(this, "网络异常",e.getMessage());
                 return;
             }
+            if (!result) return;
             Intent intent = new Intent();
             intent.setClass(this, WaitRoom.class);
             intent.putExtra("roomNumber",roomNumber);
@@ -115,6 +117,5 @@ public class EnterRoom extends AppCompatActivity {
             finish();
         }
     }
-
 
 }

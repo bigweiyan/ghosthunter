@@ -12,17 +12,18 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.gps.Sensor_If;
 import com.hunter.game.models.Signal;
 import com.hunter.game.models.Tools;
 import com.hunter.master.foxhunter.R;
-import com.hunter.network.NetworkExample;
 import com.hunter.network.NetworkException;
+import com.hunter.network.NetworkImplement;
 import com.hunter.network.NetworkSupport;
-import com.hunter.sensor.SensorExample;
 import com.hunter.sensor.SensorException;
 import com.hunter.sensor.SensorSupport;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * 房间设置界面.
@@ -49,6 +50,7 @@ public class RoomSetting extends AppCompatActivity {
     private ArrayList<Signal> signals;
     private SensorSupport ss;
     private NetworkSupport ns;
+    private Random rand;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,9 +58,8 @@ public class RoomSetting extends AppCompatActivity {
         Intent intent = getIntent();
         mode = intent.getIntExtra("mode",MODE_BATTLE);
 
-        ss = new SensorExample();
-        ns = new NetworkExample();
-
+        ss = new Sensor_If(getApplicationContext());
+        ns = new NetworkImplement();
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -68,6 +69,7 @@ public class RoomSetting extends AppCompatActivity {
         signalListText.setMovementMethod(ScrollingMovementMethod.getInstance());
         signals = new ArrayList<>();
         signalText = new ArrayList<>();
+        rand = new Random();
 
         switch (mode) {
             case MODE_BATTLE:
@@ -96,12 +98,11 @@ public class RoomSetting extends AppCompatActivity {
                     Tools.showDialog(RoomSetting.this,"请稍等","位置正在初始化，请稍等");
                     return;
                 }
-                // TODO: 2016/11/12 连接GPS协议
+
                 try {
                     double lat = ss.getLatitude();
                     double lon = ss.getLongitude();
-                    int dir = ss.getDirection();
-                    signals.add(new Signal(lat,lon,dir));
+                    signals.add(new Signal(lat,lon,rand.nextInt(6)+1));
                     signalText.add("信号源：纬度"+lat+" 经度:"+lon);
                 }catch (SensorException e) {
                     Tools.showDialog(RoomSetting.this,"传感器异常",e.getMessage());
@@ -114,6 +115,7 @@ public class RoomSetting extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 signalText.clear();
+                signals.clear();
                 showSignals();
             }
         });
@@ -122,6 +124,7 @@ public class RoomSetting extends AppCompatActivity {
             public void onClick(View v) {
                 if (signalText.size() == 0) return;
                 signalText.remove(signalText.size()-1);
+                signals.remove(signals.size()-1);
                 showSignals();
             }
         });
@@ -190,6 +193,5 @@ public class RoomSetting extends AppCompatActivity {
         intent.putExtra("isHost",true);
         this.startActivity(intent);
         finish();
-        // TODO: 2016/11/12 连接通讯协议，转入WaitRoom
     }
 }

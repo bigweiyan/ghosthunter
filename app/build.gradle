@@ -3,6 +3,12 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 24
     buildToolsVersion "24.0.2"
+    sourceSets{
+        main{
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+
     defaultConfig {
         applicationId "com.hunter.master.foxhunter"
         minSdkVersion 16
@@ -20,11 +26,13 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    compile fileTree(include: ['*.jar'], dir: 'libs')
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile 'com.android.support:appcompat-v7:24.2.1'
     compile 'com.android.support:support-v4:24.2.1'
     testCompile 'junit:junit:4.12'
+    compile files('libs/AMapNavi_1.9.3_AMapLocation_3.0.0_20161014.jar')
+    compile files('lib/mysql-connector-java-5.1.18-bin.jar')
 }
