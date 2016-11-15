@@ -88,6 +88,14 @@ public class RoomSetting extends AppCompatActivity {
         addSignal.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                int sensor = ss.checkSensor();
+                if (sensor == SensorSupport.NO_START) {
+                    Tools.showDialog(RoomSetting.this,"传感器异常","未检测到传感器");
+                    return;
+                } else if(sensor == SensorSupport.BUSY) {
+                    Tools.showDialog(RoomSetting.this,"请稍等","位置正在初始化，请稍等");
+                    return;
+                }
                 // TODO: 2016/11/12 连接GPS协议
                 try {
                     double lat = ss.getLatitude();
