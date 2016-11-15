@@ -34,7 +34,6 @@ public interface NetworkSupport {
      */
     public static final int GAME_OVER = 4;
 
-
     /**
      * 检测是否有网络.
      * @return 是：有网络 否：无网络
@@ -65,6 +64,16 @@ public interface NetworkSupport {
      * @throws NetworkException
      */
     public boolean checkIn(int roomNumber, String playerName, boolean isBlue) throws NetworkException;
+
+    /**
+     * 离开已创建的房间。离开成功时返回true，否则抛出异常，在异常中标明错误类型.
+     * <p>如果未发生异常但没有离开成功，则返回false
+     * @param roomNumber 房间号
+     * @param playerName 玩家昵称
+     * @return 是否退出成功
+     * @throws NetworkException
+     */
+    public boolean checkOut(int roomNumber, String playerName) throws NetworkException;
 
     /**
      * 得到蓝方队员的列表（团队模式），即列表1.
@@ -119,7 +128,7 @@ public interface NetworkSupport {
     public boolean gameStart(int roomNumber) throws NetworkException;
 
     /**
-     * 修改当前游戏的状态.
+     * 当前游戏的状态.
      * @param roomNumber 待查房间号
      * @return 游戏状态，详见接口变量
      * @throws NetworkException

@@ -2,6 +2,7 @@ package com.hunter.game;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.Window;
@@ -9,6 +10,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.hunter.game.models.GameState;
 import com.hunter.game.models.RoomRule;
 import com.hunter.game.models.Tools;
 import com.hunter.master.foxhunter.R;
@@ -26,8 +28,14 @@ public class WaitRoom extends AppCompatActivity {
     private int roomNumber;
     private String playerName;
     private String hostName;
+    private boolean isHost;
+    private int gameState;
     private ArrayList<String> playerNameRed;
     private ArrayList<String> playerNameBlue;
+
+    private NetworkExample ne;
+
+
     private TextView playerListRed;
     private TextView playerListBlue;
     private TextView mode;
@@ -36,7 +44,43 @@ public class WaitRoom extends AppCompatActivity {
     private TextView roomNumberTV;
     private TextView endCondition;
     private Button readyButton;
-    private NetworkExample ne;
+
+    private Handler mHandler = new Handler();
+    private Runnable timerTask = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                playerNameRed = ne.getMembersRed(roomNumber);
+                playerNameBlue = ne.getMembersBlue(roomNumber);
+                gameState = ne.getGameState(roomNumber);
+                for(int i = 0; i < playerNameRed.size(); i++) {
+                    if (playerNameRed.get(i).equals(playerName)) {
+                        playerNameRed.set(i,playerName+"(您)");
+                    }
+                }
+                for(int i = 0; i < playerNameBlue.size(); i++) {
+                    if (playerNameBlue.get(i).equals(playerName)) {
+                        playerNameBlue.set(i,playerName+"(您)");
+                    }
+                }
+                setPlayerList();
+            } catch (NetworkException e) {
+                Tools.showDialog(WaitRoom.this,"网络异常",e.getMessage());
+            }
+            if (gameState == GameState.START && !isHost) {
+                Intent intent = new Intent();
+                intent.setFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
+                intent.putExtra("name",playerName);
+                intent.putExtra("mode",rule.mode);
+                intent.putExtra("roomNumber",roomNumber);
+
+                intent.setClass(WaitRoom.this,HuntGame.class);
+                WaitRoom.this.startActivity(intent);
+                WaitRoom.this.finish();
+            }
+            mHandler.postDelayed(timerTask,1000);
+        }
+    };
 
 
     @Override
@@ -45,6 +89,7 @@ public class WaitRoom extends AppCompatActivity {
         Intent intent = getIntent();
         roomNumber = intent.getIntExtra("roomNumber",0);
         playerName = intent.getStringExtra("playerName");
+        isHost = intent.getBooleanExtra("isHost",false);
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -71,31 +116,18 @@ public class WaitRoom extends AppCompatActivity {
         playerNameBlue = new ArrayList<>();
         playerNameRed = new ArrayList<>();
 
-        // TODO: 2016/11/12 添加rule的初始化和playNameRed、Blue的初始化
         try {
             rule = ne.getRoomRule(roomNumber);
-            playerNameRed = ne.getMembersRed(roomNumber);
-            playerNameBlue = ne.getMembersBlue(roomNumber);
             hostName = ne.getHostName(roomNumber);
-            for(int i = 0; i < playerNameRed.size(); i++) {
-                if (playerNameRed.get(i).equals(playerName)) {
-                    playerNameRed.set(i,playerName+"(您)");
-                }
-            }
-            for(int i = 0; i < playerNameBlue.size(); i++) {
-                if (playerNameBlue.get(i).equals(playerName)) {
-                    playerNameBlue.set(i,playerName+"(您)");
-                }
-            }
+
             if (hostName.equals(playerName)) {
                 hostName = hostName + "(您)";
             }
+            setRulesTV();
         }catch (NetworkException e){
             Tools.showDialog(this,"网络异常",e.getMessage());
         }
-        setPlayerList();
-        setRulesTV();
-        // TODO: 2016/11/12 添加准备动作
+
         readyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -158,5 +190,17 @@ public class WaitRoom extends AppCompatActivity {
         text = "房间编号："+roomNumber;
         roomNumberTV.setText(text);
 
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mHandler.post(timerTask);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mHandler.removeCallbacks(timerTask);
     }
 }

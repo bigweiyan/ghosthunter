@@ -39,6 +39,11 @@
             android:label="FoxHunter"
             android:screenOrientation="portrait" />
         <activity
+            android:name="com.hunter.game.HuntGame"
+            android:configChanges="keyboard|keyboardHidden|orientation"
+            android:label="测向机"
+            android:screenOrientation="portrait" />
+        <activity
             android:name="com.hunter.game.RoomSetting"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_room_setting"

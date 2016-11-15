@@ -66,7 +66,7 @@ public class EnterRoom extends AppCompatActivity {
         join.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!ns.checkLink() || !ss.checkSensor()) {
+                if (!ns.checkLink() || ss.checkSensor() == SensorSupport.NO_START) {
                     Tools.showDialog(EnterRoom.this,"连接异常","请检查您的网络连接和位置");
                     return;
                 }
@@ -110,7 +110,9 @@ public class EnterRoom extends AppCompatActivity {
             intent.putExtra("roomNumber",roomNumber);
             intent.putExtra("playerName",playerName);
             intent.putExtra("isBlue",isBlue);
+            intent.putExtra("isHost",false);
             this.startActivity(intent);
+            finish();
         }
     }
 
