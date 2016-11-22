@@ -19,10 +19,10 @@ import java.util.Properties;
 
 public class NetworkImplement implements NetworkSupport
 {
-    final private String SEVER = "10.0.2.2";
-    //final String SEVER = "172.17.25.216";
+    //final private String SEVER = "10.0.2.2";
+    final private String SEVER = "192.168.191.1";
     final private String DRIVER="com.mysql.jdbc.Driver";
-    final private String URL="jdbc:mysql://"+SEVER+"/foxhunter?user=root&password=foxhunter";
+    final private String URL="jdbc:mysql://"+SEVER+":3306/foxhunter?user=root&password=foxhunter";
 
     final private String TIME_OUT = "3000";
 
@@ -56,7 +56,7 @@ public class NetworkImplement implements NetworkSupport
         }
         catch (Exception e)
         {
-            Log.d("getConnection","Connection ERROR!");
+            Log.d("getConnection","Connection ERROR!"+e.toString());
             return null;
         }
     }
@@ -87,6 +87,7 @@ public class NetworkImplement implements NetworkSupport
     public int createRoom(int mode, String hostName, boolean useItem,
                           boolean autoReady, ArrayList<Signal> signals) throws NetworkException
     {
+        Log.d("createRoom","hostName="+hostName);
         Connection connection = getConnection();
         if(connection==null)
         {

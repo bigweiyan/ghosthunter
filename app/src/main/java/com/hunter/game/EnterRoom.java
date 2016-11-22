@@ -2,6 +2,7 @@ package com.hunter.game;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.Window;
@@ -33,6 +34,9 @@ public class EnterRoom extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        StrictMode.ThreadPolicy policy=new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
         mode = intent.getIntExtra("mode",MODE_BATTLE);
@@ -66,8 +70,11 @@ public class EnterRoom extends AppCompatActivity {
         join.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!ns.checkLink() || ss.checkSensor() == SensorSupport.NO_START) {
-                    Tools.showDialog(EnterRoom.this,"连接异常","请检查您的网络连接和位置");
+                if (!ns.checkLink()) {
+                    Tools.showDialog(EnterRoom.this,"连接异常","请检查您的网络连接");
+                    return;
+                }else if (ss.checkSensor() == SensorSupport.NO_START) {
+                    Tools.showDialog(EnterRoom.this,"连接异常","请检查您的位置");
                     return;
                 }
                 

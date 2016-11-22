@@ -3,6 +3,8 @@ package com.hunter.game;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+
+import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.Window;
@@ -86,6 +88,9 @@ public class WaitRoom extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        StrictMode.ThreadPolicy policy=new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
         roomNumber = intent.getIntExtra("roomNumber",0);
@@ -143,7 +148,12 @@ public class WaitRoom extends AppCompatActivity {
                 boolean ready = false;
                 try {
                     if (isHost) {
+<<<<<<< HEAD
                         ne.gameStart(roomNumber);
+=======
+                        boolean flag = ne.gameStart(roomNumber);
+                        if (flag) ne.setGameState(roomNumber,GameState.START);
+>>>>>>> lizijue
                     }else {
                         ready = ne.gameReady(roomNumber, playerName);
                     }
