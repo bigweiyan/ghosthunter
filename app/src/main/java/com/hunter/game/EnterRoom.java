@@ -70,8 +70,11 @@ public class EnterRoom extends AppCompatActivity {
         join.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (!ns.checkLink() || ss.checkSensor() == SensorSupport.NO_START) {
-                    Tools.showDialog(EnterRoom.this,"连接异常","请检查您的网络连接和位置");
+                if (!ns.checkLink()) {
+                    Tools.showDialog(EnterRoom.this,"连接异常","请检查您的网络连接");
+                    return;
+                }else if (ss.checkSensor() == SensorSupport.NO_START) {
+                    Tools.showDialog(EnterRoom.this,"连接异常","请检查您的位置");
                     return;
                 }
                 

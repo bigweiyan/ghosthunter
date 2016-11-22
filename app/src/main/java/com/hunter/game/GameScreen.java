@@ -5,8 +5,10 @@ import android.util.Log;
 import com.hunter.game.models.GameState;
 import com.hunter.game.models.RoomRule;
 import com.hunter.game.models.Signal;
+import com.hunter.game.models.Tools;
 import com.hunter.network.NetworkExample;
 import com.hunter.network.NetworkException;
+import com.hunter.network.NetworkImplement;
 import com.hunter.network.NetworkSupport;
 import com.hunter.sensor.SensorExample;
 import com.hunter.sensor.SensorSupport;
@@ -66,7 +68,7 @@ public class GameScreen extends GLScreen {
         onLoad =  true;
 
         ss = new SensorExample();
-        ns = new NetworkExample();
+        ns = new NetworkImplement();
     }
 
     @Override
@@ -76,7 +78,7 @@ public class GameScreen extends GLScreen {
                 rule = ns.getRoomRule(roomNumber);
                 onLoad = false;
             } catch (NetworkException e) {
-                e.printStackTrace();
+                Tools.showDialog(glGame,"网络异常","请检查网络连接");
             }
             return;
         }

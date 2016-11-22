@@ -83,7 +83,7 @@ public class NetworkExample implements NetworkSupport{
             signal.add(new Signal(2, 2, 3));
             signal.add(new Signal(3, 3, 4));
             rule.signals = signal;
-        } else if (roomNumber == 5678) {
+        } else if (roomNumber == 47) {
             rule.useItem = false;
             rule.mode = RoomRule.MODE_BATTLE;
             rule.autoReady = false;
@@ -125,6 +125,10 @@ public class NetworkExample implements NetworkSupport{
         return true;
     }
 
+    @Override
+    public boolean setGameState(int roomNumber, int gameState) throws  NetworkException{
+        return true;
+    }
     @Override
     public String getHostName(int roomNumber) throws NetworkException {
         return "Host";
