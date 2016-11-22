@@ -77,12 +77,7 @@ public class Communication extends AppCompatActivity {
                     {
                         try
                         {
-                            boolean isBlue;
-                            if(editText3.getText().toString().equals("0"))
-                                isBlue=false;
-                            else
-                                isBlue=true;
-                            Log.d("Communication",network.checkIn(Integer.parseInt(editText1.getText().toString()),editText2.getText().toString(),isBlue)+"");
+                            Log.d("Communication",network.createRoom(1,editText2.getText().toString(),true,true,new ArrayList<Signal>())+"");
                         }
                         catch (Exception e)
                         {

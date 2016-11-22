@@ -135,6 +135,14 @@ public interface NetworkSupport {
      */
     public int getGameState(int roomNumber) throws NetworkException;
 
+
+    /**
+     * 设置当前游戏的状态.
+     * @param roomNumber 房间号，改变之后的状态
+     * @return 是否设置成功
+     * @throws NetworkException
+     */
+    public boolean setGameState(int roomNumber, int gameState) throws NetworkException;
     /**
      * 查询房主.
      * @param roomNumber 房间号码
