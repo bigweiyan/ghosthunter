@@ -148,12 +148,9 @@ public class WaitRoom extends AppCompatActivity {
                 boolean ready = false;
                 try {
                     if (isHost) {
-<<<<<<< HEAD
-                        ne.gameStart(roomNumber);
-=======
                         boolean flag = ne.gameStart(roomNumber);
                         if (flag) ne.setGameState(roomNumber,GameState.START);
->>>>>>> lizijue
+
                     }else {
                         ready = ne.gameReady(roomNumber, playerName);
                     }

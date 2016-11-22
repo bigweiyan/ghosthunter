@@ -4,10 +4,8 @@ import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.hardware.SensorListener;
 import android.hardware.SensorManager;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.TextView;
 
 import com.amap.api.location.AMapLocation;
@@ -20,7 +18,6 @@ import com.hunter.sensor.SensorSupport;
 import java.text.SimpleDateFormat;
 import java.util.Locale;
 
-import static android.content.ContentValues.TAG;
 import static android.content.Context.SENSOR_SERVICE;
 
 /**
@@ -46,21 +43,15 @@ public class Sensor_If implements SensorSupport {
         // 要经过一次数据格式的转换，转换为度
         values[0] = (float) Math.toDegrees(values[0]);
         Oridata=values[0];
-<<<<<<< HEAD
-        Log.i(TAG, values[0]+"");
-=======
+
         //Log.i(TAG, values[0]+"");
->>>>>>> lizijue
         //values[1] = (float) Math.toDegrees(values[1]);
         //values[2] = (float) Math.toDegrees(values[2]);
         if(dirResult!=null)
         {
             dirResult.setText(""+(int)Oridata);
         }
-<<<<<<< HEAD
-=======
         /*
->>>>>>> lizijue
         if(values[0] >= -5 && values[0] < 5){
             Log.i(TAG, "正北");
         }
@@ -85,10 +76,7 @@ public class Sensor_If implements SensorSupport {
         else if(values[0] >= -85 && values[0] <-5){
             Log.i(TAG, "西北");
         }
-<<<<<<< HEAD
-=======
         */
->>>>>>> lizijue
     }
     private SensorEventListener slistener= new SensorEventListener() {
         @Override
@@ -215,10 +203,6 @@ public class Sensor_If implements SensorSupport {
             sb.append("错误描述:" + location.getLocationDetail() + "\n");
         }
         sb.append("回调时间: " + formatUTC(System.currentTimeMillis(), "yyyy-MM-dd HH:mm:ss") + "\n");
-<<<<<<< HEAD
-=======
-        Log.d("gps", String.valueOf(sb));
->>>>>>> lizijue
         return sb.toString();
     }
     public void setShowlocID(TextView id)
@@ -369,21 +353,12 @@ public class Sensor_If implements SensorSupport {
 
     @Override
     public int checkSensor() {
-<<<<<<< HEAD
-        if(typenum==nogps)
-            return 0;
-        if(typenum==999||typenum==0)
-            return 1;
-        return 2;
-=======
 
         if(typenum==nogps)
             return SensorSupport.NO_START;
         if(typenum==999||typenum==0)
             return SensorSupport.BUSY;
-
         return SensorSupport.OK;
->>>>>>> lizijue
     }
 
     @Override
