@@ -7,10 +7,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+
+import com.hunter.game.models.RoomRule;
+
 import java.lang.String;
 
 public class MainActivity extends ListActivity {
-    String tests[] = {"master.foxhunter.Communication","game.FoxHunter","master.foxhunter.UserInterface","master.foxhunter.GameLogic"};
+    String tests[] = {"master.foxhunter.Communication","game.FoxHunter","game.HuntGame","master.foxhunter.GameLogic"};
     public void onCreate(Bundle savedInstanceState){
         Log.d("lzj","main start");
         super.onCreate(savedInstanceState);
@@ -26,8 +29,12 @@ public class MainActivity extends ListActivity {
             @SuppressWarnings("rawtypes")
 
             Class clazz = Class.forName("com.hunter."+testName);
-
             Intent intent = new Intent(this,clazz);
+            if (testName.equals("game.HuntGame")) {
+                intent.putExtra("name","testName");
+                intent.putExtra("mode", RoomRule.MODE_TEAM);
+                intent.putExtra("roomNumber",43);
+            }
             startActivity(intent);
         }catch(ClassNotFoundException e){
             e.printStackTrace();

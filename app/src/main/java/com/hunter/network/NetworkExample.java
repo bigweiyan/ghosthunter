@@ -1,5 +1,6 @@
 package com.hunter.network;
 
+import com.hunter.game.models.Item;
 import com.hunter.game.models.RoomRule;
 import com.hunter.game.models.Signal;
 
@@ -83,15 +84,19 @@ public class NetworkExample implements NetworkSupport{
             signal.add(new Signal(2, 2, 3));
             signal.add(new Signal(3, 3, 4));
             rule.signals = signal;
-        } else if (roomNumber == 47) {
-            rule.useItem = false;
-            rule.mode = RoomRule.MODE_BATTLE;
+        } else if (roomNumber == 42 || roomNumber == 43) {
+            rule.useItem = true;
+            if (roomNumber == 42)
+                rule.mode = RoomRule.MODE_BATTLE;
+            else
+                rule.mode = RoomRule.MODE_TEAM;
             rule.autoReady = false;
             ArrayList<Signal> signal = new ArrayList<>();
             signal.add(new Signal(0, 0, 1));
             signal.add(new Signal(1, 1, 2));
             signal.add(new Signal(2, 2, 3));
             signal.add(new Signal(3, 3, 4));
+            signal.add(new Signal(4, 4, 5));
             rule.signals = signal;
         }else {
             throw new NetworkException(NetworkException.WRONG_NUM);
@@ -132,5 +137,44 @@ public class NetworkExample implements NetworkSupport{
     @Override
     public String getHostName(int roomNumber) throws NetworkException {
         return "Host";
+    }
+
+    @Override
+    public ArrayList<String> getHighScores(int roomNumber) throws NetworkException {
+        ArrayList<String> result = new ArrayList<>();
+        if(roomNumber == 42) {
+            result.add("Mike 3");
+            result.add("Tom 2");
+            result.add("Sam 1");
+        }else if (roomNumber == 43) {
+            result.add("2");
+            result.add("2");
+        }
+        return result;
+    }
+
+    @Override
+    public ArrayList<Item> getItemsEffect(int roomNumber, String playerName) throws NetworkException {
+        return null;
+    }
+
+    @Override
+    public Item findSignal(int roomNumber, String playerName, int signal) throws NetworkException {
+        return null;
+    }
+
+    @Override
+    public ArrayList<Integer> getSignalBelong(int roomNumber) throws NetworkException {
+        if (roomNumber == 43) {
+            ArrayList<Integer> list = new ArrayList<>();
+            list.add(0);
+            list.add(1);
+            list.add(2);
+            list.add(0);
+            list.add(1);
+            list.add(2);
+            return list;
+        }
+        return null;
     }
 }
