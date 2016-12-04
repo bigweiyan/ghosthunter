@@ -57,7 +57,7 @@ public class GameState {
      * 当前生效的道具.
      */
     public Item item;
-    public ArrayList<Item> workingItems;
+    public ArrayList<Item> workingItems;//包括别人的debuff
 
     /**
      * 当前测向机的频率.取值范围1-6,参见Signal类.
@@ -84,6 +84,9 @@ public class GameState {
     /**
      * 更新生效道具的剩余时间，更新信号源的声音大小.
      * @param deltaTime
+     * signalSound
+     * 同时负责统计已进行的时间
+     * 更新状态
      */
     public void updateSound(float deltaTime) {
         // TODO: 2016/12/4  
@@ -100,6 +103,7 @@ public class GameState {
     /**
      * 从服务器获得了新的附加状态.
      * @param item
+     *
      */
     public void receiveAffect(Item item) {
         // TODO: 2016/12/4  
@@ -107,6 +111,7 @@ public class GameState {
 
     /**
      * 用户使用了道具.
+     * 只有一个道具所以没有参数
      */
     public void useItem() {
         // TODO: 2016/12/4  
