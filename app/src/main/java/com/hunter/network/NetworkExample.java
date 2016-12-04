@@ -1,5 +1,6 @@
 package com.hunter.network;
 
+import com.hunter.game.models.Item;
 import com.hunter.game.models.RoomRule;
 import com.hunter.game.models.Signal;
 
@@ -83,8 +84,8 @@ public class NetworkExample implements NetworkSupport{
             signal.add(new Signal(2, 2, 3));
             signal.add(new Signal(3, 3, 4));
             rule.signals = signal;
-        } else if (roomNumber == 47) {
-            rule.useItem = false;
+        } else if (roomNumber == 42) {
+            rule.useItem = true;
             rule.mode = RoomRule.MODE_BATTLE;
             rule.autoReady = false;
             ArrayList<Signal> signal = new ArrayList<>();
@@ -92,6 +93,7 @@ public class NetworkExample implements NetworkSupport{
             signal.add(new Signal(1, 1, 2));
             signal.add(new Signal(2, 2, 3));
             signal.add(new Signal(3, 3, 4));
+            signal.add(new Signal(4, 4, 5));
             rule.signals = signal;
         }else {
             throw new NetworkException(NetworkException.WRONG_NUM);
@@ -132,5 +134,24 @@ public class NetworkExample implements NetworkSupport{
     @Override
     public String getHostName(int roomNumber) throws NetworkException {
         return "Host";
+    }
+
+    @Override
+    public ArrayList<String> getHighScores(int roomNumber) throws NetworkException {
+        ArrayList<String> result = new ArrayList<>();
+        result.add("Mike 3");
+        result.add("Tom 2");
+        result.add("Sam 1");
+        return result;
+    }
+
+    @Override
+    public ArrayList<Item> getItemsEffect(int roomNumber, String playerName) throws NetworkException {
+        return null;
+    }
+
+    @Override
+    public Item findSignal(int roomNumber, String playerName, int signal) throws NetworkException {
+        return null;
     }
 }

@@ -2,6 +2,7 @@ package com.hunter.network;
 
 import android.util.Log;
 
+import com.hunter.game.models.Item;
 import com.hunter.game.models.RoomRule;
 import com.hunter.game.models.Signal;
 
@@ -748,6 +749,24 @@ public class NetworkImplement implements NetworkSupport
             Log.d("getHostName","other Exception "+e);
             throw new NetworkException(NetworkException.UNKNOWN);
         }
+    }
+
+    @Override
+    public ArrayList<String> getHighScores(int roomNumber) throws NetworkException {
+        // TODO: 2016/12/4  
+        return null;
+    }
+
+    @Override
+    public ArrayList<Item> getItemsEffect(int roomNumber, String playerName) throws NetworkException {
+        // TODO: 2016/12/4  
+        return null;
+    }
+
+    @Override
+    public Item findSignal(int roomNumber, String playerName, int signal) throws NetworkException {
+        // TODO: 2016/12/4  
+        return null;
     }
 
 }

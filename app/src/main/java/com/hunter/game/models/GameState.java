@@ -40,35 +40,90 @@ public class GameState {
      */
     public boolean isSearchButtonWake;
 
+
     /**
-     * 判断信号源是否被找到.
-     * 每一个成员对应RoomRule中signals是否被找到.
+     * 以下三个变量分别表示信号的数据.
+     * 对应是否被找到.
+     * 以及当前探测器感受信号的大小(范围0.0f-1.0f)
      */
+    public ArrayList<Signal> signals;
     public ArrayList<Boolean> isSignalsFound;
+    public ArrayList<Float> signalSound;
 
     /**
      * 当前获得的道具.可能为null(无道具).
-     */
-    public Item item;
-
-    /**
      * 当前生效的道具.
      */
+    public Item item;
     public ArrayList<Item> workingItems;
 
     /**
-     * 当前的频率.取值范围1-6,参见Signal类.
+     * 当前测向机的频率.取值范围1-6,参见Signal类.
      */
-    public int presentFreq;
+    private int presentFreq;
 
-    public GameState(int gameState,int signalNumber) {
+    public GameState(int gameState,ArrayList<Signal> signals) {
         this.gameState = gameState;
         isSearchButtonWake = true;
         presentFreq = Signal.FREQ_1;
         workingItems = new ArrayList<>();
+
+        this.signals = signals;
         isSignalsFound = new ArrayList<>();
-        for (int i = 0; i < signalNumber; i++) {
+        signalSound = new ArrayList<>();
+        for (int i = 0; i < signals.size(); i++) {
             isSignalsFound.add(false);
+            signalSound.add(0.0f);
         }
+    }
+
+    /**
+     * 更新生效道具的剩余时间，更新信号源的声音大小.
+     * @param deltaTime
+     */
+    public void updateSound(float deltaTime) {
+
+    }
+
+    /**
+     * 从服务器获得了新的道具.
+     * @param item
+     */
+    public void receiveItem(Item item) {
+
+    }
+
+    /**
+     * 从服务器获得了新的附加状态.
+     * @param item
+     */
+    public void receiveAffect(Item item) {
+
+    }
+
+    /**
+     * 用户使用了道具.
+     */
+    public void useItem() {
+
+    }
+
+    /**
+     * 用户点击了采集.更新采集状态并设searchButtonWake为false
+     * @param latitude 当前纬度
+     * @param longitude 当前经度
+     * @return 返回采集成功的信号源的id,如果采集失败返回-1.
+     */
+    public int search(double latitude, double longitude) {
+        return -1;
+    }
+
+    public void addFreq() {
+        presentFreq ++;
+        if (presentFreq > 6) presentFreq = 1;
+    }
+
+    public int getFreq() {
+        return presentFreq;
     }
 }

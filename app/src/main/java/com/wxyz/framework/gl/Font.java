@@ -5,6 +5,8 @@ public class Font {
 	public final int glyphWidth;
 	public final int glyphHeight;
 	public final TextureRegion[] glyphs = new TextureRegion[96];
+	private float scalex;
+	private float scaley;
 	
 	/**
 	 * 字体文件 要求标准ASCII码可打印的96个字符，且字符等宽
@@ -17,6 +19,8 @@ public class Font {
 	 */
 	public Font(Texture texture, int offsetX, int offsetY, int glyphPerRow,
 			int glyphWidth, int glyphHeight){
+		scalex = 1.0f;
+		scaley = 1.0f;
 		this.texture = texture;
 		this.glyphWidth = glyphWidth;
 		this.glyphHeight = glyphHeight;
@@ -46,8 +50,18 @@ public class Font {
 			if(c<0 || c>glyphs.length - 1)
 				continue;
 			TextureRegion glyph = glyphs[c];
-			batcher.drawSprite(x, y, glyphWidth, glyphHeight, glyph);
-			x += glyphWidth;
+			batcher.drawSprite(x, y, glyphWidth*scalex, glyphHeight*scaley, glyph);
+			x += glyphWidth*scalex;
 		}
+	}
+
+	public void setScale(float scale) {
+		this.scalex = scale;
+		this.scaley = scale;
+	}
+
+	public void setScale(float scalex, float scaley) {
+		this.scalex = scalex;
+		this.scaley = scaley;
 	}
 }

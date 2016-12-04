@@ -1,5 +1,6 @@
 package com.hunter.network;
 
+import com.hunter.game.models.Item;
 import com.hunter.game.models.RoomRule;
 import com.hunter.game.models.Signal;
 
@@ -139,4 +140,34 @@ public interface NetworkSupport {
      * @throws NetworkException
      */
     public String getHostName(int roomNumber) throws NetworkException;
+
+    /**
+     * 获得最高分列表。其中对于混战模式，获得前三人的分数和名字（分数降序）,例如：
+     * <br>"Name 2","Name 1","Name 0"
+     * <br>对于团队模式，获得两个团队总分（分数降序）,例如
+     * <br>"Blue 5","Red 4"
+     * @param roomNumber 房间号
+     * @return 排行榜
+     * @throws NetworkException
+     */
+    public ArrayList<String> getHighScores(int roomNumber) throws NetworkException;
+
+    /**
+     * 获得服务器上用户当前收到的自身/对手的状态影响.
+     * @param roomNumber
+     * @param playerName
+     * @return
+     * @throws NetworkException
+     */
+    public ArrayList<Item> getItemsEffect(int roomNumber, String playerName) throws NetworkException;
+
+    /**
+     * 用户找到的信号源，服务器返回一个道具(50%几率)
+     * @param roomNumber
+     * @param playerName
+     * @param signal 信号源的编号
+     * @return
+     * @throws NetworkException
+     */
+    public Item findSignal(int roomNumber, String playerName, int signal) throws NetworkException;
 }
