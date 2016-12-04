@@ -765,8 +765,12 @@ public class NetworkImplement implements NetworkSupport
 
     @Override
     public Item findSignal(int roomNumber, String playerName, int signal) throws NetworkException {
-        // TODO: 2016/12/4  
+        // TODO: 2016/12/4
         return null;
     }
 
+    @Override
+    public ArrayList<Integer> getSignalBelong(int roomNumber) throws NetworkException {
+        return null;
+    }
 }

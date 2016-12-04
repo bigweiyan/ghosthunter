@@ -43,12 +43,14 @@ public class GameState {
 
     /**
      * 以下三个变量分别表示信号的数据.
-     * 对应是否被找到.
+     * 对应是否被自己找到.
      * 以及当前探测器感受信号的大小(范围0.0f-1.0f)
+     * 对于团队模式，还可以设置信号源的归属(未发现0,红队1,蓝队2)
      */
     public ArrayList<Signal> signals;
     public ArrayList<Boolean> isSignalsFound;
     public ArrayList<Float> signalSound;
+    public ArrayList<Integer> signalBelong;
 
     /**
      * 当前获得的道具.可能为null(无道具).
@@ -71,9 +73,11 @@ public class GameState {
         this.signals = signals;
         isSignalsFound = new ArrayList<>();
         signalSound = new ArrayList<>();
+        signalBelong = new ArrayList<>();
         for (int i = 0; i < signals.size(); i++) {
             isSignalsFound.add(false);
             signalSound.add(0.0f);
+            signalBelong.add(0);
         }
     }
 

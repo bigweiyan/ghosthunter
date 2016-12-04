@@ -43,6 +43,7 @@ public class GameScreen extends GLScreen {
     private Circle freqButton;
     //游戏控制有关变量
     private GameState state;
+    private int mode;
     private int roomNumber;
     private String playerName;
     private ArrayList<String> highScores;
@@ -60,6 +61,7 @@ public class GameScreen extends GLScreen {
         super(game);
         camera = new Camera2D(glGraphics, 1080, 1920);
         batcher = new SpriteBatcher(glGraphics, 30);
+        mode = ((HuntGame)glGame).mode;
         //初始化Present有关变量
         touchPos = new Vector2();
         stateTime = 0.0f;
@@ -84,6 +86,7 @@ public class GameScreen extends GLScreen {
                 RoomRule rule = ns.getRoomRule(roomNumber);
                 state = new GameState(GameState.START,rule.signals);
                 highScores = ns.getHighScores(roomNumber);
+
                 onLoad = false;
             } catch (NetworkException e) {
                 Tools.showDialog(glGame,"网络异常","请检查网络连接");
@@ -102,9 +105,14 @@ public class GameScreen extends GLScreen {
             try {
                 state.gameState = ns.getGameState(roomNumber);
                 ArrayList<Item> items = ns.getItemsEffect(roomNumber,playerName);
-                if (items != null)
-                for (int i = 0; i < items.size(); i++) {
-                    state.receiveAffect(items.get(i));
+                if(mode == RoomRule.MODE_TEAM) {
+                    state.signalBelong = ns.getSignalBelong(roomNumber);
+                }
+                highScores = ns.getHighScores(roomNumber);
+                if (items != null) {
+                    for (int i = 0; i < items.size(); i++) {
+                        state.receiveAffect(items.get(i));
+                    }
                 }
             }catch (NetworkException e){
                 Tools.showDialog(glGame,"网络异常",e.getMessage());
@@ -175,7 +183,8 @@ public class GameScreen extends GLScreen {
 
         gl.glEnable(GL10.GL_TEXTURE_2D);
 
-        batcher.beginBatch(GameAssets.battle_back);
+        if(mode == RoomRule.MODE_BATTLE) batcher.beginBatch(GameAssets.battle_back);
+        else batcher.beginBatch(GameAssets.team_back);
         batcher.drawSprite(540,960,1080,1920,GameAssets.page_region);
         batcher.endBatch();
 
@@ -183,7 +192,8 @@ public class GameScreen extends GLScreen {
         gl.glBlendFunc(GL10.GL_SRC_ALPHA, GL10.GL_ONE_MINUS_SRC_ALPHA);
 
 
-        batcher.beginBatch(GameAssets.battle_back);
+        if(mode == RoomRule.MODE_BATTLE) batcher.beginBatch(GameAssets.battle_back);
+        else batcher.beginBatch(GameAssets.team_back);
         if(state != null) {
             if (buttonState == BUTTON_UP) {
                 if (state == null || state.isSearchButtonWake) {
@@ -199,7 +209,7 @@ public class GameScreen extends GLScreen {
             batcher.drawSprite(204, 1128, 224, 224,
                     420 - 60.0f * state.getFreq(), GameAssets.frequency_pointer);
             //绘制指针
-            if (state != null) {
+            if (state != null && mode == RoomRule.MODE_BATTLE) {
                 for (int i = 0; i < state.isSignalsFound.size(); i++) {
                     if (state.isSignalsFound.get(i)) {
                         batcher.drawSprite(591 + 132 * (i % 4),
@@ -209,6 +219,22 @@ public class GameScreen extends GLScreen {
                         batcher.drawSprite(591 + 132 * (i % 4),
                                 131 + (i / 4) * 119,
                                 93, 96, GameAssets.fox_remained);
+                    }
+                }
+            } else if (state != null && mode == RoomRule.MODE_TEAM) {
+                for (int i = 0; i < state.signalBelong.size(); i++) {
+                    if (state.signalBelong.get(i) == 1) {
+                        batcher.drawSprite(591 + 132 * (i % 4),
+                                131 + (i / 4) * 119,
+                                93, 96, GameAssets.fox_red);
+                    } else if (state.signalBelong.get(i) == 0) {
+                        batcher.drawSprite(591 + 132 * (i % 4),
+                                131 + (i / 4) * 119,
+                                93, 96, GameAssets.fox_remained);
+                    } else {
+                        batcher.drawSprite(591 + 132 * (i % 4),
+                                131 + (i / 4) * 119,
+                                93, 96, GameAssets.fox_blue);
                     }
                 }
             }
@@ -221,8 +247,14 @@ public class GameScreen extends GLScreen {
 
         gl.glBlendFunc(GL10.GL_ONE, GL10.GL_ONE_MINUS_SRC_ALPHA);
         batcher.beginBatch(GameAssets.font_texture);
-        GameAssets.font.setScale(1.5f,2.5f);
-        GameAssets.font.drawText(batcher,"Mike 0",196,1740);
+        if(mode == RoomRule.MODE_BATTLE) {
+            GameAssets.font.setScale(1.5f, 2.5f);
+            GameAssets.font.drawText(batcher, "Mike 0", 196, 1740);
+        }else {
+            GameAssets.font.setScale(1.5f, 2.5f);
+            GameAssets.font.drawText(batcher,highScores.get(0),340,1620);
+            GameAssets.font.drawText(batcher,highScores.get(1),700,1620);
+        }
         batcher.endBatch();
 
 

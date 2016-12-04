@@ -84,9 +84,12 @@ public class NetworkExample implements NetworkSupport{
             signal.add(new Signal(2, 2, 3));
             signal.add(new Signal(3, 3, 4));
             rule.signals = signal;
-        } else if (roomNumber == 42) {
+        } else if (roomNumber == 42 || roomNumber == 43) {
             rule.useItem = true;
-            rule.mode = RoomRule.MODE_BATTLE;
+            if (roomNumber == 42)
+                rule.mode = RoomRule.MODE_BATTLE;
+            else
+                rule.mode = RoomRule.MODE_TEAM;
             rule.autoReady = false;
             ArrayList<Signal> signal = new ArrayList<>();
             signal.add(new Signal(0, 0, 1));
@@ -139,9 +142,14 @@ public class NetworkExample implements NetworkSupport{
     @Override
     public ArrayList<String> getHighScores(int roomNumber) throws NetworkException {
         ArrayList<String> result = new ArrayList<>();
-        result.add("Mike 3");
-        result.add("Tom 2");
-        result.add("Sam 1");
+        if(roomNumber == 42) {
+            result.add("Mike 3");
+            result.add("Tom 2");
+            result.add("Sam 1");
+        }else if (roomNumber == 43) {
+            result.add("2");
+            result.add("2");
+        }
         return result;
     }
 
@@ -152,6 +160,21 @@ public class NetworkExample implements NetworkSupport{
 
     @Override
     public Item findSignal(int roomNumber, String playerName, int signal) throws NetworkException {
+        return null;
+    }
+
+    @Override
+    public ArrayList<Integer> getSignalBelong(int roomNumber) throws NetworkException {
+        if (roomNumber == 43) {
+            ArrayList<Integer> list = new ArrayList<>();
+            list.add(0);
+            list.add(1);
+            list.add(2);
+            list.add(0);
+            list.add(1);
+            list.add(2);
+            return list;
+        }
         return null;
     }
 }
