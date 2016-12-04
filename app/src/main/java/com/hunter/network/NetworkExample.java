@@ -148,7 +148,7 @@ public class NetworkExample implements NetworkSupport{
             result.add("Sam 1");
         }else if (roomNumber == 43) {
             result.add("2");
-            result.add("2");
+            result.add("1");
         }
         return result;
     }
@@ -156,6 +156,11 @@ public class NetworkExample implements NetworkSupport{
     @Override
     public ArrayList<Item> getItemsEffect(int roomNumber, String playerName) throws NetworkException {
         return null;
+    }
+
+    @Override
+    public void useItem(int roomNumber, String playerName, int item) throws NetworkException {
+
     }
 
     @Override
@@ -172,7 +177,6 @@ public class NetworkExample implements NetworkSupport{
             list.add(2);
             list.add(0);
             list.add(1);
-            list.add(2);
             return list;
         }
         return null;
