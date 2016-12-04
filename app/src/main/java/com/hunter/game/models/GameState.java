@@ -86,7 +86,7 @@ public class GameState {
      * @param deltaTime
      */
     public void updateSound(float deltaTime) {
-
+        // TODO: 2016/12/4  
     }
 
     /**
@@ -94,7 +94,7 @@ public class GameState {
      * @param item
      */
     public void receiveItem(Item item) {
-
+        // TODO: 2016/12/4  
     }
 
     /**
@@ -102,14 +102,14 @@ public class GameState {
      * @param item
      */
     public void receiveAffect(Item item) {
-
+        // TODO: 2016/12/4  
     }
 
     /**
      * 用户使用了道具.
      */
     public void useItem() {
-
+        // TODO: 2016/12/4  
     }
 
     /**

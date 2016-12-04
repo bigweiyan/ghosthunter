@@ -153,13 +153,22 @@ public interface NetworkSupport {
     public ArrayList<String> getHighScores(int roomNumber) throws NetworkException;
 
     /**
-     * 获得服务器上用户当前收到的自身/对手的状态影响.
+     * 获得服务器上用户当前收到的自身/对手的状态影响.一次状态改变只收一次消息.
      * @param roomNumber
      * @param playerName
      * @return
      * @throws NetworkException
      */
     public ArrayList<Item> getItemsEffect(int roomNumber, String playerName) throws NetworkException;
+
+    /**
+     * 某个用户使用了道具.对相应角色在服务器上添加相应的消息.
+     * @param roomNumber
+     * @param playerName
+     * @param item 道具编号，详见Item类.
+     * @throws NetworkException
+     */
+    public void useItem(int roomNumber, String playerName, int item) throws NetworkException;
 
     /**
      * 用户找到的信号源，服务器返回一个道具(50%几率).

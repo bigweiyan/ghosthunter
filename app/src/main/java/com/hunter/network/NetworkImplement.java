@@ -773,4 +773,9 @@ public class NetworkImplement implements NetworkSupport
     public ArrayList<Integer> getSignalBelong(int roomNumber) throws NetworkException {
         return null;
     }
+
+    @Override
+    public void useItem(int roomNumber, String playerName, int item) throws NetworkException {
+        // TODO: 2016/12/4  
+    }
 }
