@@ -168,7 +168,7 @@ public interface NetworkSupport {
      * @param item 道具编号，详见Item类.
      * @throws NetworkException
      */
-    public void useItem(int roomNumber, String playerName, int item) throws NetworkException;
+    public void useItem(int roomNumber, String playerName, Item item) throws NetworkException;
 
     /**
      * 用户找到的信号源，服务器返回一个道具(50%几率).

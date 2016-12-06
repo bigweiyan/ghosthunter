@@ -5,11 +5,8 @@ import android.util.Log;
 import com.hunter.game.models.GameState;
 import com.hunter.game.models.Item;
 import com.hunter.game.models.RoomRule;
+import com.hunter.game.models.Signal;
 import com.hunter.game.models.Tools;
-import com.hunter.network.NetworkExample;
-import com.hunter.network.NetworkException;
-import com.hunter.network.NetworkSupport;
-import com.hunter.sensor.SensorExample;
 import com.hunter.sensor.SensorException;
 import com.hunter.sensor.SensorSupport;
 import com.wxyz.framework.Game;
@@ -18,6 +15,7 @@ import com.wxyz.framework.gl.Camera2D;
 import com.wxyz.framework.gl.SpriteBatcher;
 import com.wxyz.framework.gl.math.Circle;
 import com.wxyz.framework.gl.math.OverlapTest;
+import com.wxyz.framework.gl.math.Rectangle;
 import com.wxyz.framework.gl.math.Vector2;
 import com.wxyz.framework.impl.GLScreen;
 
@@ -35,27 +33,23 @@ public class GameScreen extends GLScreen {
     private Camera2D camera;
     private SpriteBatcher batcher;
     //present有关变量
-    private float TICK = 0.04f;
-    private float stateTime;
-    private int networkFrame;
+    //private float TICK = 0.04f;
+    //private float stateTime;
+    //private int networkFrame;
     private Vector2 touchPos;
     private Circle searchButton;
     private Circle freqButton;
+    private Rectangle itemButton;
     //游戏控制有关变量
     private GameState state;
     private int mode;
-    private int roomNumber;
-    private String playerName;
     private ArrayList<String> highScores;
     private boolean onLoad;
     private int buttonState;
     private static final int BUTTON_UP = 0;
     private static final int BUTTON_DOWN = 1;
     //游戏状态有关变量
-    private NetworkSupport ns;
     private SensorSupport ss;
-
-
 
     public GameScreen(Game game) {
         super(game);
@@ -64,66 +58,55 @@ public class GameScreen extends GLScreen {
         mode = ((HuntGame)glGame).mode;
         //初始化Present有关变量
         touchPos = new Vector2();
-        stateTime = 0.0f;
-        networkFrame = 0;
+        //stateTime = 0.0f;
+        //networkFrame = 0;
         buttonState = BUTTON_UP;
         searchButton = new Circle(710,894,314);
         freqButton = new Circle(204,1128,224);
+        itemButton = new Rectangle(78,557,194,194);
         //初始化update有关变量
-        roomNumber = ((HuntGame)game).roomNumber;
-        playerName = ((HuntGame)game).playerName;
+        ss = ((HuntGame)game).getSs();
         onLoad =  true;
         //初始化游戏信息
-
-        ss = new SensorExample();
-        ns = new NetworkExample();
     }
 
     @Override
     public void update(float deltaTime) {
         if (onLoad) {
-            try {
-                RoomRule rule = ns.getRoomRule(roomNumber);
-                state = new GameState(GameState.START,rule.signals);
-                highScores = ns.getHighScores(roomNumber);
-
-                onLoad = false;
-            } catch (NetworkException e) {
-                Tools.showDialog(glGame,"网络异常","请检查网络连接");
-            }
+            ArrayList<Signal> signals = ((HuntGame)glGame).getSignals();
+            state = new GameState(GameState.START,signals);
+            highScores = ((HuntGame)glGame).getHighScores();
+            onLoad = false;
             return;
         }
         //游戏初始化，使用网络
 
-        stateTime += deltaTime;
-        while (stateTime >= TICK) {
-            stateTime -= TICK;
-            networkFrame ++;
+        if(state.gameState == GameState.GAME_OVER) {
+            Tools.showDialog(glGame,"游戏结束","游戏已结束");
+            // TODO: 2016/12/4 跳转到下一屏幕
         }
-        if (networkFrame >= 25) {
-            networkFrame -= 25;
-            try {
-                state.gameState = ns.getGameState(roomNumber);
-                ArrayList<Item> items = ns.getItemsEffect(roomNumber,playerName);
-                if(mode == RoomRule.MODE_TEAM) {
-                    state.signalBelong = ns.getSignalBelong(roomNumber);
-                }
-                highScores = ns.getHighScores(roomNumber);
-                if (items != null) {
-                    for (int i = 0; i < items.size(); i++) {
-                        state.receiveAffect(items.get(i));
-                    }
-                }
-            }catch (NetworkException e){
-                Tools.showDialog(glGame,"网络异常",e.getMessage());
-            }
+        //更新游戏状态
 
-            if(state.gameState == GameState.GAME_OVER) {
-                Tools.showDialog(glGame,"游戏结束","游戏已结束");
-                // TODO: 2016/12/4 跳转到下一屏幕 
+        if (((HuntGame)glGame).isNewData()) {
+            state.receiveItem(((HuntGame) glGame).getItem());
+            //获得服务器返回的道具
+            highScores = ((HuntGame) glGame).getHighScores();
+            //获得最高分列表
+            if (mode == RoomRule.MODE_TEAM)
+                state.signalBelong = ((HuntGame) glGame).getSignalBelong();
+            //获得信号源状态
+            ArrayList<Item> items = ((HuntGame) glGame).getItems();
+            if (items != null) {
+                for (int i = 0; i < items.size(); i++) {
+                    Item temp = items.get(i);
+                    state.receiveAffect(temp);
+                    Log.d("item","Activate No."+temp.getItemType());
+                }
             }
+            //获得道具的附加状态
+            ((HuntGame)glGame).dataReceived();
         }
-        //更新游戏状态、道具状态、比分，使用网络
+        //检查服务器返回的消息
 
         state.updateSound(deltaTime);
         //更新声音信息，道具剩余时间
@@ -153,12 +136,10 @@ public class GameScreen extends GLScreen {
                 if (OverlapTest.pointInCircle(searchButton,touchPos)) {
                     try {
                         int signal = state.search(ss.getLatitude(),ss.getLongitude());
-                        Item item = ns.findSignal(roomNumber,playerName,signal);
-                        if (item != null) state.receiveItem(item);
+                        Log.d("search", "result"+signal);
+                        if (signal != -1) ((HuntGame)glGame).findSignal(signal);
                     }catch (SensorException e) {
-                        Tools.showDialog(glGame,"搜索时错误","无法定位");
-                    }catch (NetworkException e) {
-                        Tools.showDialog(glGame,"搜索时错误","无法通信");
+                        Tools.showDialog(glGame, "搜索时错误", "无法定位");
                     }
                 }
 
@@ -167,12 +148,17 @@ public class GameScreen extends GLScreen {
                     state.addFreq();
                 }
 
+                if (OverlapTest.pointInRectangle(itemButton,touchPos)) {
+                    if(state.item != null) {
+                        ((HuntGame) glGame).useItem(state.item);
+                        state.useItem();
+                    }
+                }
+
                 buttonState = BUTTON_UP;
             }
-            Log.d("Touch","Event!"+event.x +" "+ event.y);
         }
         //检查按钮的点击
-        // TODO: 2016/12/4 增加道具的按钮点击查询
     }
 
     @Override
@@ -238,12 +224,19 @@ public class GameScreen extends GLScreen {
                     }
                 }
             }
-            // TODO: 2016/12/4 绘制道具信息
+
         }else{
             batcher.drawSprite(540,960,1080,128,GameAssets.connecting);
         }
         //绘制提示信息
         batcher.endBatch();
+
+        if(state.item != null) {
+            batcher.beginBatch(GameAssets.item_texture);
+            batcher.drawSprite(195,674,194,194,GameAssets.items_region[state.item.getItemType()]);
+            batcher.endBatch();
+        }
+        //绘制道具
 
         gl.glBlendFunc(GL10.GL_ONE, GL10.GL_ONE_MINUS_SRC_ALPHA);
         batcher.beginBatch(GameAssets.font_texture);
@@ -256,7 +249,6 @@ public class GameScreen extends GLScreen {
             GameAssets.font.drawText(batcher,highScores.get(1),700,1620);
         }
         batcher.endBatch();
-
 
         gl.glDisable(GL10.GL_BLEND);
     }
