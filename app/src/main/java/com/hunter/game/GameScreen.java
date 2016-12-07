@@ -109,7 +109,7 @@ public class GameScreen extends GLScreen {
         //检查服务器返回的消息
 
         state.updateSound(deltaTime);
-        //更新声音信息，道具剩余时间
+        //更新声音信息，道具剩余时间，搜索按键的冷却时间
 
         // TODO: 2016/12/4 发出声音
 
