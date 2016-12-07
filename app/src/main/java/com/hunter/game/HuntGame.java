@@ -34,14 +34,15 @@ public class HuntGame extends GLGame {
     public int mode;
     private NetworkSupport ns;
     private SensorSupport ss;
-    private int gameState;
     private ArrayList<Item> items;
     private ArrayList<Integer> signalBelong;
     private ArrayList<String> highScores;
     private ArrayList<Signal> signals;
-
-    private int massage;
+    private Item itemGet; //服务器赋予的道具
     private boolean newData;
+    //服务器中的同步内容 其中newData标志服务器是否更新
+
+
     /**
      * 用户找到了一个信号源
      */
@@ -51,8 +52,9 @@ public class HuntGame extends GLGame {
      */
     private static final int MASSAGE_USE_ITEM = 0x2;
     private int signalFound;
-    private Item itemGet;
     private Item itemUse;
+    private int massage;
+    //用户的请求 massage用来标志请求的类型
 
     private Handler mHandler = new Handler();
     private Runnable timerTask = new Runnable() {
@@ -60,6 +62,7 @@ public class HuntGame extends GLGame {
         public void run() {
             if (state == GLGameState.Running) {
                 try {
+                    newData = false;
                     items = ns.getItemsEffect(roomNumber, playerName);
                     //获得道具效果
                     if (mode == RoomRule.MODE_TEAM) {
@@ -68,6 +71,9 @@ public class HuntGame extends GLGame {
                     //获得信号源归属
                     highScores = ns.getHighScores(roomNumber);
                     //获得最高分
+                    newData = true;
+                    //同步服务器
+
                     if (massage%2 == 1) {
                         itemGet = ns.findSignal(roomNumber,playerName,signalFound);
                     }
@@ -77,7 +83,7 @@ public class HuntGame extends GLGame {
                     }
                     //相应使用道具操作
                     massage = 0;
-                    newData = true;
+                    //处理本地消息
                 } catch (NetworkException e) {
                     Tools.showDialog(HuntGame.this, "网络异常", e.getMessage());
                 }
@@ -146,10 +152,6 @@ public class HuntGame extends GLGame {
 
     public SensorSupport getSs() {
         return ss;
-    }
-
-    public int getGameState() {
-        return gameState;
     }
 
     /**

@@ -6,7 +6,7 @@ package com.hunter.game.models;
  */
 
 public class Item {
-    public static final int ITEM_KNOW_FREQ = 0;
+    public static final int ITEM_SHORTEN_COLD = 0;
     public static final int ITEM_COMPASS_LOSS = 1;
     public static final int ITEM_FREQ_LOSS = 2;
     public static final int ITEM_ENLARGE_FREQ = 3;
