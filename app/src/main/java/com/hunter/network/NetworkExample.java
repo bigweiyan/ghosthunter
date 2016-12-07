@@ -1,10 +1,13 @@
 package com.hunter.network;
 
+import android.util.Log;
+
 import com.hunter.game.models.Item;
 import com.hunter.game.models.RoomRule;
 import com.hunter.game.models.Signal;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * 测试用例：模拟服务器
@@ -15,10 +18,16 @@ public class NetworkExample implements NetworkSupport{
 
     private boolean ready;
     private int requests;
+    private int highRequests;
+    private Random rand;
+    private int item;
 
     public NetworkExample() {
         ready = false;
         requests = 0;
+        highRequests = 0;
+        rand = new Random();
+        item = -1;
     }
 
     @Override
@@ -143,40 +152,87 @@ public class NetworkExample implements NetworkSupport{
     public ArrayList<String> getHighScores(int roomNumber) throws NetworkException {
         ArrayList<String> result = new ArrayList<>();
         if(roomNumber == 42) {
-            result.add("Mike 3");
-            result.add("Tom 2");
-            result.add("Sam 1");
+            if (highRequests < 3){
+                result.add("Mike 0");
+                result.add("Tom 0");
+                result.add("Sam 0");
+
+            }else if(highRequests < 5){
+                result.add("Tom 2");
+                result.add("Mike 2");
+                result.add("Sam 1");
+            }else {
+                result.add("Mike 3");
+                result.add("Tom 2");
+                result.add("Sam 1");
+            }
+
         }else if (roomNumber == 43) {
-            result.add("2");
-            result.add("1");
+            if (highRequests < 3) {
+                result.add("0");
+                result.add("0");
+            }else if(highRequests < 5){
+                result.add("0");
+                result.add("1");
+            }else{
+                result.add("2");
+                result.add("1");
+            }
+
         }
+        highRequests++;
         return result;
     }
 
     @Override
     public ArrayList<Item> getItemsEffect(int roomNumber, String playerName) throws NetworkException {
+        if(item != -1){
+            Log.d("item","massage resend");
+            ArrayList<Item> list = new ArrayList<>();
+            list.add(new Item(item));
+            item = -1;
+            return list;
+        }
         return null;
     }
 
     @Override
-    public void useItem(int roomNumber, String playerName, int item) throws NetworkException {
-
+    public void useItem(int roomNumber, String playerName, Item item) throws NetworkException {
+        this.item = item.getItemType();
+        Log.d("item","massage received item type"+this.item);
     }
 
     @Override
     public Item findSignal(int roomNumber, String playerName, int signal) throws NetworkException {
-        return null;
+        int type = rand.nextInt(5);
+        Item item = new Item(type);
+        if (rand.nextFloat() < 0.5f) return null;
+        return item;
     }
 
     @Override
     public ArrayList<Integer> getSignalBelong(int roomNumber) throws NetworkException {
         if (roomNumber == 43) {
             ArrayList<Integer> list = new ArrayList<>();
-            list.add(0);
-            list.add(1);
-            list.add(2);
-            list.add(0);
-            list.add(1);
+            if (highRequests < 3) {
+                list.add(0);
+                list.add(0);
+                list.add(0);
+                list.add(0);
+                list.add(0);
+            }else if(highRequests < 5){
+                list.add(0);
+                list.add(0);
+                list.add(2);
+                list.add(0);
+                list.add(0);
+            }else{
+                list.add(0);
+                list.add(1);
+                list.add(2);
+                list.add(0);
+                list.add(1);
+            }
             return list;
         }
         return null;

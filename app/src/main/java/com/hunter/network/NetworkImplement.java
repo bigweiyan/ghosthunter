@@ -492,10 +492,11 @@ public class NetworkImplement implements NetworkSupport
                     userRst.close();
                     stmt.close();
                     connection.close();
-                    if(isready==1)
+                    if(isready == 1) {
                         return false;
-                    else
+                    } else {
                         return true;
+                    }
                 }
                 else
                 {
@@ -775,7 +776,7 @@ public class NetworkImplement implements NetworkSupport
     }
 
     @Override
-    public void useItem(int roomNumber, String playerName, int item) throws NetworkException {
-        // TODO: 2016/12/4  
+    public void useItem(int roomNumber, String playerName, Item item) throws NetworkException {
+        // TODO: 2016/12/4
     }
 }

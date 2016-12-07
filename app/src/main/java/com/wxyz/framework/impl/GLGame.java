@@ -22,7 +22,7 @@ import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 public abstract class GLGame extends Activity implements Game, Renderer {
-	enum GLGameState{
+	protected enum GLGameState{
 		Initialized,
 		Running,
 		Paused,
@@ -35,7 +35,7 @@ public abstract class GLGame extends Activity implements Game, Renderer {
 	Input input;
 	FileIO fileIO;
 	Screen screen;
-	GLGameState state = GLGameState.Initialized;
+	protected GLGameState state = GLGameState.Initialized;
 	Object stateChanged = new Object();
 	long startTime = System.nanoTime();
 	WakeLock wakeLock;

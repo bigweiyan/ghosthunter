@@ -6,11 +6,11 @@ package com.hunter.game.models;
  */
 
 public class Item {
-    public static final int ITEM_KNOW_FREQ = 1;
-    public static final int ITEM_COMPASS_LOSS = 2;
-    public static final int ITEM_FREQ_LOSS = 3;
-    public static final int ITEM_ENLARGE_FREQ = 4;
-    public static final int ITEM_DIRECT_REVERT = 5;
+    public static final int ITEM_SHORTEN_COLD = 0;
+    public static final int ITEM_COMPASS_LOSS = 1;
+    public static final int ITEM_FREQ_LOSS = 2;
+    public static final int ITEM_ENLARGE_FREQ = 3;
+    public static final int ITEM_DIRECT_REVERT = 4;
 
     /**
      * 道具的种类.
@@ -21,7 +21,7 @@ public class Item {
      */
     private float remainTime;
     public Item(int itemType) {
-
+        this.itemType = itemType;
     }
 
     public void setRemainTime(float remainTime) {

@@ -14,6 +14,7 @@ public class GameAssets {
     public static Texture battle_back;
     public static Texture team_back;
     public static Texture font_texture;
+    public static Texture item_texture;
 
     public static TextureRegion page_region;
     public static TextureRegion search_button_up;
@@ -25,12 +26,14 @@ public class GameAssets {
     public static TextureRegion fox_hunted;
     public static TextureRegion fox_red;
     public static TextureRegion fox_blue;
+    public static TextureRegion[] items_region;
     public static Font font;
 
     public static void load(GLGame game) {
         battle_back = new Texture(game,"gameUI1.png");
         team_back = new Texture(game, "gameUI2.png");
         font_texture = new Texture(game, "font.png");
+        item_texture = new Texture(game, "item.png");
 
         page_region = new TextureRegion(battle_back,0,0,1080,1920);
         search_button_up = new TextureRegion(battle_back,1080,0,628,628);
@@ -44,11 +47,21 @@ public class GameAssets {
         fox_blue = new TextureRegion(team_back,1708,820,93,96);
 
         font = new Font(font_texture,0,0,16,32,48);
+
+        items_region = new TextureRegion[6];
+        items_region[0] = new TextureRegion(item_texture,0,0,194,194);
+        items_region[1] = new TextureRegion(item_texture,194,0,194,194);
+        items_region[2] = new TextureRegion(item_texture,388,0,194,194);
+        items_region[3] = new TextureRegion(item_texture,0,194,194,194);
+        items_region[4] = new TextureRegion(item_texture,194,194,194,194);
+        items_region[5] = new TextureRegion(item_texture,388,194,194,194);
+
     }
 
     public static void reload() {
         battle_back.reload();
         team_back.reload();
         font_texture.reload();
+        item_texture.reload();
     }
 }

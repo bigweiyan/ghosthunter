@@ -1,6 +1,7 @@
 package com.hunter.game.models;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  * 存储游戏的状态，如是否开始，道具效果等.
@@ -97,7 +98,8 @@ public class GameState {
      * @param item
      */
     public void receiveItem(Item item) {
-        // TODO: 2016/12/4  
+        if(item != null)
+            this.item = item;
     }
 
     /**
@@ -114,6 +116,7 @@ public class GameState {
      * 只有一个道具所以没有参数
      */
     public void useItem() {
+        item = null;
         // TODO: 2016/12/4  
     }
 
@@ -124,7 +127,9 @@ public class GameState {
      * @return 返回采集成功的信号源的id,如果采集失败返回-1.
      */
     public int search(double latitude, double longitude) {
-        return -1;
+        Random rand  = new Random();
+        return rand.nextInt(signals.size());
+        // TODO: 2016/12/6  
     }
 
     public void addFreq() {
