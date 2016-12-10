@@ -27,6 +27,12 @@ public class GameAssets {
     public static TextureRegion fox_red;
     public static TextureRegion fox_blue;
     public static TextureRegion[] items_region;
+    public static TextureRegion[] items_descript;
+    public static TextureRegion[] toasts;
+    public static final int TOAST_SIG_GET = 0;
+    public static final int TOAST_NO_SIG_GET = 1;
+    public static final int TOAST_ITEM_GET = 2;
+    public static final int TOAST_UNDER_ITEM = 3;
     public static Font font;
 
     public static void load(GLGame game) {
@@ -48,13 +54,23 @@ public class GameAssets {
 
         font = new Font(font_texture,0,0,16,32,48);
 
-        items_region = new TextureRegion[6];
+        items_region = new TextureRegion[5];
         items_region[0] = new TextureRegion(item_texture,0,0,194,194);
         items_region[1] = new TextureRegion(item_texture,194,0,194,194);
         items_region[2] = new TextureRegion(item_texture,388,0,194,194);
         items_region[3] = new TextureRegion(item_texture,0,194,194,194);
         items_region[4] = new TextureRegion(item_texture,194,194,194,194);
-        items_region[5] = new TextureRegion(item_texture,388,194,194,194);
+        items_descript = new TextureRegion[5];
+        for(int i = 0; i < 3; i++) {
+            items_descript[i] = new TextureRegion(item_texture, 582, 40*i, 188, 40);
+        }
+        for (int i = 3; i < 5; i++) {
+            items_descript[i] = new TextureRegion(item_texture, 770, 40*(i%3), 188, 40);
+        }
+        toasts = new TextureRegion[4];
+        for(int i = 0; i < 4; i++) {
+            toasts[i] = new TextureRegion(item_texture, 582, 120+80*i, 442, 80);
+        }
 
     }
 
