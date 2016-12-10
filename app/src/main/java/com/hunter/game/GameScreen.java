@@ -78,8 +78,7 @@ public class GameScreen extends GLScreen {
         //游戏初始化，使用网络
 
         if(state.gameState == GameState.GAME_OVER) {
-            Tools.showDialog(glGame,"游戏结束","游戏已结束");
-            // TODO: 2016/12/4 跳转到下一屏幕
+            ((HuntGame)glGame).gameOver();
         }
         //更新游戏状态
 

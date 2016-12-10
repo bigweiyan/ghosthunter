@@ -209,4 +209,12 @@ public class HuntGame extends GLGame {
     public boolean isNewData(){
         return newData;
     }
+
+    public void gameOver() {
+        Intent intent = new Intent();
+        intent.setClass(this,HighScoreActivity.class);
+        intent.putExtra("roomNumber",roomNumber);
+        startActivity(intent);
+        finish();
+    }
 }

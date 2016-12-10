@@ -89,6 +89,11 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/title_activity_wait_room"
             android:theme="@style/FullscreenTheme"/>
+        <activity
+            android:name="com.hunter.game.HighScoreActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:label="@string/title_activity_wait_room"
+            android:theme="@style/FullscreenTheme"/>
     </application>
 
 </manifest>
