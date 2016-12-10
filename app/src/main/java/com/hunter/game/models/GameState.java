@@ -104,7 +104,7 @@ public class GameState {
      * @param item
      */
     public void receiveAffect(Item item) {
-        // TODO: 2016/12/4  
+        workingItems.add(item);
     }
 
     /**

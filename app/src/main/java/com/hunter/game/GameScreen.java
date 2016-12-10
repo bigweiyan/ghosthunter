@@ -1,11 +1,10 @@
 package com.hunter.game;
 
-import android.util.Log;
-
 import com.hunter.game.models.GameState;
 import com.hunter.game.models.Item;
 import com.hunter.game.models.RoomRule;
 import com.hunter.game.models.Signal;
+import com.hunter.game.models.ToastRenderer;
 import com.hunter.game.models.Tools;
 import com.hunter.sensor.SensorException;
 import com.hunter.sensor.SensorSupport;
@@ -32,10 +31,8 @@ import javax.microedition.khronos.opengles.GL10;
 public class GameScreen extends GLScreen {
     private Camera2D camera;
     private SpriteBatcher batcher;
+    private ToastRenderer toastRenderer;
     //present有关变量
-    //private float TICK = 0.04f;
-    //private float stateTime;
-    //private int networkFrame;
     private Vector2 touchPos;
     private Circle searchButton;
     private Circle freqButton;
@@ -54,12 +51,11 @@ public class GameScreen extends GLScreen {
     public GameScreen(Game game) {
         super(game);
         camera = new Camera2D(glGraphics, 1080, 1920);
-        batcher = new SpriteBatcher(glGraphics, 30);
+        batcher = new SpriteBatcher(glGraphics, 50);
         mode = ((HuntGame)glGame).mode;
+        toastRenderer = new ToastRenderer(540,960,884,160,batcher);
         //初始化Present有关变量
         touchPos = new Vector2();
-        //stateTime = 0.0f;
-        //networkFrame = 0;
         buttonState = BUTTON_UP;
         searchButton = new Circle(710,894,314);
         freqButton = new Circle(204,1128,224);
@@ -88,7 +84,9 @@ public class GameScreen extends GLScreen {
         //更新游戏状态
 
         if (((HuntGame)glGame).isNewData()) {
-            state.receiveItem(((HuntGame) glGame).getItem());
+            Item item = ((HuntGame) glGame).getItem();
+            if (item != null) toastRenderer.addToast(GameAssets.TOAST_ITEM_GET);
+            state.receiveItem(item);
             //获得服务器返回的道具
             highScores = ((HuntGame) glGame).getHighScores();
             //获得最高分列表
@@ -100,7 +98,7 @@ public class GameScreen extends GLScreen {
                 for (int i = 0; i < items.size(); i++) {
                     Item temp = items.get(i);
                     state.receiveAffect(temp);
-                    Log.d("item","Activate No."+temp.getItemType());
+                    toastRenderer.addToast(GameAssets.TOAST_UNDER_ITEM);
                 }
             }
             //获得道具的附加状态
@@ -136,8 +134,12 @@ public class GameScreen extends GLScreen {
                 if (OverlapTest.pointInCircle(searchButton,touchPos)) {
                     try {
                         int signal = state.search(ss.getLatitude(),ss.getLongitude());
-                        Log.d("search", "result"+signal);
-                        if (signal != -1) ((HuntGame)glGame).findSignal(signal);
+                        if (signal == -1) {
+                            toastRenderer.addToast(GameAssets.TOAST_NO_SIG_GET);
+                        }else {
+                            ((HuntGame)glGame).findSignal(signal);
+                            toastRenderer.addToast(GameAssets.TOAST_SIG_GET);
+                        }
                     }catch (SensorException e) {
                         Tools.showDialog(glGame, "搜索时错误", "无法定位");
                     }
@@ -228,12 +230,22 @@ public class GameScreen extends GLScreen {
         }else{
             batcher.drawSprite(540,960,1080,128,GameAssets.connecting);
         }
-        //绘制提示信息
+        //绘制屏幕UI
         batcher.endBatch();
 
-        if(state.item != null) {
+        toastRenderer.printToast(GameAssets.item_texture,GameAssets.toasts,deltaTime);
+        //绘制提示信息
+
+        int itemLen = state.workingItems.size();
+        if(state.item != null || itemLen != 0) {
             batcher.beginBatch(GameAssets.item_texture);
-            batcher.drawSprite(195,674,194,194,GameAssets.items_region[state.item.getItemType()]);
+            if (state.item != null) {
+                batcher.drawSprite(195, 674, 194, 194, GameAssets.items_region[state.item.getItemType()]);
+                batcher.drawSprite(195, 500, 188, 40, GameAssets.items_descript[state.item.getItemType()]);
+            }
+            for(int i = 0; i < state.workingItems.size(); i++) {
+                batcher.drawSprite(80+i*80,40,60,60,GameAssets.items_region[state.workingItems.get(i).getItemType()]);
+            }
             batcher.endBatch();
         }
         //绘制道具
@@ -242,13 +254,17 @@ public class GameScreen extends GLScreen {
         batcher.beginBatch(GameAssets.font_texture);
         if(mode == RoomRule.MODE_BATTLE) {
             GameAssets.font.setScale(1.5f, 2.5f);
-            GameAssets.font.drawText(batcher, "Mike 0", 196, 1740);
+            GameAssets.font.drawText(batcher, highScores.get(0), 196, 1740);
+            GameAssets.font.setScale(1.5f,2.0f);
+            GameAssets.font.drawText(batcher, highScores.get(1), 196, 1566);
+            GameAssets.font.drawText(batcher, highScores.get(2), 700, 1566);
         }else {
             GameAssets.font.setScale(1.5f, 2.5f);
             GameAssets.font.drawText(batcher,highScores.get(0),340,1620);
             GameAssets.font.drawText(batcher,highScores.get(1),700,1620);
         }
         batcher.endBatch();
+        //绘制最高分
 
         gl.glDisable(GL10.GL_BLEND);
     }

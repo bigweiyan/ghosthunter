@@ -32,8 +32,8 @@ public class MainActivity extends ListActivity {
             Intent intent = new Intent(this,clazz);
             if (testName.equals("game.HuntGame")) {
                 intent.putExtra("name","testName");
-                intent.putExtra("mode", RoomRule.MODE_TEAM);
-                intent.putExtra("roomNumber",43);
+                intent.putExtra("mode", RoomRule.MODE_BATTLE);
+                intent.putExtra("roomNumber",42);
             }
             startActivity(intent);
         }catch(ClassNotFoundException e){
