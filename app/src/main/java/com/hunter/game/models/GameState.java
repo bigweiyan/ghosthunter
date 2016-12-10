@@ -65,6 +65,8 @@ public class GameState {
      */
     private int presentFreq;
 
+    private float time;
+
     public GameState(int gameState,ArrayList<Signal> signals) {
         this.gameState = gameState;
         isSearchButtonWake = true;
@@ -80,6 +82,8 @@ public class GameState {
             signalSound.add(0.0f);
             signalBelong.add(0);
         }
+
+        time = 0.0f;
     }
 
     /**
@@ -87,7 +91,11 @@ public class GameState {
      * @param deltaTime
      */
     public void updateSound(float deltaTime) {
-        // TODO: 2016/12/4  
+        // TODO: 2016/12/4
+        time += deltaTime;
+        if (time > 10) {
+            gameState = GAME_OVER;
+        }
     }
 
     /**
