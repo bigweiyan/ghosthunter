@@ -3,6 +3,7 @@ package com.hunter.game;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -149,6 +150,7 @@ public class WaitRoom extends AppCompatActivity {
                     if (isHost) {
                         boolean flag = ne.gameStart(roomNumber);
                         if (flag) ne.setGameState(roomNumber,GameState.START);
+
                     }else {
                         ready = ne.gameReady(roomNumber, playerName);
                     }
