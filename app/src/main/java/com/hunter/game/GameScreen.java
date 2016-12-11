@@ -105,7 +105,12 @@ public class GameScreen extends GLScreen {
         }
         //检查服务器返回的消息
 
-        state.updateSound(deltaTime);
+        try {
+            state.updateSound((float)ss.getLatitude(),(float)ss.getLongitude(),deltaTime,ss.getDirection());
+        }catch (SensorException e) {
+            Tools.showDialog(glGame, "搜索时错误", "无法定位");
+        }
+
         //更新声音信息，道具剩余时间，搜索按键的冷却时间
 
         // TODO: 2016/12/4 发出声音

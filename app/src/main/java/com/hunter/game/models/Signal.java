@@ -1,5 +1,7 @@
 package com.hunter.game.models;
 
+import com.hunter.game.GameAssets;
+
 /**
  * 信号源对象的封装.
  * Created by weiyan on 2016/11/12.
@@ -26,16 +28,55 @@ public class Signal {
      * 频率.
      */
     public int frequency;
+    private int[][] soundMap={
+            {1,1,1,1,1,-1,-1,-1},{0,1,1,1,1,-1,-1,-1},
+            {0,0,1,1,1,-1,-1,-1},{0,0,0,1,1,-1,-1,-1},
+            {0,0,0,0,1,-1,-1,-1},{0,0,0,0,0,-1,-1,-1},
+            {1,0,0,0,0,-1,-1,-1},{1,1,0,0,0,-1,-1,-1},
+            {1,1,1,0,0,-1,-1,-1},{1,1,1,1,0,-1,-1,-1}};
+    int soundIndex=-1;
+    float time;
+    int id;
 
     public Signal(double latitude, double longitude, int frequency) {
         this.frequency = frequency;
         this.latitude = latitude;
         this.longitude = longitude;
+        time = 0.5f;
     }
 
     public Signal() {
         this.latitude = 0;
         this.longitude = 0;
         this.frequency = 1;
+        time = 0.5f;
+    }
+
+    public void setId(int id)
+    {
+        this.id=id;
+    }
+
+    public void play(float volume,float dtime)
+    {
+        time-=dtime;
+        if (dtime<0)
+        {
+            soundIndex=(soundIndex+1)%8;
+            int NowId=soundMap[id%10][soundIndex];
+            if(NowId==0)
+            {
+                GameAssets.short_sound.play(volume);
+            }
+            if(NowId==1)
+            {
+                GameAssets.long_sound.play(volume);
+            }
+            if(NowId==0)
+            {
+                GameAssets.empty_sound.play(volume);
+            }
+            time=0.5f;
+        }
     }
 }
