@@ -21,4 +21,10 @@ public class RoomRule {
     public int mode;
     public ArrayList<Signal> signals;
 
+    public RoomRule(boolean useItem,boolean autoReady, int mode) {
+        this.useItem = useItem;
+        this.autoReady = autoReady;
+        this.mode = mode;
+        this.signals = new ArrayList<>();
+    }
 }

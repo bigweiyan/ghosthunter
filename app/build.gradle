@@ -34,4 +34,5 @@ dependencies {
     compile 'com.android.support:support-v4:24.2.1'
     testCompile 'junit:junit:4.12'
     compile files('libs/AMapNavi_1.9.3_AMapLocation_3.0.0_20161014.jar')
+    compile files('lib/mysql-connector-java-5.1.18-bin.jar')
 }

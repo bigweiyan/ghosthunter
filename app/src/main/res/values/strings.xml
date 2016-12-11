@@ -18,4 +18,5 @@
     <string name="battleMode">混战模式</string>
     <string name="gameOver1">游戏结束方式：时间到达60分钟</string>
     <string name="gameOver2">游戏结束方式：有一个队伍拿到半数以上信号源</string>
+
 </resources>
