@@ -36,10 +36,10 @@ import static com.hunter.game.models.RoomRule.MODE_TEAM;
 
 public class NetworkImplement implements NetworkSupport
 {
-    //final private String SEVER = "10.0.2.2";
-    final private String SEVER = "192.168.191.1";
+    final private String SEVER = "123.206.28.100";
+    //final private String SEVER = "192.168.191.1";
     final private String DRIVER="com.mysql.jdbc.Driver";
-    final private String URL="jdbc:mysql://"+SEVER+":3306/foxhunter?user=root&password=foxhunter";
+    final private String URL="jdbc:mysql://"+SEVER+":3306/foxhunter?user=root&password=KHuTuiGhjfYTdGVYLKj987676RtgJhFtYf";
 
     final private String TIME_OUT = "3000";
 
@@ -134,7 +134,7 @@ public class NetworkImplement implements NetworkSupport
                     int signalId = 0;
                     for(Signal signal:signals)
                     {
-                        String signalInsert = "insert into signal values("+roomID+","+signal.longitude+","+signal.latitude+","+signal.frequency+",0,"+signalId+");";
+                        String signalInsert = "insert into signals values("+roomID+","+signal.longitude+","+signal.latitude+","+signal.frequency+",0,"+signalId+");";
                         signalId++;
                         //Log.d("createRoom",signalInsert);
                         if(stmt.executeUpdate(signalInsert)!=1)
@@ -447,7 +447,7 @@ public class NetworkImplement implements NetworkSupport
                 roomRule.signals=new ArrayList<>();
                 roomRst.close();
 
-                String signalQuery = "select * from signal where roomid="+roomNumber+";";
+                String signalQuery = "select * from signals where roomid="+roomNumber+";";
                 ResultSet rst = stmt.executeQuery(signalQuery);
                 while(rst.next())
                 {
@@ -1111,7 +1111,7 @@ public class NetworkImplement implements NetworkSupport
 
             if(roomMode==MODE_TEAM)
             {
-                String signalUpdate = "update signal set belong="+team+" where roomid="+roomNumber+" and signalid='"+signal+"';";
+                String signalUpdate = "update signals set belong="+team+" where roomid="+roomNumber+" and signalid='"+signal+"';";
                 if(stmt.executeUpdate(signalUpdate)!=1)
                     throw new NetworkException(NetworkException.UNKNOWN);
             }
