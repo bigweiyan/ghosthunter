@@ -774,7 +774,6 @@ public class NetworkImplement implements NetworkSupport
         }
     }
 
-
     /**
      * 获得最高分列表。其中对于混战模式，获得前三人的分数和名字（分数降序）,例如：
      * <br>"Name 2","Name 1","Name 0"
@@ -1184,5 +1183,4 @@ public class NetworkImplement implements NetworkSupport
             throw new NetworkException(NetworkException.UNKNOWN);
         }
     }
-
 }
