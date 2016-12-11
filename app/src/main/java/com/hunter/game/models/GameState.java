@@ -3,6 +3,8 @@ package com.hunter.game.models;
 import java.util.ArrayList;
 import java.util.Random;
 
+import static android.R.attr.x;
+
 /**
  * 存储游戏的状态，如是否开始，道具效果等.
  * Created by weiyan on 2016/11/13.
@@ -64,7 +66,15 @@ public class GameState {
      * 当前测向机的频率.取值范围1-6,参见Signal类.
      */
     private int presentFreq;
-
+    /*
+        防止溢出，把整数部分提取出来
+     */
+    int timeUsedzheng;
+    float timeUsedxiao;
+    /*
+    声音大小
+     */
+    double soundVolume;
     public GameState(int gameState,ArrayList<Signal> signals) {
         this.gameState = gameState;
         isSearchButtonWake = true;
@@ -81,7 +91,25 @@ public class GameState {
             signalBelong.add(0);
         }
     }
-
+    /*
+        计算距离
+     */
+    private static final  double EARTH_RADIUS = 6378137;//赤道半径(单位m)
+    private static double rad(double d)
+    {
+        return d * Math.PI / 180.0;
+    }
+    public static double GetDistance(double lon1,double lat1,double lon2, double lat2)
+    {
+        double radLat1 = rad(lat1);
+        double radLat2 = rad(lat2);
+        double a = radLat1 - radLat2;
+        double b = rad(lon1) - rad(lon2);
+        double s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a/2),2)+Math.cos(radLat1)*Math.cos(radLat2)*Math.pow(Math.sin(b/2),2)));
+        s = s * EARTH_RADIUS;
+        //s = Math.round(s * 10000) / 10000;
+        return s;
+    }
     /**
      * 更新生效道具的剩余时间，更新信号源的声音大小.
      * @param deltaTime
@@ -89,8 +117,26 @@ public class GameState {
      * 同时负责统计已进行的时间
      * 更新状态
      */
-    public void updateSound(float deltaTime) {
-        // TODO: 2016/12/4  
+    public void updateSound(float deltaTime,double latitude, double longitude,double angle) {
+        // TODO: 2016/12/4
+        timeUsedxiao+=deltaTime;
+        while(timeUsedxiao>1) {
+            timeUsedxiao-=1;
+            timeUsedzheng+=1;
+        }
+        for(int i=0;i<this.signals.size();i++) {
+            if(signals.get(i).frequency==this.getFreq()) {
+                Signal aimSignal = signals.get(i);
+                double earthR=6371229;
+                double dy=(latitude-aimSignal.latitude)*Math.PI*earthR/180;
+                double dx=(longitude-aimSignal.longitude)*Math.PI*earthR*Math.cos(((latitude+aimSignal.latitude)/2)*Math.PI/180)/180;
+                double len=Math.hypot(dx,dy);
+                double dangle=Math.abs(90- Math.toDegrees(Math.acos(dx/len))-angle);
+                this.soundVolume=0;
+                soundVolume=((200-len)/200.0)*((180-dangle)/180.0);
+                //咋算呢？？？
+            }
+        }
     }
 
     /**
@@ -108,7 +154,8 @@ public class GameState {
      *
      */
     public void receiveAffect(Item item) {
-        // TODO: 2016/12/4  
+        // TODO: 2016/12/4
+        this.workingItems.add(item);
     }
 
     /**
@@ -117,7 +164,6 @@ public class GameState {
      */
     public void useItem() {
         item = null;
-        // TODO: 2016/12/4  
     }
 
     /**
@@ -127,9 +173,35 @@ public class GameState {
      * @return 返回采集成功的信号源的id,如果采集失败返回-1.
      */
     public int search(double latitude, double longitude) {
-        Random rand  = new Random();
-        return rand.nextInt(signals.size());
-        // TODO: 2016/12/6  
+
+        isSearchButtonWake=false;
+        double dlat=0.001;//误差范围
+        double dlong=0.001;
+
+        int retnum=-10;
+        for(int i=0;i<signals.size();i++){
+            double dis=GetDistance(longitude,latitude,signals.get(i).longitude,signals.get(i).latitude);
+            if(dis<10)
+            {
+                if(!isSignalsFound.get(i)){
+                    isSignalsFound.set(i, true);
+                    retnum=i;
+                    break;
+                }
+            }
+            /*
+            if((Math.abs(latitude-signals.get(i).latitude)<dlat)&&(Math.abs(longitude - signals.get(i).longitude)<dlong)){
+                if(!isSignalsFound.get(i)){
+                    isSignalsFound.set(i, true);
+                    retnum=i;
+                    break;
+                }
+            }
+            */
+        }
+        return retnum;
+        // TODO: 2016/12/6
+
     }
 
     public void addFreq() {

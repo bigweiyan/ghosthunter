@@ -71,7 +71,7 @@ public class GameScreen extends GLScreen {
     }
 
     @Override
-    public void update(float deltaTime) {
+    public void update(float deltaTime) throws SensorException {
         if (onLoad) {
             ArrayList<Signal> signals = ((HuntGame)glGame).getSignals();
             state = new GameState(GameState.START,signals);
@@ -108,7 +108,7 @@ public class GameScreen extends GLScreen {
         }
         //检查服务器返回的消息
 
-        state.updateSound(deltaTime);
+        state.updateSound(deltaTime,ss.getLatitude(),ss.getLongitude(),ss.getDirection());
         //更新声音信息，道具剩余时间，搜索按键的冷却时间
 
         // TODO: 2016/12/4 发出声音

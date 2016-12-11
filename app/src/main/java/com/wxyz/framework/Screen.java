@@ -1,4 +1,7 @@
 package com.wxyz.framework;
+
+import com.hunter.sensor.SensorException;
+
 /**
  * 使用该类的子类表示不同的屏幕
  * 是游戏的前端及控制板块
@@ -18,7 +21,7 @@ public abstract class Screen {
 	 * 这个方法处理事件和场景切换
 	 * @param deltaTime
 	 */
-	public abstract void update(float deltaTime);
+	public abstract void update(float deltaTime) throws SensorException;
 	/**
 	 * 这个方法生成屏幕中的图像
 	 * @param deltaTime
