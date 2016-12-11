@@ -112,9 +112,6 @@ public class GameScreen extends GLScreen {
         }
 
         //更新声音信息，道具剩余时间，搜索按键的冷却时间
-
-        // TODO: 2016/12/4 发出声音
-
         game.getInput().getKeyEvents();
         List<Input.TouchEvent> events =  game.getInput().getTouchEvents();
 

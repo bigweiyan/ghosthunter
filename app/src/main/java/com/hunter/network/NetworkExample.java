@@ -101,11 +101,12 @@ public class NetworkExample implements NetworkSupport{
                 rule.mode = RoomRule.MODE_TEAM;
             rule.autoReady = false;
             ArrayList<Signal> signal = new ArrayList<>();
-            signal.add(new Signal(0, 0, 1));
-            signal.add(new Signal(1, 1, 2));
-            signal.add(new Signal(2, 2, 3));
-            signal.add(new Signal(3, 3, 4));
-            signal.add(new Signal(4, 4, 5));
+            signal.add(new Signal(126.635986, 45.742495, 1));
+            signal.add(new Signal(126.6359861, 45.7424951, 2));
+            signal.add(new Signal(126.6359859, 45.7424949, 3));
+            signal.add(new Signal(126.6359861, 45.7424949, 4));
+            signal.add(new Signal(126.6359859, 45.7424951, 5));
+            signal.add(new Signal(126.632111, 45.744669, 6));
             rule.signals = signal;
         }else {
             throw new NetworkException(NetworkException.WRONG_NUM);
