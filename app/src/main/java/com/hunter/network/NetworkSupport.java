@@ -1,5 +1,6 @@
 package com.hunter.network;
 
+import com.hunter.game.models.Item;
 import com.hunter.game.models.RoomRule;
 import com.hunter.game.models.Signal;
 
@@ -65,6 +66,14 @@ public interface NetworkSupport {
     public boolean checkIn(int roomNumber, String playerName, boolean isBlue) throws NetworkException;
 
     /**
+     * 得到蓝方队员的列表（团队模式），即列表1.
+     * @param roomNumber 房间号码
+     * @return 蓝方队员列表
+     * @throws NetworkException
+     */
+    public ArrayList<String> getMembersBlue(int roomNumber) throws  NetworkException;
+
+    /**
      * 离开已创建的房间。离开成功时返回true，否则抛出异常，在异常中标明错误类型.
      * <p>如果未发生异常但没有离开成功，则返回false
      * @param roomNumber 房间号
@@ -74,13 +83,6 @@ public interface NetworkSupport {
      */
     public boolean checkOut(int roomNumber, String playerName) throws NetworkException;
 
-    /**
-     * 得到蓝方队员的列表（团队模式），即列表1.
-     * @param roomNumber 房间号码
-     * @return 蓝方队员列表
-     * @throws NetworkException
-     */
-    public ArrayList<String> getMembersBlue(int roomNumber) throws  NetworkException;
 
     /**
      * 得到红方队员的列表（团队模式）/所有玩家的列表（混战模式），即列表2.
@@ -108,6 +110,14 @@ public interface NetworkSupport {
     public boolean gameReady(int roomNumber, String playerName) throws NetworkException;
 
     /**
+     * 房主发出开始游戏信号
+     * @param roomNumber 待查房间号
+     * @return 游戏是否开始，开始则返回true，如果未全准备好，返回false，有异常抛出
+     * @throws NetworkException
+     */
+    public boolean gameStart(int roomNumber) throws NetworkException;
+
+    /**
      * 当前游戏的状态.
      * @param roomNumber 待查房间号
      * @return 游戏状态，详见接口变量
@@ -115,6 +125,14 @@ public interface NetworkSupport {
      */
     public int getGameState(int roomNumber) throws NetworkException;
 
+
+    /**
+     * 设置当前游戏的状态.
+     * @param roomNumber 房间号，改变之后的状态
+     * @return 是否设置成功
+     * @throws NetworkException
+     */
+    public boolean setGameState(int roomNumber, int gameState) throws NetworkException;
     /**
      * 查询房主.
      * @param roomNumber 房间号码
@@ -122,4 +140,53 @@ public interface NetworkSupport {
      * @throws NetworkException
      */
     public String getHostName(int roomNumber) throws NetworkException;
+
+    /**
+     * 获得最高分列表。其中对于混战模式，获得前三人的分数和名字（分数降序）,例如：
+     * <br>"Name 2","Name 1","Name 0"
+     * <br>对于团队模式，获得两个团队总分，固定红前蓝后,例如
+     * <br>"5","4"(代表红队5分，蓝队4分)
+     * @param roomNumber 房间号
+     * @return 排行榜
+     * @throws NetworkException
+     */
+    public ArrayList<String> getHighScores(int roomNumber) throws NetworkException;
+
+    /**
+     * 获得服务器上用户当前收到的自身/对手的状态影响.一次状态改变只收一次消息.
+     * @param roomNumber
+     * @param playerName
+     * @return
+     * @throws NetworkException
+     */
+    public ArrayList<Item> getItemsEffect(int roomNumber, String playerName) throws NetworkException;
+
+    /**
+     * 某个用户使用了道具.对相应角色在服务器上添加相应的消息.
+     * @param roomNumber
+     * @param playerName
+     * @param item 道具编号，详见Item类.
+     * @throws NetworkException
+     */
+    public void useItem(int roomNumber, String playerName, Item item) throws NetworkException;
+
+    /**
+     * 用户找到的信号源，服务器返回一个道具(50%几率).
+     * 如果是组队模式，检查该信号源是否未被对方发现
+     * @param roomNumber
+     * @param playerName
+     * @param signal 信号源的编号
+     * @return
+     * @throws NetworkException
+     */
+    public Item findSignal(int roomNumber, String playerName, int signal) throws NetworkException;
+
+    /**
+     * 用户返回服务器上的最新游戏信息，即各个信号源的归属问题.按顺序，0未发现，1红队，2蓝队.
+     * 如返回0,1,2,0,1,2 代表第0、3号信号源未被两队发现，1、4号信号源被红队发现，2、5号信号源被蓝队发现.
+     * @param roomNumber
+     * @return
+     * @throws NetworkException
+     */
+    public ArrayList<Integer> getSignalBelong(int roomNumber) throws NetworkException;
 }

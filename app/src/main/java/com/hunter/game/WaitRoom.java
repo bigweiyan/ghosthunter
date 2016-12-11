@@ -3,6 +3,8 @@ package com.hunter.game;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+
+import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.Window;
@@ -14,8 +16,9 @@ import com.hunter.game.models.GameState;
 import com.hunter.game.models.RoomRule;
 import com.hunter.game.models.Tools;
 import com.hunter.master.foxhunter.R;
-import com.hunter.network.NetworkExample;
 import com.hunter.network.NetworkException;
+import com.hunter.network.NetworkImplement;
+import com.hunter.network.NetworkSupport;
 
 import java.util.ArrayList;
 
@@ -33,7 +36,7 @@ public class WaitRoom extends AppCompatActivity {
     private ArrayList<String> playerNameRed;
     private ArrayList<String> playerNameBlue;
 
-    private NetworkExample ne;
+    private NetworkSupport ne;
 
 
     private TextView playerListRed;
@@ -70,7 +73,11 @@ public class WaitRoom extends AppCompatActivity {
             if (gameState == GameState.START && !isHost) {
                 Intent intent = new Intent();
                 intent.setFlags(Intent.FLAG_ACTIVITY_LAUNCHED_FROM_HISTORY);
-                intent.setClass(WaitRoom.this,FoxHunter.class);
+                intent.putExtra("name",playerName);
+                intent.putExtra("mode",rule.mode);
+                intent.putExtra("roomNumber",roomNumber);
+
+                intent.setClass(WaitRoom.this,HuntGame.class);
                 WaitRoom.this.startActivity(intent);
                 WaitRoom.this.finish();
             }
@@ -81,6 +88,9 @@ public class WaitRoom extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        StrictMode.ThreadPolicy policy=new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
         roomNumber = intent.getIntExtra("roomNumber",0);
@@ -92,7 +102,7 @@ public class WaitRoom extends AppCompatActivity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_wait_room);
 
-        ne = new NetworkExample(); //临时
+        ne = new NetworkImplement(); //临时
 
         playerListRed = (TextView)findViewById(R.id.playerList1);
         playerListBlue = (TextView)findViewById(R.id.playerList2);
@@ -103,15 +113,22 @@ public class WaitRoom extends AppCompatActivity {
         endCondition = (TextView)findViewById(R.id.waitGameEnd);
         readyButton = (Button)findViewById(R.id.waitGameReady);
         Button back = (Button)findViewById(R.id.waitQuitRoom);
+        if (isHost) {
+            readyButton.setText("开始游戏");
+        }
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                try {
+                    ne.checkOut(roomNumber, playerName);
+                    finish();
+                }catch (NetworkException e) {
+                    Tools.showDialog(WaitRoom.this,"网络异常",e.getMessage());
+                }
             }
         });
         playerNameBlue = new ArrayList<>();
         playerNameRed = new ArrayList<>();
-
         try {
             rule = ne.getRoomRule(roomNumber);
             hostName = ne.getHostName(roomNumber);
@@ -124,17 +141,27 @@ public class WaitRoom extends AppCompatActivity {
             Tools.showDialog(this,"网络异常",e.getMessage());
         }
 
+
         readyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 boolean ready = false;
                 try {
-                    ready = ne.gameReady(roomNumber, playerName);
+                    if (isHost) {
+                        boolean flag = ne.gameStart(roomNumber);
+                        if (flag) ne.setGameState(roomNumber,GameState.START);
+
+                    }else {
+                        ready = ne.gameReady(roomNumber, playerName);
+                    }
                 }catch (NetworkException e){
                     Tools.showDialog(WaitRoom.this,"网络异常",e.getMessage());
                     return;
                 }
-                if (ready) {
+
+                if (isHost) {
+                    readyButton.setText("开始游戏");
+                }else if (ready) {
                     readyButton.setText(R.string.cancelReady);
                 }else {
                     readyButton.setText(R.string.gameReady);
