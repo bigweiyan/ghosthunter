@@ -11,7 +11,23 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.TreeMap;
+
+import static com.hunter.game.models.Item.ITEM_COMPASS_LOSS;
+import static com.hunter.game.models.Item.ITEM_DIRECT_REVERT;
+import static com.hunter.game.models.Item.ITEM_ENLARGE_FREQ;
+import static com.hunter.game.models.Item.ITEM_FREQ_LOSS;
+import static com.hunter.game.models.Item.ITEM_SHORTEN_COLD;
+import static com.hunter.game.models.RoomRule.MODE_BATTLE;
+import static com.hunter.game.models.RoomRule.MODE_TEAM;
 
 /**
  * 网络类的实现
@@ -20,10 +36,10 @@ import java.util.Properties;
 
 public class NetworkImplement implements NetworkSupport
 {
-    //final private String SEVER = "10.0.2.2";
-    final private String SEVER = "192.168.191.1";
+    final private String SEVER = "123.206.28.100";
+    //final private String SEVER = "192.168.191.1";
     final private String DRIVER="com.mysql.jdbc.Driver";
-    final private String URL="jdbc:mysql://"+SEVER+":3306/foxhunter?user=root&password=foxhunter";
+    final private String URL="jdbc:mysql://"+SEVER+":3306/foxhunter?user=root&password=KHuTuiGhjfYTdGVYLKj987676RtgJhFtYf";
 
     final private String TIME_OUT = "3000";
 
@@ -75,6 +91,7 @@ public class NetworkImplement implements NetworkSupport
             return true;
     }
 
+
     /**
      * 创建新的游戏.
      * @param mode 游戏模式
@@ -114,9 +131,11 @@ public class NetworkImplement implements NetworkSupport
                 if(rst.next())
                 {
                     final int roomID = rst.getInt("max(roomid)");
+                    int signalId = 0;
                     for(Signal signal:signals)
                     {
-                        String signalInsert = "insert into signal values("+roomID+","+signal.longitude+","+signal.latitude+","+signal.frequency+");";
+                        String signalInsert = "insert into signals values("+roomID+","+signal.longitude+","+signal.latitude+","+signal.frequency+",0,"+signalId+");";
+                        signalId++;
                         //Log.d("createRoom",signalInsert);
                         if(stmt.executeUpdate(signalInsert)!=1)
                         {
@@ -200,7 +219,7 @@ public class NetworkImplement implements NetworkSupport
             }
             userRst.close();
 
-            String userUpdate = "insert into user values("+roomNumber+",'"+playerName+"',"+iIsBlue+","+"0);";
+            String userUpdate = "insert into user values("+roomNumber+",'"+playerName+"',"+iIsBlue+","+"0,0);";
             if(stmt.executeUpdate(userUpdate)==1)
             {
                 stmt.close();
@@ -286,7 +305,6 @@ public class NetworkImplement implements NetworkSupport
     }
 
 
-
     /**
      * 得到蓝方队员的列表（团队模式），即列表1.
      * @param roomNumber 房间号码
@@ -341,6 +359,7 @@ public class NetworkImplement implements NetworkSupport
             throw new NetworkException(NetworkException.UNKNOWN);
         }
     }
+
 
     /**
      * 得到红方队员的列表（团队模式）/所有玩家的列表（混战模式），即列表2.
@@ -397,6 +416,7 @@ public class NetworkImplement implements NetworkSupport
         }
     }
 
+
     /**
      * 得到游戏的规则
      * @param roomNumber 房间号码
@@ -420,14 +440,14 @@ public class NetworkImplement implements NetworkSupport
             ResultSet roomRst = stmt.executeQuery(roomQuery);
             if (roomRst.next())
             {
-                RoomRule roomRule = new RoomRule(false,false,RoomRule.MODE_TEAM);
+                RoomRule roomRule = new RoomRule(false,false, MODE_TEAM);
                 roomRule.mode=roomRst.getInt("mode");
                 roomRule.useItem=roomRst.getBoolean("useitem");
                 roomRule.autoReady=roomRst.getBoolean("autoready");
                 roomRule.signals=new ArrayList<>();
                 roomRst.close();
 
-                String signalQuery = "select * from signal where roomid="+roomNumber+";";
+                String signalQuery = "select * from signals where roomid="+roomNumber+";";
                 ResultSet rst = stmt.executeQuery(signalQuery);
                 while(rst.next())
                 {
@@ -460,6 +480,7 @@ public class NetworkImplement implements NetworkSupport
             throw new NetworkException(NetworkException.UNKNOWN);
         }
     }
+
 
     /**
      * 发出准备/取消准备信号。成功则返回是\否，失败则抛出异常
@@ -525,7 +546,6 @@ public class NetworkImplement implements NetworkSupport
             throw new NetworkException(NetworkException.UNKNOWN);
         }
     }
-
 
 
     /**
@@ -654,6 +674,7 @@ public class NetworkImplement implements NetworkSupport
         }
     }
 
+
     /**
      * 设置当前游戏的状态.
      * @param roomNumber 房间号，改变之后的状态
@@ -700,6 +721,7 @@ public class NetworkImplement implements NetworkSupport
             throw new NetworkException(NetworkException.UNKNOWN);
         }
     }
+
 
     /**
      * 查询房主.
@@ -752,31 +774,413 @@ public class NetworkImplement implements NetworkSupport
         }
     }
 
-    @Override
-    public ArrayList<String> getHighScores(int roomNumber) throws NetworkException {
-        // TODO: 2016/12/4  
-        return null;
+    /**
+     * 获得最高分列表。其中对于混战模式，获得前三人的分数和名字（分数降序）,例如：
+     * <br>"Name 2","Name 1","Name 0"
+     * <br>对于团队模式，获得两个团队总分，固定红前蓝后,例如
+     * <br>"5","4"(代表红队5分，蓝队4分)
+     * @param roomNumber 房间号
+     * @return 排行榜
+     * @throws NetworkException
+     */
+    public ArrayList<String> getHighScores(int roomNumber) throws NetworkException
+    {
+        Connection connection = getConnection();
+        if(connection==null)
+        {
+            Log.d("getHighScores", "TIME OUT");
+            throw new NetworkException(NetworkException.TIME_OUT);
+        }
+
+        try
+        {
+            int roomMode = getRoomRule(roomNumber).mode;
+            ArrayList<String> score = new ArrayList<>();
+
+            Statement stmt = connection.createStatement();
+
+            String userQuery = "select * from user where roomid=" + roomNumber + ";";
+            ResultSet userRst = stmt.executeQuery(userQuery);
+
+            if(roomMode == MODE_TEAM)   //团队模式 得到红蓝两队分数
+            {
+                int redScore = 0;
+                int blueScore = 0;
+                while (userRst.next())
+                {
+                    if(userRst.getBoolean("isblue"))
+                        blueScore+=userRst.getInt("score");
+                    else
+                        redScore+=userRst.getInt("score");
+                }
+
+                score.add(""+redScore);
+                score.add(""+blueScore);
+            }
+            else                        //混战模式 得到前三人的分数和名字
+            {
+                class User implements Comparable
+                {
+                    int score;
+                    String userName;
+
+                    User(int score, String userName)
+                    {
+                        this.score=score;
+                        this.userName=userName;
+                    }
+
+                    public int compareTo(Object obj)
+                    {
+                        User B = (User) obj;
+                        return B.score-this.score;
+                    }
+                }
+
+                List<User> list = new ArrayList<User>();
+                while(userRst.next())
+                {
+                    list.add(new User(userRst.getInt("score"),userRst.getString("username")+" "+userRst.getString("score")));
+                }
+                Collections.sort(list);
+
+                int rank = 0;
+                for (User i : list)
+                {
+                    //System.out.println("score="+i.score+" name="+i.userName);
+                    score.add(i.userName);
+                    rank++;
+                    if(rank==3)
+                        break;
+                }
+                for(int i=rank; i<3; i++)
+                    score.add("");
+
+            }
+
+            userRst.close();
+            stmt.close();
+            connection.close();
+
+            return score;
+        }
+        catch (NetworkException e)
+        {
+            Log.d("getHighScores","Network Exception "+e);
+            throw e;
+        }
+        catch (Exception e)
+        {
+            Log.d("getHighScores","other Exception "+e);
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
     }
 
-    @Override
+
+    /**
+     * 某个用户使用了道具.对相应角色在服务器上添加相应的消息.
+     * @param roomNumber
+     * @param playerName
+     * @param item 道具编号，详见Item类.
+     * @throws NetworkException
+     */
+    public void useItem(int roomNumber, String playerName, Item item) throws NetworkException
+    {
+        Log.d("useItem","begin");
+        Connection connection = getConnection();
+        if(connection==null)
+        {
+            Log.d("useItem", "TIME OUT");
+            throw new NetworkException(NetworkException.TIME_OUT);
+        }
+
+        try
+        {
+            int roomMode = getRoomRule(roomNumber).mode;
+            HashMap<String, Boolean> team = new HashMap<String, Boolean>();
+            boolean useItemUserTeam = false;
+            ArrayList<String> effectedUser = new ArrayList<String>();
+            Statement stmt = connection.createStatement();
+
+            String userQuery = "select * from user where roomid=" + roomNumber + ";";
+            ResultSet userRst = stmt.executeQuery(userQuery);
+
+            while(userRst.next())
+            {
+                team.put(userRst.getString("username"), userRst.getBoolean("isblue"));
+            }
+
+            useItemUserTeam = team.get(playerName);
+
+            switch (item.getItemType())
+            {
+                case ITEM_SHORTEN_COLD :
+                    if(roomMode==MODE_TEAM)
+                    {
+                        for(String i:team.keySet())
+                            if(team.get(i)==useItemUserTeam)
+                                effectedUser.add(i);
+                    }
+                    else
+                    {
+                        effectedUser.add(playerName);
+                    }
+                    break;
+
+                case ITEM_COMPASS_LOSS:
+                    if(roomMode==MODE_TEAM)
+                    {
+                        for(String i:team.keySet())
+                            if(team.get(i)!=useItemUserTeam)
+                                effectedUser.add(i);
+                    }
+                    else
+                    {
+                        for(String i:team.keySet())
+                            if(!i.equals(playerName))
+                                effectedUser.add(i);
+                    }
+                    break;
+
+                case ITEM_FREQ_LOSS:
+                    if(roomMode==MODE_TEAM)
+                    {
+                        for(String i:team.keySet())
+                            if(team.get(i)!=useItemUserTeam)
+                                effectedUser.add(i);
+                    }
+                    else
+                    {
+                        for(String i:team.keySet())
+                            if(!i.equals(playerName))
+                                effectedUser.add(i);
+                    }
+                    break;
+
+                case ITEM_ENLARGE_FREQ:
+                    if(roomMode==MODE_TEAM)
+                    {
+                        for(String i:team.keySet())
+                            if(team.get(i)==useItemUserTeam)
+                                effectedUser.add(i);
+                    }
+                    else
+                    {
+                        effectedUser.add(playerName);
+                    }
+                    break;
+
+                case ITEM_DIRECT_REVERT:
+
+                    ArrayList<String> userList = new ArrayList<>();
+
+                    if(roomMode==MODE_TEAM)
+                    {
+                        for(String i:team.keySet())
+                            if(team.get(i)!=useItemUserTeam)
+                                userList.add(i);
+                    }
+                    else
+                    {
+                        for(String i:team.keySet())
+                            if(!i.equals(playerName))
+                                userList.add(i);
+                    }
+                    effectedUser.add(userList.get((int)(Math.random()*userList.size())));
+
+                    break;
+
+                default:
+                    throw new NetworkException(NetworkException.UNKNOWN);
+            }
+
+            for(String i:effectedUser)
+            {
+                String itemUpdate = "insert into item values("+roomNumber+",'"+ i +"',"+item.getItemType()+","+item.getRemainTime()+");";
+                Log.d("useItem", "useItem: "+itemUpdate);
+                if(stmt.executeUpdate(itemUpdate)!=1)
+                {
+                    stmt.close();
+                    connection.close();
+                    throw new NetworkException(NetworkException.UNKNOWN);
+                }
+            }
+            stmt.close();
+            connection.close();
+        }
+        catch (NetworkException e)
+        {
+            Log.d("useItem","Network Exception "+e);
+            throw e;
+        }
+        catch (Exception e)
+        {
+            Log.d("useItem","other Exception "+e);
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
+    }
+
+
+    /**
+     * 获得服务器上用户当前收到的自身/对手的状态影响.一次状态改变只收一次消息.
+     * @param roomNumber
+     * @param playerName
+     * @return
+     * @throws NetworkException
+     */
     public ArrayList<Item> getItemsEffect(int roomNumber, String playerName) throws NetworkException {
-        // TODO: 2016/12/4  
-        return null;
+        Connection connection = getConnection();
+        if(connection==null)
+        {
+            Log.d("getItemsEffect", "TIME OUT");
+            throw new NetworkException(NetworkException.TIME_OUT);
+        }
+
+        try
+        {
+            ArrayList<Item> item = new ArrayList<>();
+            Statement stmt = connection.createStatement();
+
+            String itemQuery = "select * from item where roomid=" + roomNumber + " and username=" + playerName +";";
+            ResultSet userRst = stmt.executeQuery(itemQuery);
+
+            while(userRst.next())
+            {
+                Item oneItem = new Item(userRst.getInt("itemtype"));
+                oneItem.setRemainTime(userRst.getFloat("remaintime"));
+                item.add(oneItem);
+            }
+
+            String itemUpdate = "delete from item where roomid="+roomNumber+" and username='"+playerName+"';";
+            stmt.executeUpdate(itemUpdate);
+
+            stmt.close();
+            connection.close();
+
+            return item;
+        }
+        catch (Exception e)
+        {
+            Log.d("getItemsEffect","other Exception "+e);
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
     }
 
-    @Override
-    public Item findSignal(int roomNumber, String playerName, int signal) throws NetworkException {
-        // TODO: 2016/12/4
-        return null;
+    /**
+     * 用户找到的信号源，服务器返回一个道具(50%几率).
+     * 如果是组队模式，检查该信号源是否未被对方发现
+     * @param roomNumber
+     * @param playerName
+     * @param signal 信号源的编号     *从0开始编号
+     * @return
+     * @throws NetworkException
+     */
+    public Item findSignal(int roomNumber, String playerName, int signal) throws NetworkException
+    {
+        Connection connection = getConnection();
+        if(connection==null)
+        {
+            Log.d("findSignal", "TIME OUT");
+            throw new NetworkException(NetworkException.TIME_OUT);
+        }
+
+        try
+        {
+            int roomMode = getRoomRule(roomNumber).mode;
+            int team = 0;
+
+            Statement stmt = connection.createStatement();
+            String userQuery = "select * from user where roomid=" + roomNumber + " and username='" + playerName + "';";
+            //Log.d("findSignal", userQuery);
+            ResultSet userRst = stmt.executeQuery(userQuery);
+            int score = 0;
+            if(userRst.next())
+            {
+                score = userRst.getInt("score");
+                team = userRst.getInt("isblue") + 1;
+            }
+            else
+                throw new NetworkException(NetworkException.UNKNOWN);
+
+            userRst.close();
+            score++;
+            String userUpdate = "update user set score="+score+" where roomid="+roomNumber+" and username='"+playerName+"';";
+            if(stmt.executeUpdate(userUpdate) != 1)
+                throw new NetworkException(NetworkException.UNKNOWN);
+
+            if(roomMode==MODE_TEAM)
+            {
+                String signalUpdate = "update signals set belong="+team+" where roomid="+roomNumber+" and signalid='"+signal+"';";
+                if(stmt.executeUpdate(signalUpdate)!=1)
+                    throw new NetworkException(NetworkException.UNKNOWN);
+            }
+            stmt.close();
+            connection.close();
+
+            if(Math.random()<0.5)
+            {
+                Item item = new Item((int)(Math.random()*5));
+                //Log.d("findSignal",""+item.getItemType());
+                if(item.getItemType()==0)
+                    item.setRemainTime(180);                // * 用秒做时间单位
+                else
+                    item.setRemainTime(60);
+
+                return item;
+            }
+            else
+                return null;
+        }
+        catch (NetworkException e)
+        {
+            Log.d("findSignal","Network Exception "+e);
+            throw e;
+        }
+        catch (Exception e)
+        {
+            Log.d("findSignal","other Exception "+e);
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
     }
 
-    @Override
+
+    /**
+     * 用户返回服务器上的最新游戏信息，即各个信号源的归属问题.按顺序，0未发现，1红队，2蓝队.
+     * 如返回0,1,2,0,1,2 代表第0、3号信号源未被两队发现，1、4号信号源被红队发现，2、5号信号源被蓝队发现.
+     * @param roomNumber
+     * @return
+     * @throws NetworkException
+     */
     public ArrayList<Integer> getSignalBelong(int roomNumber) throws NetworkException {
-        return null;
-    }
+        Connection connection = getConnection();
+        if(connection==null)
+        {
+            Log.d("getSignalBelong", "TIME OUT");
+            throw new NetworkException(NetworkException.TIME_OUT);
+        }
 
-    @Override
-    public void useItem(int roomNumber, String playerName, Item item) throws NetworkException {
-        // TODO: 2016/12/4
+        try
+        {
+
+            ArrayList<Integer> belong = new ArrayList<>();
+
+            Statement stmt = connection.createStatement();
+
+            String userQuery = "select * from signal where roomid=" + roomNumber + ";";
+            ResultSet signalRst = stmt.executeQuery(userQuery);
+
+
+            while (signalRst.next())
+            {
+                belong.add(new Integer(signalRst.getInt("belong")));
+            }
+
+            return belong;
+        }
+        catch (Exception e)
+        {
+            Log.d("getSignalBelong","other Exception "+e);
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
     }
 }

@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.util.ArrayList;
 
+import com.hunter.game.models.Item;
 import com.hunter.game.models.RoomRule;
 import com.hunter.game.models.Signal;
 import com.hunter.network.NetworkImplement;
@@ -77,7 +78,8 @@ public class Communication extends AppCompatActivity {
                     {
                         try
                         {
-                            Log.d("Communication",network.createRoom(1,editText2.getText().toString(),true,true,new ArrayList<Signal>())+"");
+                            Log.d("Communication",
+                                    ""+network.checkIn(Integer.parseInt(editText1.getText().toString()), editText2.getText().toString(),false));
                         }
                         catch (Exception e)
                         {
@@ -131,7 +133,17 @@ public class Communication extends AppCompatActivity {
                     {
                         try
                         {
-                            Log.d("Communication",network.gameStart(Integer.parseInt(editText1.getText().toString()))+"");
+                            Log.d("Communication","useblue");
+                            int roomid = Integer.parseInt(editText1.getText().toString());
+                            String name = editText2.getText().toString();
+                            int signal = Integer.parseInt(editText3.getText().toString());
+
+                            Item item = network.findSignal(roomid,name,signal);
+
+                            if(item!=null)
+                                Log.d("Communication","got item! " + item.getItemType()+" "+item.getRemainTime());
+                            else
+                                Log.d("Communication","got noitem! ");
 
                         }
                         catch (Exception e)
@@ -158,7 +170,12 @@ public class Communication extends AppCompatActivity {
                     {
                         try
                         {
-                            Log.d("Communication",""+network.setGameState(Integer.parseInt(editText1.getText().toString()),Integer.parseInt(editText3.getText().toString())));
+                            //Log.d("Communication",""+network.setGameState(Integer.parseInt(editText1.getText().toString()),Integer.parseInt(editText3.getText().toString())));
+                            int roomid = Integer.parseInt(editText1.getText().toString());
+                            String name = editText2.getText().toString();
+                            ArrayList<Item> list = network.getItemsEffect(roomid,name);
+                            for(Item i:list)
+                                System.out.println(i.getItemType()+" "+i.getRemainTime());
                         }
                         catch (Exception e)
                         {
