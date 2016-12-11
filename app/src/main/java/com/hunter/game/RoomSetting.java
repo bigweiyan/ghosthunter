@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -46,7 +45,7 @@ public class RoomSetting extends AppCompatActivity {
     private int mode;
 
     private View mContentView;
-    private NetworkImplement ns;
+    private NetworkSupport ns;
     private TextView signalListText;
     private ArrayList<String> signalText;
     private ArrayList<Signal> signals;
@@ -60,7 +59,6 @@ public class RoomSetting extends AppCompatActivity {
         StrictMode.setThreadPolicy(policy);
 
         super.onCreate(savedInstanceState);
-
 
         Intent intent = getIntent();
         mode = intent.getIntExtra("mode",MODE_BATTLE);
@@ -104,7 +102,6 @@ public class RoomSetting extends AppCompatActivity {
                     Tools.showDialog(RoomSetting.this,"请稍等","位置正在初始化，请稍等");
                     return;
                 }
-
                 try {
                     double lat = ss.getLatitude();
                     double lon = ss.getLongitude();
@@ -186,15 +183,7 @@ public class RoomSetting extends AppCompatActivity {
         showSignals();
         int roomNumber = 0;
         try {
-            Log.d("RoomSetting",mode+" "+hostname+" "+useItem+" "+autoReady+" "+String.valueOf(signals));
-            final NetworkImplement networkImplement = new NetworkImplement();
-            final String hostname1 = hostname;
-            final boolean useItem1 = useItem;
-            final boolean autoReady1 = autoReady;
-            final ArrayList<Signal> signals1 = new ArrayList<>(signals);
-
             roomNumber = ns.createRoom(mode,hostname,useItem,autoReady,signals);
-            Log.d("RoomSetting",roomNumber+"");
         } catch (NetworkException e) {
             Tools.showDialog(this,"网络异常",e.getMessage());
             return;
