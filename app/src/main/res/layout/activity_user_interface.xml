@@ -10,12 +10,22 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.hunter.master.foxhunter.UserInterface">
 
-    <TextView
-        android:text="User Interface"
+    <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:id="@+id/textView" />
+        android:text="发送"
+        android:id="@+id/testButton"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="接受信息"
+        style="@style/SettingLabel"/>
+
+    <TextView
+        android:id="@+id/testText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:lines="6"
+        android:scrollbars="vertical"/>
 </RelativeLayout>

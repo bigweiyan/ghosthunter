@@ -13,7 +13,8 @@ import com.hunter.game.models.RoomRule;
 import java.lang.String;
 
 public class MainActivity extends ListActivity {
-    String tests[] = {"master.foxhunter.Communication","game.FoxHunter","game.HuntGame","master.foxhunter.GameLogic"};
+    String tests[] = {"master.foxhunter.Communication","game.FoxHunter","game.HuntGame",
+            "master.foxhunter.GameLogic","master.foxhunter.UserInterface"};
     public void onCreate(Bundle savedInstanceState){
         Log.d("lzj","main start");
         super.onCreate(savedInstanceState);
