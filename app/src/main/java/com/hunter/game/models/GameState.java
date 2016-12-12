@@ -4,6 +4,8 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
+import static android.R.attr.mode;
+
 /**
  * 存储游戏的状态，如是否开始，道具效果等.
  * Created by weiyan on 2016/11/13.
@@ -36,6 +38,7 @@ public class GameState {
      * 存储游戏的状态：NO_SUCH_ROOM;NOT_READY_YET;READY_TO_START;START;GAME_OVER.
      */
     public int gameState;
+    public boolean useItemBoolean;
 
     /**
      * 是否可以进行采集周围信号源的操作。否代表正在冷却.
@@ -60,6 +63,7 @@ public class GameState {
      */
     public Item item;
     public ArrayList<Item> workingItems;//包括别人的debuff
+    public int effect;
 
     /**
      * 当前测向机的频率.取值范围1-6,参见Signal类.
@@ -69,9 +73,12 @@ public class GameState {
      * searchButton的冷却时间
      */
     float coldTime;
+    int tick;
+    float millysecond;
 
-    public GameState(int gameState,ArrayList<Signal> signals) {
+    public GameState(int gameState,ArrayList<Signal> signals, boolean useItem) {
         this.gameState = gameState;
+        this.useItemBoolean = useItem;
         isSearchButtonWake = true;
         presentFreq = Signal.FREQ_1;
         workingItems = new ArrayList<>();
@@ -87,10 +94,10 @@ public class GameState {
             this.signals.get(i).setSoundMap(GameSetting.soundMap[i]);
         }
         coldTime = 2.0f;
+        millysecond = 0.0f;
+        tick = 0;
     }
-    /*
-        计算距离
-     */
+
     private static final  double EARTH_RADIUS = 6378137;//赤道半径(单位m)
     private static double rad(double d)
     {
@@ -104,8 +111,6 @@ public class GameState {
         double b = rad(lon1) - rad(lon2);
         double s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a/2),2)+Math.cos(radLat1)*Math.cos(radLat2)*Math.pow(Math.sin(b/2),2)));
         s = s * EARTH_RADIUS;
-        //s = Math.round(s * 10000) / 10000;
-
         return s;
     }
     /**
@@ -116,22 +121,52 @@ public class GameState {
      * 更新状态
      */
     public void updateSound(float deltaTime,double latitude, double longitude,double angle) {
-        for (Signal i:signals)
-        {
-            if(i.frequency==this.getFreq())
-            {
+        if(mode == RoomRule.MODE_BATTLE) {
+            millysecond += deltaTime;
+            while(millysecond > 1){
+                millysecond -= 1;
+                tick ++;
+            }
+            if (tick > 3600) this.gameState = GAME_OVER;
+        }else{
+            int red = 0;
+            int blue = 0;
+            int len = signalBelong.size();
+            for (int i = 0; i < len; i++){
+                if(signalBelong.get(i) == 1){
+                    red++;
+                }else if (signalBelong.get(i) == 2){
+                    blue++;
+                }
+            }
+            if(red > len/2 + 1 || blue > len / 2 + 1) {
+                gameState = GAME_OVER;
+            }
+        }
+        //更新游戏时间/胜利条件
+        int tempFreq = this.presentFreq;
+        if(effect << 4 % 2 == 1){
+            tempFreq = (presentFreq + 3) % 6 + 1;
+        }
+
+        for (Signal i:signals){
+            if(i.frequency==tempFreq ||
+                    (effect << 3 % 2 == 1 && Math.abs(tempFreq - i.frequency) <= 1)){
                 i.play(deltaTime);
             }
         }
         for(int i=0;i<this.signals.size();i++) {
-            if(signals.get(i).frequency==this.getFreq()) {
+            if(signals.get(i).frequency==tempFreq||
+                    (effect << 3 % 2 == 1 && Math.abs(tempFreq - signals.get(i).frequency) <= 1)){
+
                 Signal aimSignal = signals.get(i);
 
                 double len = GetDistance(aimSignal.longitude,aimSignal.latitude,longitude,latitude);
                 double dx= GetDistance(aimSignal.longitude,latitude,longitude,latitude);
-                if(latitude > aimSignal.latitude) {
+                if(latitude < aimSignal.latitude) {
                     dx = -dx;
                 }
+                Log.d("dx",dx+"");
                 double dangle=Math.asin(dx/len)*180/Math.PI;
 
                 dangle = dangle - angle;
@@ -140,21 +175,56 @@ public class GameState {
                     aimSignal.setVolume(1f);
                 }else if (len > 510){
                     aimSignal.setVolume(0f);
-                }else{
-                    float volume = 1 - ((float)len-10)/500;
-                    volume *= 0.5f+(Math.cos(rad(dangle))*0.5);
+                }else {
+                    float volume = 1 - ((float) len - 10) / 500;
+                    if (effect << 1 % 2 == 1) {
+                        dangle = 90;
+                    //效果：取消角度修正
+                    }else if (effect << 2 % 2 == 1){
+                        dangle = 180 - dangle;
+                        //效果：方向转向
+                    }
+                    volume *= 0.5f + (Math.cos(rad(dangle)) * 0.5);
                     aimSignal.setVolume(volume);
                 }
             }
         }
-
+        //更新声音
+        effect = 0;
+        int len = workingItems.size();
+        for(int i = 0; i < len; i++) {
+            Item item = workingItems.get(i);
+            if(item.getItemType() == Item.ITEM_SHORTEN_COLD){
+                effect = effect | 0x1;
+            }else if(item.getItemType() == Item.ITEM_COMPASS_LOSS){
+                effect = effect | 0x2;
+            }else if(item.getItemType() == Item.ITEM_DIRECT_REVERT){
+                effect = effect | 0x4;
+            }else if(item.getItemType() == Item.ITEM_ENLARGE_FREQ){
+                effect = effect | 0x8;
+            }else if(item.getItemType() == Item.ITEM_FREQ_LOSS){
+                effect = effect | 0x16;
+            }
+            item.setRemainTime(item.getRemainTime() - deltaTime);
+            if(item.getRemainTime() < 0){
+                workingItems.remove(i);
+            }
+            i--;
+            len--;
+        }
+        //更新道具
         if(!isSearchButtonWake) {
             coldTime -= deltaTime;
             if (coldTime < 0) {
                 isSearchButtonWake = true;
-                coldTime = 2.0f;
+                if(effect % 2 == 1){ //冷却时间减半
+                    coldTime = 1.0f;
+                }else {
+                    coldTime = 2.0f;
+                }
             }
         }
+        //更新按钮
     }
 
     /**
@@ -162,7 +232,7 @@ public class GameState {
      * @param item
      */
     public void receiveItem(Item item) {
-        if(item != null)
+        if(useItemBoolean)
             this.item = item;
     }
 

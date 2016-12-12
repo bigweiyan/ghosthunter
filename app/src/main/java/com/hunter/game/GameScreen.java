@@ -43,6 +43,7 @@ public class GameScreen extends GLScreen {
     private ArrayList<String> highScores;
     private boolean onLoad;
     private int buttonState;
+    private boolean useItem;
     private static final int BUTTON_UP = 0;
     private static final int BUTTON_DOWN = 1;
     //游戏状态有关变量
@@ -70,7 +71,8 @@ public class GameScreen extends GLScreen {
     public void update(float deltaTime) {
         if (onLoad) {
             ArrayList<Signal> signals = ((HuntGame)glGame).getSignals();
-            state = new GameState(GameState.START,signals);
+            useItem = ((HuntGame)glGame).getUseItem();
+            state = new GameState(GameState.START,signals,useItem);
             highScores = ((HuntGame)glGame).getHighScores();
             onLoad = false;
             return;
@@ -106,7 +108,7 @@ public class GameScreen extends GLScreen {
         //检查服务器返回的消息
 
         try {
-            state.updateSound(deltaTime,(float)ss.getLongitude(),(float)ss.getLatitude(),ss.getDirection());
+            state.updateSound(deltaTime,(float)ss.getLatitude(),(float)ss.getLongitude(),ss.getDirection());
         }catch (SensorException e) {
             Tools.showDialog(glGame, "搜索时错误", "无法定位");
         }
@@ -134,7 +136,7 @@ public class GameScreen extends GLScreen {
             if (event.type == Input.TouchEvent.TOUCH_UP) {
                 if (OverlapTest.pointInCircle(searchButton,touchPos)) {
                     try {
-                        int signal = state.search(ss.getLongitude(),ss.getLatitude());
+                        int signal = state.search(ss.getLatitude(),ss.getLongitude());
                         if (signal == -1) {
                             toastRenderer.addToast(GameAssets.TOAST_NO_SIG_GET);
                         }else {

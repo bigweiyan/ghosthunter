@@ -10,8 +10,8 @@ import com.hunter.game.models.Item;
 import com.hunter.game.models.RoomRule;
 import com.hunter.game.models.Signal;
 import com.hunter.game.models.Tools;
-import com.hunter.network.NetworkExample;
 import com.hunter.network.NetworkException;
+import com.hunter.network.NetworkImplement;
 import com.hunter.network.NetworkSupport;
 import com.hunter.sensor.SensorSupport;
 import com.wxyz.framework.Screen;
@@ -40,6 +40,7 @@ public class HuntGame extends GLGame {
     private ArrayList<Signal> signals;
     private Item itemGet; //服务器赋予的道具
     private boolean newData;
+    private boolean useItemBoolean;
     //服务器中的同步内容 其中newData标志服务器是否更新
 
 
@@ -111,13 +112,15 @@ public class HuntGame extends GLGame {
         massage = 0;
         newData = false;
 
-        ns = new NetworkExample();
+        ns = new NetworkImplement();
         ss = new Sensor_If(this);
 
         try {
             RoomRule rule = ns.getRoomRule(roomNumber);
             signals = rule.signals;
+            useItemBoolean = rule.useItem;
             highScores = ns.getHighScores(roomNumber);
+
         } catch (NetworkException e) {
             Tools.showDialog(this,"网络异常","请检查网络连接");
         }
@@ -193,7 +196,6 @@ public class HuntGame extends GLGame {
      */
     public void useItem(Item item) {
         setMassage(MASSAGE_USE_ITEM);
-        //Log.d("massage","massage:"+massage);
         itemUse = item;
     }
 
@@ -216,5 +218,9 @@ public class HuntGame extends GLGame {
         intent.putExtra("roomNumber",roomNumber);
         startActivity(intent);
         finish();
+    }
+
+    public boolean getUseItem(){
+        return useItemBoolean;
     }
 }
