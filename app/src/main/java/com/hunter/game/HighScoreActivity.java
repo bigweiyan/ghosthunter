@@ -3,6 +3,7 @@ package com.hunter.game;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -14,6 +15,7 @@ import com.hunter.game.models.Tools;
 import com.hunter.master.foxhunter.R;
 import com.hunter.network.NetworkExample;
 import com.hunter.network.NetworkException;
+import com.hunter.network.NetworkImplement;
 import com.hunter.network.NetworkSupport;
 
 import java.util.ArrayList;
@@ -34,7 +36,7 @@ public class HighScoreActivity extends Activity {
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         roomNumber = getIntent().getIntExtra("roomNumber",0);
-        ns = new NetworkExample();
+        ns = new NetworkImplement();
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
@@ -57,10 +59,13 @@ public class HighScoreActivity extends Activity {
         result = (TextView)findViewById(R.id.result);
         StringBuilder sb = new StringBuilder();
         ArrayList<String> highscores = new ArrayList<>();
+
         try {
             highscores = ns.getHighScores(roomNumber);
             mode = ns.getRoomRule(roomNumber).mode;
+
         }catch (NetworkException e){
+            Log.w("high", "onCreate: "+e);
             Tools.showDialog(this,"连接失败","请检查网络连接");
         }
         for (int i = 0; i < highscores.size(); i++) {

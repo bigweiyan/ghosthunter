@@ -1,6 +1,5 @@
 package com.hunter.network;
 
-import android.os.Message;
 import android.util.Log;
 
 import com.hunter.game.models.Item;
@@ -14,8 +13,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.logging.Handler;
-
 
 /**
  * 网络类的实现
@@ -40,12 +37,12 @@ public class NetworkImplement implements NetworkSupport
         {
             HttpURLConnection connection = null;
             try {
-                URL url = new URL("http://115.236.59.67:8080/CloudERP/"+string);
-                Log.d("th","http://115.236.59.67:8080/CloudERP/"+string);
-
+                URL url = new URL("http://115.236.59.67:8080/FoxHunt/index.jsp"+string);
+                Log.i("thread", "run: "+"http://115.236.59.67:8080/FoxHunt/index.jsp"+string);
                 connection = (HttpURLConnection) url.openConnection();
                 // 设置请求方法，默认是GET
                 connection.setRequestMethod("GET");
+                connection.setConnectTimeout(3000);
                 // 设置字符集
                 connection.setRequestProperty("Charset", "UTF-8");
                 // 设置文件类型
@@ -62,7 +59,7 @@ public class NetworkImplement implements NetworkSupport
                     while((i=is.read())!=-1){
                         baos.write(i);
                     }
-                    result = baos.toString();
+                    result = baos.toString().trim();
                 }
             } catch (IOException e) {
                 // TODO Auto-generated catch block
@@ -76,57 +73,55 @@ public class NetworkImplement implements NetworkSupport
 
     }
 
-    private String oneSignalToString(Signal signal)
-    {
-        if(signal==null)
-            return null;
-        String ret = "";
-        ret=ret+signal.latitude+","+signal.longitude+","+signal.frequency+";";
-        return ret;
-    }
-
-    private String signalToString(ArrayList<Signal> signal)
-    {
-        if(signal==null)
-            return null;
-
-        String ret = "";
-
-        for(Signal i:signal)
-        {
-            ret=ret+oneSignalToString(i);
-        }
-        return ret;
-    }
-
-    private ArrayList<Signal> stringToSignalList(String string)
-    {
-
-        try
-        {
-            ArrayList<Signal> signal = new ArrayList<>();
-            String[] list = string.split(";");
-            for (String i : list)
-            {
-                String[] temp = i.split(",");
-                Signal onesignal = new Signal(Double.parseDouble(temp[0]), Double.parseDouble(temp[1]), Integer.parseInt(temp[2]));
-                signal.add(onesignal);
-            }
-            return signal;
-        }
-        catch (Exception e)
-        {
-            return null;
-        }
-
-    }
-
 
     private String doubleToString(double f)
     {
         return ""+(int)(f*1000000);
     }
 
+    /**
+     * 检测是否有网络.
+     * @return 是：有网络 否：无网络
+     */
+    public boolean checkLink()
+    {
+        Log.i(TAG, "checkLink: ");
+        String string = "?methodid=1";
+
+        try
+        {
+            result = null;
+
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+
+            String ret = new String(result);
+            result = null;
+
+            if (ret.startsWith("error:"))
+            {
+                throw new NetworkException(ret.substring(6));
+            }
+            else
+            {
+                return ret.equals("true") ? true : false;
+            }
+        }
+        catch (NetworkException e)
+        {
+            return false;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+    }
+
+    String TAG = "test";
 
     /**
      * 创建新的游戏.
@@ -141,20 +136,21 @@ public class NetworkImplement implements NetworkSupport
     public int createRoom(int mode, String hostName, boolean useItem,
                           boolean autoReady, ArrayList<Signal> signals) throws NetworkException
     {
+        Log.i(TAG, "createRoom: ");
+        String string = "?methodid=2";
+        string += "&mode=" + mode;
+        string += "&hostName=" + hostName;
+        string += "&useItem=" + useItem;
+        string += "&autoReady=" + autoReady;
+        for (int i = 0; i < signals.size(); i++)
+        {
+            string += "&lat" + i + "=" + doubleToString(signals.get(i).latitude);
+            string += "&lon" + i + "=" + doubleToString(signals.get(i).longitude);
+            string += "&freq" + i + "=" + signals.get(i).frequency;
+        }
+
         try
         {
-            String string = "?method=2";
-            string += "&mode=" + mode;
-            string += "&hostName=" + hostName;
-            string += "&useItem=" + useItem;
-            string += "&autoReady=" + autoReady;
-            for (int i = 0; i < signals.size(); i++)
-            {
-                string += "&lat" + i + "=" + doubleToString(signals.get(i).latitude);
-                string += "&lon" + i + "=" + doubleToString(signals.get(i).longitude);
-                string += "&freq" + i + "=" + signals.get(i).frequency;
-            }
-
             result = null;
 
             Thread thread = new myThread(string);
@@ -163,11 +159,19 @@ public class NetworkImplement implements NetworkSupport
             while (true)
                 if (result != null)
                     break;
+            String ret = new String(result);
+            result = null;
 
-            if (result.startsWith("error:"))
-                throw new NetworkException(result.substring(6));
+            if (ret.startsWith("error:"))
+            {
+                Log.i(TAG, "createRoom: "+ret);
+                throw new NetworkException(ret.substring(6));
+            }
             else
-                return Integer.parseInt(result);
+            {
+                Log.i(TAG, "createRoom: ok!"+ret);
+                return Integer.parseInt(ret);
+            }
         }
         catch (NetworkException e)
         {
@@ -175,6 +179,7 @@ public class NetworkImplement implements NetworkSupport
         }
         catch (Exception e)
         {
+            Log.i(TAG, "createRoom: otherexcpetion"+e);
             throw new NetworkException(NetworkException.UNKNOWN);
         }
     }
@@ -191,13 +196,47 @@ public class NetworkImplement implements NetworkSupport
      */
     public boolean checkIn(int roomNumber, String playerName, boolean isBlue) throws NetworkException
     {
-        String string = "?method=1";
+        Log.i(TAG, "checkIn: ");
+
+        String string = "?methodid=3";
         string+="&roomNumber="+roomNumber;
         string+="&playerName="+playerName;
         string+="&isBlue="+isBlue;
 
+        try
+        {
+            result = null;
 
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+
+            String ret = new String(result);
+            result = null;
+
+            if (ret.startsWith("error:"))
+            {
+                throw new NetworkException(ret.substring(6));
+            }
+            else
+            {
+                return ret.equals("true")?true:false;
+            }
+        }
+        catch (NetworkException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
     }
+
+
 
 
     /**
@@ -210,9 +249,41 @@ public class NetworkImplement implements NetworkSupport
      */
     public boolean checkOut(int roomNumber, String playerName) throws NetworkException
     {
-        String string = "?method=2";
+        Log.i(TAG, "checkOut: ");
+
+        String string = "?methodid=4";
         string+="&roomNumber="+roomNumber;
         string+="&playerName="+playerName;
+
+        try
+        {
+            result = null;
+
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
+            {
+                throw new NetworkException(ret.substring(6));
+            }
+            else
+            {
+                return ret.equals("true")?true:false;
+            }
+        }
+        catch (NetworkException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
     }
 
 
@@ -224,8 +295,46 @@ public class NetworkImplement implements NetworkSupport
      */
     public ArrayList<String> getMembersBlue(int roomNumber) throws  NetworkException
     {
-        String string = "?method=3";
+        Log.i(TAG, "getMembersBlue: ");
+
+        String string = "?methodid=5";
         string+="&roomNumber="+roomNumber;
+
+        try
+        {
+            result = null;
+
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+
+            String ret = new String(result);
+            result = null;
+
+            if (ret.startsWith("error:"))
+            {
+                Log.i(TAG, "getMembersBlue: "+ret+"");
+                throw new NetworkException(ret.substring(6));
+            }
+            else
+            {
+                ArrayList<String> ret2 = new ArrayList<>();
+                for(String i:ret.split("\n"))
+                    ret2.add(i);
+                return ret2;
+            }
+        }
+        catch (NetworkException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
     }
 
 
@@ -237,8 +346,44 @@ public class NetworkImplement implements NetworkSupport
      */
     public ArrayList<String> getMembersRed(int roomNumber) throws  NetworkException
     {
-        String string = "?method=4";
+        Log.i(TAG, "getMembersRed: ");
+
+        String string = "?methodid=6";
         string+="&roomNumber="+roomNumber;
+
+        try
+        {
+            result = null;
+
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
+            {
+                Log.i(TAG, "getMembersRed: "+ret+"");
+                throw new NetworkException(ret.substring(6));
+            }
+            else
+            {
+                ArrayList<String> ret2 = new ArrayList<>();
+                for(String i:ret.split("\n"))
+                    ret2.add(i);
+                return ret2;
+            }
+        }
+        catch (NetworkException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
     }
 
 
@@ -250,8 +395,47 @@ public class NetworkImplement implements NetworkSupport
      */
     public RoomRule getRoomRule(int roomNumber) throws NetworkException
     {
-        String string = "?method=5";
+        Log.i(TAG, "getRoomRule: ");
+
+        String string = "?methodid=7";
         string+="&roomNumber="+roomNumber;
+
+        try
+        {
+            result = null;
+
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
+            {
+                Log.i(TAG, "getRoomRule: "+ret+"");
+                throw new NetworkException(ret.substring(6));
+            }
+            else
+            {
+                RoomRule ret2 = Tools.stringToRoomRule(ret);
+                Log.i(TAG, "getRoomRule: "+ret2.mode+" "+ret2.autoReady+" "+ret2.useItem);
+                for (Signal i:ret2.signals)
+                    Log.i(TAG, "getRoomRule: "+i.latitude+" "+i.longitude+" "+i.frequency);
+                return ret2;
+            }
+        }
+        catch (NetworkException e)
+        {
+            Log.i(TAG, "getRoomRule: me "+e);
+            throw e;
+        }
+        catch (Exception e)
+        {
+            Log.i(TAG, "getRoomRule: others "+e);
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
     }
 
 
@@ -264,10 +448,45 @@ public class NetworkImplement implements NetworkSupport
      */
     public boolean gameReady(int roomNumber, String playerName) throws NetworkException
     {
-        String string = "?method=6";
+        Log.i(TAG, "gameReady: ");
+
+        String string = "?methodid=8";
         string+="&roomNumber="+roomNumber;
         string+="&playerName="+playerName;
+
+        try
+        {
+            result = null;
+
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
+            {
+                Log.i(TAG, "gameReady: "+ret);
+                throw new NetworkException(ret.substring(6));
+            }
+            else
+            {
+                return ret.equals("true") ? true : false;
+            }
+
+        }
+        catch (NetworkException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
     }
+
 
 
     /**
@@ -278,8 +497,42 @@ public class NetworkImplement implements NetworkSupport
      */
     public boolean gameStart(int roomNumber) throws NetworkException
     {
-        String string = "?method=7";
+        Log.i(TAG, "gameStart: ");
+
+        String string = "?methodid=9";
         string+="&roomNumber="+roomNumber;
+
+        try
+        {
+            result = null;
+
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
+            {
+                Log.i(TAG, "gameStart: "+ret);
+                throw new NetworkException(ret.substring(6));
+            }
+            else
+            {
+                return ret.equals("true") ? true : false;
+            }
+        }
+        catch (NetworkException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
+
     }
 
 
@@ -291,8 +544,41 @@ public class NetworkImplement implements NetworkSupport
      */
     public int getGameState(int roomNumber) throws NetworkException
     {
-        String string = "?method=8";
+        Log.i(TAG, "getGameState: ");
+
+        String string = "?methodid=10";
         string+="&roomNumber="+roomNumber;
+
+        try
+        {
+            result = null;
+
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
+            {
+                Log.i(TAG, "getGameState: "+ret);
+                throw new NetworkException(ret.substring(6));
+            }
+            else
+            {
+                return Integer.parseInt(ret);
+            }
+        }
+        catch (NetworkException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
     }
 
 
@@ -304,9 +590,42 @@ public class NetworkImplement implements NetworkSupport
      */
     public boolean setGameState(int roomNumber, int gameState) throws NetworkException
     {
-        String string = "?method=9";
+        Log.i(TAG, "setGameState: ");
+
+        String string = "?methodid=11";
         string+="&roomNumber="+roomNumber;
         string+="&gameState="+gameState;
+
+        try
+        {
+            result = null;
+
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
+            {
+                Log.i(TAG, "setGameState: "+ret);
+                throw new NetworkException(ret.substring(6));
+            }
+            else
+            {
+                return ret.equals("true") ? true : false;
+            }
+        }
+        catch (NetworkException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
     }
 
 
@@ -318,8 +637,42 @@ public class NetworkImplement implements NetworkSupport
      */
     public String getHostName(int roomNumber) throws NetworkException
     {
-        String string = "?method=10";
+        Log.i(TAG, "getHostName: ");
+
+        String string = "?methodid=12";
         string+="&roomNumber="+roomNumber;
+
+        try
+        {
+            result = null;
+
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
+            {
+                Log.i(TAG, "getHostName: "+ret);
+                throw new NetworkException(ret.substring(6));
+            }
+            else
+            {
+                return ret;
+            }
+
+        }
+        catch (NetworkException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
     }
 
 
@@ -334,8 +687,52 @@ public class NetworkImplement implements NetworkSupport
      */
     public ArrayList<String> getHighScores(int roomNumber) throws NetworkException
     {
-        String string = "?method=11";
+        Log.i(TAG, "getHighScores: ");
+
+        String string = "?methodid=13";
         string+="&roomNumber="+roomNumber;
+
+        try
+        {
+            result = null;
+
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
+            {
+                Log.i(TAG, "getHighScores: "+ret);
+                throw new NetworkException(ret.substring(6));
+            }
+            else
+            {
+                ArrayList<String> ret2 = new ArrayList<>();
+                int player = 0;
+                for (String i : ret.split("\n"))
+                {
+                    ret2.add(i);
+                    player++;
+                    if(player==3)
+                        break;
+                }
+                for(int i=player;i<3;i++)
+                    ret2.add(" ");
+                return ret2;
+            }
+        }
+        catch (NetworkException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
     }
 
 
@@ -348,10 +745,39 @@ public class NetworkImplement implements NetworkSupport
      */
     public void useItem(int roomNumber, String playerName, Item item) throws NetworkException
     {
-        String string = "?method=12";
+        Log.i(TAG, "useItem: ");
+
+        String string = "?methodid=14";
         string+="&roomNumber="+roomNumber;
         string+="&playerName="+playerName;
         string+="&item="+item;
+
+        try
+        {
+            result = null;
+
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
+            {
+                Log.i(TAG, "useItem: "+ret);
+                throw new NetworkException(ret.substring(6));
+            }
+        }
+        catch (NetworkException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
     }
 
 
@@ -362,10 +788,44 @@ public class NetworkImplement implements NetworkSupport
      * @return
      * @throws NetworkException
      */
-    public ArrayList<Item> getItemsEffect(int roomNumber, String playerName) throws NetworkException {
-        String string = "?method=13";
+    public ArrayList<Item> getItemsEffect(int roomNumber, String playerName) throws NetworkException
+    {
+        Log.i(TAG, "getItemsEffect: ");
+
+        String string = "?methodid=15";
         string+="&roomNumber="+roomNumber;
         string+="&playerName="+playerName;
+
+        try
+        {
+            result = null;
+
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
+            {
+                Log.i(TAG, "getItemsEffect: "+ret);
+                throw new NetworkException(ret.substring(6));
+            }
+            else
+            {
+                return Tools.stringToItems(ret);
+            }
+        }
+        catch (NetworkException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
     }
 
     /**
@@ -379,10 +839,44 @@ public class NetworkImplement implements NetworkSupport
      */
     public Item findSignal(int roomNumber, String playerName, int signal) throws NetworkException
     {
-        String string = "?method=14";
+
+        Log.i(TAG, "findSignal: ");
+
+        String string = "?methodid=16";
         string+="&roomNumber="+roomNumber;
         string+="&playerName="+playerName;
         string+="&signal="+signal;
+
+        try
+        {
+            result = null;
+
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
+            {
+                Log.i(TAG, "findSignal: "+ret);
+                throw new NetworkException(ret.substring(6));
+            }
+            else
+            {
+                return Tools.stringToItem(ret);
+            }
+        }
+        catch (NetworkException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
     }
 
 
@@ -393,8 +887,46 @@ public class NetworkImplement implements NetworkSupport
      * @return
      * @throws NetworkException
      */
-    public ArrayList<Integer> getSignalBelong(int roomNumber) throws NetworkException {
-        String string = "?method=15";
-        string+="&roomNumber="+roomNumber;
+    public ArrayList<Integer> getSignalBelong(int roomNumber) throws NetworkException
+    {
+        Log.i(TAG, "getSignalBelong: ");
+
+        String string = "?methodid=17";
+        string += "&roomNumber=" + roomNumber;
+
+        try
+        {
+            result = null;
+
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
+            {
+                Log.i(TAG, "getSignalBelong: "+ret);
+                throw new NetworkException(ret.substring(6));
+            }
+            else
+            {
+                ArrayList<Integer> ret2 = new ArrayList<>();
+                for (String i : ret.split("\n"))
+                    ret2.add(new Integer(i));
+                return ret2;
+            }
+        }
+        catch (NetworkException e)
+        {
+            throw e;
+        }
+        catch (Exception e)
+        {
+            throw new NetworkException(NetworkException.UNKNOWN);
+        }
+    }
 
 }
