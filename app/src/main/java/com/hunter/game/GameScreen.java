@@ -106,7 +106,7 @@ public class GameScreen extends GLScreen {
         //检查服务器返回的消息
 
         try {
-            state.updateSound((float)ss.getLatitude(),(float)ss.getLongitude(),deltaTime,ss.getDirection());
+            state.updateSound(deltaTime,(float)ss.getLongitude(),(float)ss.getLatitude(),ss.getDirection());
         }catch (SensorException e) {
             Tools.showDialog(glGame, "搜索时错误", "无法定位");
         }
@@ -134,7 +134,7 @@ public class GameScreen extends GLScreen {
             if (event.type == Input.TouchEvent.TOUCH_UP) {
                 if (OverlapTest.pointInCircle(searchButton,touchPos)) {
                     try {
-                        int signal = state.search(ss.getLatitude(),ss.getLongitude());
+                        int signal = state.search(ss.getLongitude(),ss.getLatitude());
                         if (signal == -1) {
                             toastRenderer.addToast(GameAssets.TOAST_NO_SIG_GET);
                         }else {

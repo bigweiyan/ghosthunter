@@ -1,5 +1,7 @@
 package com.hunter.game.models;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 
 /**
@@ -63,16 +65,11 @@ public class GameState {
      * 当前测向机的频率.取值范围1-6,参见Signal类.
      */
     private int presentFreq;
-    /*
-        防止溢出，把整数部分提取出来
+    /**
+     * searchButton的冷却时间
      */
-    int timeUsedzheng;
-    float timeUsedxiao;
     float coldTime;
-    /*
-    声音大小
-     */
-    public double soundVolume;
+
     public GameState(int gameState,ArrayList<Signal> signals) {
         this.gameState = gameState;
         isSearchButtonWake = true;
@@ -87,7 +84,7 @@ public class GameState {
             isSignalsFound.add(false);
             signalSound.add(0.0f);
             signalBelong.add(0);
-            this.signals.get(i).setId(i);
+            this.signals.get(i).setSoundMap(GameSetting.soundMap[i]);
         }
         coldTime = 2.0f;
     }
@@ -108,6 +105,7 @@ public class GameState {
         double s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a/2),2)+Math.cos(radLat1)*Math.cos(radLat2)*Math.pow(Math.sin(b/2),2)));
         s = s * EARTH_RADIUS;
         //s = Math.round(s * 10000) / 10000;
+
         return s;
     }
     /**
@@ -118,28 +116,35 @@ public class GameState {
      * 更新状态
      */
     public void updateSound(float deltaTime,double latitude, double longitude,double angle) {
-        timeUsedxiao+=deltaTime;
-        while(timeUsedxiao>1) {
-            timeUsedxiao-=1;
-            timeUsedzheng+=1;
-        }
         for (Signal i:signals)
         {
             if(i.frequency==this.getFreq())
             {
-                i.play((float)this.soundVolume,deltaTime);
+                i.play(deltaTime);
             }
         }
         for(int i=0;i<this.signals.size();i++) {
             if(signals.get(i).frequency==this.getFreq()) {
                 Signal aimSignal = signals.get(i);
-                double earthR=6371229;
-                double dy=(latitude-aimSignal.latitude)*Math.PI*earthR/180;
-                double dx=(longitude-aimSignal.longitude)*Math.PI*earthR*Math.cos(((latitude+aimSignal.latitude)/2)*Math.PI/180)/180;
-                double len=Math.hypot(dx,dy);
-                double dangle=Math.abs(90- Math.toDegrees(Math.acos(dx/len))-angle);
-                this.soundVolume=0;
-                soundVolume=((200-len)/200.0)*((190-dangle)/190.0);
+
+                double len = GetDistance(aimSignal.longitude,aimSignal.latitude,longitude,latitude);
+                double dx= GetDistance(aimSignal.longitude,latitude,longitude,latitude);
+                if(latitude > aimSignal.latitude) {
+                    dx = -dx;
+                }
+                double dangle=Math.asin(dx/len)*180/Math.PI;
+
+                dangle = dangle - angle;
+
+                if (len < 10){
+                    aimSignal.setVolume(1f);
+                }else if (len > 510){
+                    aimSignal.setVolume(0f);
+                }else{
+                    float volume = 1 - ((float)len-10)/500;
+                    volume *= 0.5f+(Math.cos(rad(dangle))*0.5);
+                    aimSignal.setVolume(volume);
+                }
             }
         }
 
@@ -167,7 +172,6 @@ public class GameState {
      *
      */
     public void receiveAffect(Item item) {
-        // TODO: 2016/12/4
         this.workingItems.add(item);
     }
 
@@ -188,12 +192,12 @@ public class GameState {
     public int search(double latitude, double longitude) {
 
         isSearchButtonWake=false;
-        double dlat=0.001;//误差范围
-        double dlong=0.001;
 
-        int retnum=-10;
-        for(int i=0;i<signals.size();i++){
-            double dis=GetDistance(longitude,latitude,signals.get(i).longitude,signals.get(i).latitude);
+        int retnum=-1;
+        for(int i = 0; i < signals.size(); i++){
+            Signal aimSignal = signals.get(i);
+            double dis=GetDistance(aimSignal.longitude,aimSignal.latitude,latitude,longitude);
+            Log.d("distence",dis+"");
             if(dis<10)
             {
                 if(!isSignalsFound.get(i)){
@@ -202,15 +206,6 @@ public class GameState {
                     break;
                 }
             }
-            /*
-            if((Math.abs(latitude-signals.get(i).latitude)<dlat)&&(Math.abs(longitude - signals.get(i).longitude)<dlong)){
-                if(!isSignalsFound.get(i)){
-                    isSignalsFound.set(i, true);
-                    retnum=i;
-                    break;
-                }
-            }
-            */
         }
         return retnum;
     }

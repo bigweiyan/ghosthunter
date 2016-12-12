@@ -101,8 +101,8 @@ public class NetworkExample implements NetworkSupport{
                 rule.mode = RoomRule.MODE_TEAM;
             rule.autoReady = false;
             ArrayList<Signal> signal = new ArrayList<>();
-            signal.add(new Signal(126.635986, 45.742495, 1));
-            signal.add(new Signal(126.6359861, 45.7424951, 2));
+            signal.add(new Signal(126.632111, 45.744669, 1));
+            signal.add(new Signal(126.636261, 45.74243, 2));
             signal.add(new Signal(126.6359859, 45.7424949, 3));
             signal.add(new Signal(126.6359861, 45.7424949, 4));
             signal.add(new Signal(126.6359859, 45.7424951, 5));

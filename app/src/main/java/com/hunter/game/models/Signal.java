@@ -28,15 +28,14 @@ public class Signal {
      * 频率.
      */
     public int frequency;
-    private int[][] soundMap={
-            {1,1,1,1,1,-1,-1,-1},{0,1,1,1,1,-1,-1,-1},
-            {0,0,1,1,1,-1,-1,-1},{0,0,0,1,1,-1,-1,-1},
-            {0,0,0,0,1,-1,-1,-1},{0,0,0,0,0,-1,-1,-1},
-            {1,0,0,0,0,-1,-1,-1},{1,1,0,0,0,-1,-1,-1},
-            {1,1,1,0,0,-1,-1,-1},{1,1,1,1,0,-1,-1,-1}};
+
+    /**
+     * 播放声音的格式、当前播放的时间、序号和长度
+     */
+    public int[] soundMap;
     int soundIndex=-1;
     float time;
-    int id;
+    float volume;
 
     public Signal(double latitude, double longitude, int frequency) {
         this.frequency = frequency;
@@ -45,25 +44,13 @@ public class Signal {
         time = 0.5f;
     }
 
-    public Signal() {
-        this.latitude = 0;
-        this.longitude = 0;
-        this.frequency = 1;
-        time = 0.5f;
-    }
-
-    public void setId(int id)
-    {
-        this.id=id;
-    }
-
-    public void play(float volume,float dtime)
+    public void play(float dtime)
     {
         time-=dtime;
-        if (dtime<0)
+        if (time < 0)
         {
-            soundIndex=(soundIndex+1)%8;
-            int NowId=soundMap[id%10][soundIndex];
+            soundIndex = (soundIndex+1)%8;
+            int NowId=soundMap[soundIndex];
             if(NowId==0)
             {
                 GameAssets.short_sound.play(volume);
@@ -78,5 +65,13 @@ public class Signal {
             }
             time=0.5f;
         }
+    }
+
+    public void setVolume(float volume) {
+        this.volume = volume;
+    }
+
+    public void setSoundMap(int[] soundMap) {
+        this.soundMap = soundMap;
     }
 }
