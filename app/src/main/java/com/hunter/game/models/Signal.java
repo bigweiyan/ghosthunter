@@ -1,5 +1,7 @@
 package com.hunter.game.models;
 
+import com.hunter.game.GameAssets;
+
 /**
  * 信号源对象的封装.
  * Created by weiyan on 2016/11/12.
@@ -27,15 +29,49 @@ public class Signal {
      */
     public int frequency;
 
+    /**
+     * 播放声音的格式、当前播放的时间、序号和长度
+     */
+    public int[] soundMap;
+    int soundIndex=-1;
+    float time;
+    float volume;
+
     public Signal(double latitude, double longitude, int frequency) {
         this.frequency = frequency;
         this.latitude = latitude;
         this.longitude = longitude;
+        time = 0.5f;
     }
 
-    public Signal() {
-        this.latitude = 0;
-        this.longitude = 0;
-        this.frequency = 1;
+    public void play(float dtime)
+    {
+        time-=dtime;
+        if (time < 0)
+        {
+            soundIndex = (soundIndex+1)%8;
+            int NowId=soundMap[soundIndex];
+            if(NowId==0)
+            {
+                GameAssets.short_sound.play(volume);
+            }
+            if(NowId==1)
+            {
+                GameAssets.long_sound.play(volume);
+            }
+            if(NowId==0)
+            {
+                GameAssets.empty_sound.play(volume);
+            }
+            time=0.5f;
+        }
+    }
+
+    public void setVolume(float volume) {
+        this.volume = volume;
+    }
+
+    public void setSoundMap(int[] soundMap) {
+        this.soundMap = soundMap;
     }
 }

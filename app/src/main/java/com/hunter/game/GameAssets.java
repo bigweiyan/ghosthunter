@@ -1,5 +1,6 @@
 package com.hunter.game;
 
+import com.wxyz.framework.Sound;
 import com.wxyz.framework.gl.Font;
 import com.wxyz.framework.gl.Texture;
 import com.wxyz.framework.gl.TextureRegion;
@@ -34,12 +35,16 @@ public class GameAssets {
     public static final int TOAST_ITEM_GET = 2;
     public static final int TOAST_UNDER_ITEM = 3;
     public static Font font;
+    public static Sound long_sound,short_sound,empty_sound;
 
     public static void load(GLGame game) {
         battle_back = new Texture(game,"gameUI1.png");
         team_back = new Texture(game, "gameUI2.png");
         font_texture = new Texture(game, "font.png");
         item_texture = new Texture(game, "item.png");
+        long_sound = game.getAudio().newSound("longsound.mp3");
+        short_sound = game.getAudio().newSound("shortsound.mp3");
+        empty_sound = game.getAudio().newSound("emptysound.mp3");
 
         page_region = new TextureRegion(battle_back,0,0,1080,1920);
         search_button_up = new TextureRegion(battle_back,1080,0,628,628);

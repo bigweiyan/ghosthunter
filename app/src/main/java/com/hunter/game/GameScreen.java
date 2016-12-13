@@ -43,6 +43,7 @@ public class GameScreen extends GLScreen {
     private ArrayList<String> highScores;
     private boolean onLoad;
     private int buttonState;
+    private boolean useItem;
     private static final int BUTTON_UP = 0;
     private static final int BUTTON_DOWN = 1;
     //游戏状态有关变量
@@ -70,7 +71,8 @@ public class GameScreen extends GLScreen {
     public void update(float deltaTime) {
         if (onLoad) {
             ArrayList<Signal> signals = ((HuntGame)glGame).getSignals();
-            state = new GameState(GameState.START,signals);
+            useItem = ((HuntGame)glGame).getUseItem();
+            state = new GameState(GameState.START,signals,useItem);
             highScores = ((HuntGame)glGame).getHighScores();
             onLoad = false;
             return;
@@ -105,11 +107,13 @@ public class GameScreen extends GLScreen {
         }
         //检查服务器返回的消息
 
-        state.updateSound(deltaTime);
+        try {
+            state.updateSound(deltaTime,(float)ss.getLatitude(),(float)ss.getLongitude(),ss.getDirection());
+        }catch (SensorException e) {
+            Tools.showDialog(glGame, "搜索时错误", "无法定位");
+        }
+
         //更新声音信息，道具剩余时间，搜索按键的冷却时间
-
-        // TODO: 2016/12/4 发出声音
-
         game.getInput().getKeyEvents();
         List<Input.TouchEvent> events =  game.getInput().getTouchEvents();
 

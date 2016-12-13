@@ -106,7 +106,7 @@ public class RoomSetting extends AppCompatActivity {
                 try {
                     double lat = ss.getLatitude();
                     double lon = ss.getLongitude();
-                    signals.add(new Signal(lat,lon,rand.nextInt(6)+1));
+                    signals.add(new Signal(lat,lon,signals.size()%6 + 1));
                     signalText.add("信号源：纬度"+lat+" 经度:"+lon);
                 }catch (SensorException e) {
                     Tools.showDialog(RoomSetting.this,"传感器异常",e.getMessage());
