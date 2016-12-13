@@ -26,7 +26,7 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Player"
+            android:text="player"
             android:textColor="@color/colorPrimary"
             android:id="@+id/playerNameInput">
         </EditText>
@@ -38,7 +38,7 @@
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="000011"
+            android:text=""
             android:inputType="number"
             android:textColor="@color/colorPrimary"
             android:id="@+id/roomNumberInput">
