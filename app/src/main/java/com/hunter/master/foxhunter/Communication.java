@@ -4,26 +4,15 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.view.menu.ExpandedMenuView;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.util.ArrayList;
 
 import com.hunter.game.models.Item;
-import com.hunter.game.models.RoomRule;
-import com.hunter.game.models.Signal;
 import com.hunter.network.NetworkImplement;
 
 public class Communication extends AppCompatActivity {
@@ -63,7 +52,7 @@ public class Communication extends AppCompatActivity {
         editText2 = (EditText)findViewById(R.id.editText2);
         editText3 = (EditText)findViewById(R.id.editText3);
 
-        textView = (TextView)findViewById(R.id.textView);
+        textView = (TextView)findViewById(R.id.testText);
 
         button1.setOnClickListener(new View.OnClickListener()
         {
@@ -78,8 +67,7 @@ public class Communication extends AppCompatActivity {
                     {
                         try
                         {
-                            Log.d("Communication",
-                                    ""+network.checkIn(Integer.parseInt(editText1.getText().toString()), editText2.getText().toString(),false));
+
                         }
                         catch (Exception e)
                         {

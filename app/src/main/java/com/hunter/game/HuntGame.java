@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
+import android.support.v4.util.LogWriter;
+import android.util.Log;
 
 import com.gps.Sensor_If;
 import com.hunter.game.models.Item;
@@ -12,6 +14,7 @@ import com.hunter.game.models.Signal;
 import com.hunter.game.models.Tools;
 import com.hunter.network.NetworkExample;
 import com.hunter.network.NetworkException;
+import com.hunter.network.NetworkImplement;
 import com.hunter.network.NetworkSupport;
 import com.hunter.sensor.SensorSupport;
 import com.wxyz.framework.Screen;
@@ -103,7 +106,7 @@ public class HuntGame extends GLGame {
         StrictMode.setThreadPolicy(policy);
 
         super.onCreate(savedInstanceState);
-
+        Log.w("tag", "onCreate: 111");
         Intent intent =  getIntent();
         playerName = intent.getStringExtra("name");
         roomNumber = intent.getIntExtra("roomNumber",0);
@@ -111,11 +114,15 @@ public class HuntGame extends GLGame {
         massage = 0;
         newData = false;
 
-        ns = new NetworkExample();
+        Log.w("tag", "onCreate: 222");
+        ns = new NetworkImplement();
         ss = new Sensor_If(this);
 
         try {
+
+            Log.w("tag", "onCreate: 333");
             RoomRule rule = ns.getRoomRule(roomNumber);
+            Log.w("tag", "onCreate: 444");
             signals = rule.signals;
             highScores = ns.getHighScores(roomNumber);
         } catch (NetworkException e) {

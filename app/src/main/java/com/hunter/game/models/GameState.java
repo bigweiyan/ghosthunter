@@ -1,5 +1,7 @@
 package com.hunter.game.models;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -77,6 +79,7 @@ public class GameState {
         isSignalsFound = new ArrayList<>();
         signalSound = new ArrayList<>();
         signalBelong = new ArrayList<>();
+        if(signals==null) Log.i("why null?", "GameState: =null");
         for (int i = 0; i < signals.size(); i++) {
             isSignalsFound.add(false);
             signalSound.add(0.0f);
