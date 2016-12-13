@@ -61,8 +61,12 @@ public class HighScoreActivity extends Activity {
         }catch (NetworkException e){
             Tools.showDialog(this,"连接失败","请检查网络连接");
         }
-        for (int i = 0; i < highscores.size(); i++) {
-            sb.append(highscores.get(i)).append('\n');
+        if(mode == RoomRule.MODE_BATTLE) {
+            for (int i = 0; i < highscores.size(); i++) {
+                sb.append(highscores.get(i)).append('\n');
+            }
+        }else{
+            sb.append("红队得分 ").append(highscores.get(0)).append("\n蓝队得分 ").append(highscores.get(1));
         }
         resultList.setText(sb.toString());
 

@@ -136,7 +136,7 @@ public class GameState {
                     blue++;
                 }
             }
-            if(red > len/2 + 1 || blue > len / 2 + 1) {
+            if(red >= len/2+1 || blue >= len / 2+1 ) {
                 gameState = GAME_OVER;
             }
         }
@@ -228,7 +228,7 @@ public class GameState {
      * @param item 获得的道具
      */
     public void receiveItem(Item item) {
-        if(useItemBoolean)
+        if(useItemBoolean && item!=null)
             this.item = item;
     }
 

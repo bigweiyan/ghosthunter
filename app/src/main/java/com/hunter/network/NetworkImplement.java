@@ -748,7 +748,7 @@ public class NetworkImplement implements NetworkSupport
         String string = "?methodid=14";
         string+="&roomNumber="+roomNumber;
         string+="&playerName="+playerName;
-        string+="&item="+item;
+        string+="&item="+item.getItemType();
 
         try
         {
