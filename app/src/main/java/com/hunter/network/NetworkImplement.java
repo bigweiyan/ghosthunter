@@ -38,7 +38,7 @@ public class NetworkImplement implements NetworkSupport
             HttpURLConnection connection = null;
             try {
                 URL url = new URL("http://115.236.59.67:8080/FoxHunt/index.jsp"+string);
-                Log.i("thread", "run: "+"http://115.236.59.67:8080/FoxHunt/index.jsp"+string);
+                //Log.i("thread", "run: "+"http://115.236.59.67:8080/FoxHunt/index.jsp"+string);
                 connection = (HttpURLConnection) url.openConnection();
                 // 设置请求方法，默认是GET
                 connection.setRequestMethod("GET");
@@ -62,7 +62,6 @@ public class NetworkImplement implements NetworkSupport
                     result = baos.toString().trim();
                 }
             } catch (IOException e) {
-                // TODO Auto-generated catch block
                 e.printStackTrace();
             } finally {
                 if(connection != null){
@@ -464,7 +463,7 @@ public class NetworkImplement implements NetworkSupport
             while (true)
                 if (result != null)
                     break;
-            String ret = new String(result);
+            String ret = result;
             result = null;
             if (ret.startsWith("error:"))
             {
@@ -473,7 +472,7 @@ public class NetworkImplement implements NetworkSupport
             }
             else
             {
-                return ret.equals("true") ? true : false;
+                return ret.equals("true");
             }
 
         }

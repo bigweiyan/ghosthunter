@@ -10,16 +10,16 @@ import com.wxyz.framework.impl.GLGame;
  */
 
 public class Assets {
-    public static Texture main_page;
-    public static Texture battle_main_page;
-    public static Texture team_main_page;
-    public static TextureRegion main_battle_button_released;
-    public static TextureRegion main_team_button_released;
-    public static TextureRegion main_battle_button_pressed;
-    public static TextureRegion main_team_button_pressed;
-    public static TextureRegion page_region;
+    static Texture main_page;
+    static Texture battle_main_page;
+    static Texture team_main_page;
+    static TextureRegion main_battle_button_released;
+    static TextureRegion main_team_button_released;
+    static TextureRegion main_battle_button_pressed;
+    static TextureRegion main_team_button_pressed;
+    static TextureRegion page_region;
 
-    public static void load(GLGame game){
+    static void load(GLGame game){
         main_page = new Texture(game,"page1.png");
         battle_main_page = new Texture(game,"page2.png");
         team_main_page = new Texture(game,"page3.png");
@@ -31,7 +31,7 @@ public class Assets {
         main_battle_button_pressed = new TextureRegion(main_page,1080,492,524,164);
     }
 
-    public static void reload(){
+    static void reload(){
         main_page.reload();
         battle_main_page.reload();
         team_main_page.reload();

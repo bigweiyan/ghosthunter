@@ -32,10 +32,10 @@ public class Signal {
     /**
      * 播放声音的格式、当前播放的时间、序号和长度
      */
-    public int[] soundMap;
-    int soundIndex=-1;
-    float time;
-    float volume;
+    private int[] soundMap;
+    private int soundIndex=-1;
+    private float time;
+    private float volume;
 
     public Signal(double latitude, double longitude, int frequency) {
         this.frequency = frequency;
@@ -44,7 +44,7 @@ public class Signal {
         time = 0.5f;
     }
 
-    public void play(float dtime)
+    void play(float dtime)
     {
         time-=dtime;
         if (time < 0)
@@ -67,11 +67,11 @@ public class Signal {
         }
     }
 
-    public void setVolume(float volume) {
+    void setVolume(float volume) {
         this.volume = volume;
     }
 
-    public void setSoundMap(int[] soundMap) {
+    void setSoundMap(int[] soundMap) {
         this.soundMap = soundMap;
     }
 }

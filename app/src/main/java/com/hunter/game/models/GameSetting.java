@@ -1,6 +1,7 @@
 package com.hunter.game.models;
 
 /**
+ * 游戏基本变量.
  * Created by weiyan on 2016/12/12.
  */
 

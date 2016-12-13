@@ -3,7 +3,6 @@ package com.hunter.game;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -15,7 +14,6 @@ import android.widget.TextView;
 import com.hunter.game.models.GameState;
 import com.hunter.game.models.RoomRule;
 import com.hunter.game.models.Tools;
-import com.hunter.master.foxhunter.R;
 import com.hunter.network.NetworkException;
 import com.hunter.network.NetworkImplement;
 import com.hunter.network.NetworkSupport;
@@ -37,7 +35,6 @@ public class WaitRoom extends AppCompatActivity {
     private ArrayList<String> playerNameBlue;
 
     private NetworkSupport ne;
-
 
     private TextView playerListRed;
     private TextView playerListBlue;

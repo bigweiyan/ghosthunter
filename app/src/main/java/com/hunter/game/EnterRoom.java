@@ -15,7 +15,6 @@ import android.widget.TextView;
 
 import com.gps.Sensor_If;
 import com.hunter.game.models.Tools;
-import com.hunter.master.foxhunter.R;
 import com.hunter.network.NetworkException;
 import com.hunter.network.NetworkImplement;
 import com.hunter.network.NetworkSupport;
@@ -27,8 +26,6 @@ import com.hunter.sensor.SensorSupport;
 public class EnterRoom extends AppCompatActivity {
     public static final int MODE_TEAM = 0;
     public static final int MODE_BATTLE = 1;
-    private int mode;
-    private TextView mContentView;
     NetworkSupport ns;
     SensorSupport ss;
 
@@ -39,7 +36,7 @@ public class EnterRoom extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         Intent intent = getIntent();
-        mode = intent.getIntExtra("mode",MODE_BATTLE);
+        int mode = intent.getIntExtra("mode",MODE_BATTLE);
         
         ns = new NetworkImplement();
         ss = new Sensor_If(getApplicationContext());
@@ -48,7 +45,7 @@ public class EnterRoom extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_enter_room);
-        mContentView = (TextView) findViewById(R.id.enterRoomLabel);
+        TextView mContentView = (TextView) findViewById(R.id.enterRoomLabel);
         switch (mode) {
             case MODE_BATTLE:
                 mContentView.setText("加入混战模式>选择房间");
@@ -103,9 +100,8 @@ public class EnterRoom extends AppCompatActivity {
         }
 
         boolean result;
-        if ("".equals(playerName) || "".equals(roomNumber)){
+        if ("".equals(playerName) || roomNumber == 0){
             Tools.showDialog(this, "输入错误","请填写您的昵称和要加入的房间号");
-            return;
         }else {
             try {
                 result = ns.checkIn(roomNumber,playerName,isBlue);

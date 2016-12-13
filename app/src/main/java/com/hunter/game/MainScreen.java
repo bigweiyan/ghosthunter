@@ -29,7 +29,7 @@ public class MainScreen extends GLScreen {
     private boolean downPressed;
     private Rectangle downButton;
     private Vector2 touchPos;
-    int mode;
+    private int mode;
     private static final int MODE_NONE = 0;
     private static final int MODE_BATTLE = 1;
     private static final int MODE_TEAM = 2;

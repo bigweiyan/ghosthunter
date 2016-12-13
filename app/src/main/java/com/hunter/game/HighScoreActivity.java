@@ -3,7 +3,6 @@ package com.hunter.game;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -12,8 +11,6 @@ import android.widget.TextView;
 
 import com.hunter.game.models.RoomRule;
 import com.hunter.game.models.Tools;
-import com.hunter.master.foxhunter.R;
-import com.hunter.network.NetworkExample;
 import com.hunter.network.NetworkException;
 import com.hunter.network.NetworkImplement;
 import com.hunter.network.NetworkSupport;
@@ -26,24 +23,21 @@ import java.util.ArrayList;
  */
 
 public class HighScoreActivity extends Activity {
-    private NetworkSupport ns;
-    private Button button;
-    private int roomNumber;
-    private TextView result;
-    private TextView resultList;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
-        roomNumber = getIntent().getIntExtra("roomNumber",0);
-        ns = new NetworkImplement();
+
+        int roomNumber = getIntent().getIntExtra("roomNumber",0);
+        NetworkSupport ns = new NetworkImplement();
 
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.high_score_activity);
 
-        button = (Button) findViewById(R.id.gameOver);
+        Button button = (Button) findViewById(R.id.gameOver);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -55,8 +49,8 @@ public class HighScoreActivity extends Activity {
         });
 
         int mode = 0;
-        resultList = (TextView)findViewById(R.id.resultList1);
-        result = (TextView)findViewById(R.id.result);
+        TextView resultList = (TextView)findViewById(R.id.resultList1);
+        TextView result = (TextView)findViewById(R.id.result);
         StringBuilder sb = new StringBuilder();
         ArrayList<String> highscores = new ArrayList<>();
 
@@ -65,7 +59,6 @@ public class HighScoreActivity extends Activity {
             mode = ns.getRoomRule(roomNumber).mode;
 
         }catch (NetworkException e){
-            Log.w("high", "onCreate: "+e);
             Tools.showDialog(this,"连接失败","请检查网络连接");
         }
         for (int i = 0; i < highscores.size(); i++) {

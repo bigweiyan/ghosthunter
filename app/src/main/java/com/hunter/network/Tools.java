@@ -1,10 +1,10 @@
 package com.hunter.network;
 
-import java.util.ArrayList;
-
 import com.hunter.game.models.Item;
 import com.hunter.game.models.RoomRule;
 import com.hunter.game.models.Signal;
+
+import java.util.ArrayList;
 
 public class Tools {
 	public static String oneSignalToString(Signal signal){

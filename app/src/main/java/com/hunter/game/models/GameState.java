@@ -4,8 +4,6 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
-import static android.R.attr.mode;
-
 /**
  * 存储游戏的状态，如是否开始，道具效果等.
  * Created by weiyan on 2016/11/13.
@@ -38,7 +36,8 @@ public class GameState {
      * 存储游戏的状态：NO_SUCH_ROOM;NOT_READY_YET;READY_TO_START;START;GAME_OVER.
      */
     public int gameState;
-    public boolean useItemBoolean;
+    private boolean useItemBoolean;
+    private int gameMode;
 
     /**
      * 是否可以进行采集周围信号源的操作。否代表正在冷却.
@@ -54,7 +53,6 @@ public class GameState {
      */
     public ArrayList<Signal> signals;
     public ArrayList<Boolean> isSignalsFound;
-    public ArrayList<Float> signalSound;
     public ArrayList<Integer> signalBelong;
 
     /**
@@ -63,7 +61,7 @@ public class GameState {
      */
     public Item item;
     public ArrayList<Item> workingItems;//包括别人的debuff
-    public int effect;
+    private int effect;
 
     /**
      * 当前测向机的频率.取值范围1-6,参见Signal类.
@@ -72,25 +70,23 @@ public class GameState {
     /**
      * searchButton的冷却时间
      */
-    float coldTime;
-    int tick;
-    float millysecond;
+    private float coldTime;
+    private int tick;
+    private float millysecond;
 
-    public GameState(int gameState,ArrayList<Signal> signals, boolean useItem) {
+    public GameState(int gameState,ArrayList<Signal> signals, boolean useItem, int gameMode) {
         this.gameState = gameState;
         this.useItemBoolean = useItem;
         isSearchButtonWake = true;
         presentFreq = Signal.FREQ_1;
+        this.gameMode = gameMode;
         workingItems = new ArrayList<>();
 
         this.signals = signals;
         isSignalsFound = new ArrayList<>();
-        signalSound = new ArrayList<>();
         signalBelong = new ArrayList<>();
-        if(signals==null) Log.i("why null?", "GameState: =null");
         for (int i = 0; i < signals.size(); i++) {
             isSignalsFound.add(false);
-            signalSound.add(0.0f);
             signalBelong.add(0);
             this.signals.get(i).setSoundMap(GameSetting.soundMap[i]);
         }
@@ -104,7 +100,7 @@ public class GameState {
     {
         return d * Math.PI / 180.0;
     }
-    public static double GetDistance(double lon1,double lat1,double lon2, double lat2)
+    private static double GetDistance(double lon1,double lat1,double lon2, double lat2)
     {
         double radLat1 = rad(lat1);
         double radLat2 = rad(lat2);
@@ -122,7 +118,7 @@ public class GameState {
      * 更新状态
      */
     public void updateSound(float deltaTime,double latitude, double longitude,double angle) {
-        if(mode == RoomRule.MODE_BATTLE) {
+        if(gameMode == RoomRule.MODE_BATTLE) {
             millysecond += deltaTime;
             while(millysecond > 1){
                 millysecond -= 1;
@@ -146,19 +142,19 @@ public class GameState {
         }
         //更新游戏时间/胜利条件
         int tempFreq = this.presentFreq;
-        if(effect << 4 % 2 == 1){
+        if((effect >> 4) % 2 == 1){
             tempFreq = (presentFreq + 3) % 6 + 1;
         }
 
         for (Signal i:signals){
             if(i.frequency==tempFreq ||
-                    (effect << 3 % 2 == 1 && Math.abs(tempFreq - i.frequency) <= 1)){
+                    ((effect >> 3) % 2 == 1 && Math.abs(tempFreq - i.frequency) <= 1)){
                 i.play(deltaTime);
             }
         }
         for(int i=0;i<this.signals.size();i++) {
             if(signals.get(i).frequency==tempFreq||
-                    (effect << 3 % 2 == 1 && Math.abs(tempFreq - signals.get(i).frequency) <= 1)){
+                    ((effect >> 3) % 2 == 1 && Math.abs(tempFreq - signals.get(i).frequency) <= 1)){
 
                 Signal aimSignal = signals.get(i);
 
@@ -167,7 +163,6 @@ public class GameState {
                 if(latitude < aimSignal.latitude) {
                     dx = -dx;
                 }
-                Log.d("dx",dx+"");
                 double dangle=Math.asin(dx/len)*180/Math.PI;
 
                 dangle = dangle - angle;
@@ -178,10 +173,10 @@ public class GameState {
                     aimSignal.setVolume(0f);
                 }else {
                     float volume = 1 - ((float) len - 10) / 500;
-                    if (effect << 1 % 2 == 1) {
+                    if ((effect >> 1) % 2 == 1) {
                         dangle = 90;
                     //效果：取消角度修正
-                    }else if (effect << 2 % 2 == 1){
+                    }else if ((effect >> 2) % 2 == 1){
                         dangle = 180 - dangle;
                         //效果：方向转向
                     }
@@ -230,7 +225,7 @@ public class GameState {
 
     /**
      * 从服务器获得了新的道具.
-     * @param item
+     * @param item 获得的道具
      */
     public void receiveItem(Item item) {
         if(useItemBoolean)
@@ -239,7 +234,7 @@ public class GameState {
 
     /**
      * 从服务器获得了新的附加状态.
-     * @param item
+     * @param item 获得的状态
      *
      */
     public void receiveAffect(Item item) {
@@ -267,8 +262,8 @@ public class GameState {
         int retnum=-1;
         for(int i = 0; i < signals.size(); i++){
             Signal aimSignal = signals.get(i);
-            double dis=GetDistance(aimSignal.longitude,aimSignal.latitude,latitude,longitude);
-            Log.d("distence",dis+"");
+            double dis=GetDistance(aimSignal.longitude,aimSignal.latitude,longitude,latitude);
+            Log.d("distance","DIS"+dis);
             if(dis<10)
             {
                 if(!isSignalsFound.get(i)){

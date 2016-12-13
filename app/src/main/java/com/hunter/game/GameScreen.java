@@ -43,7 +43,6 @@ public class GameScreen extends GLScreen {
     private ArrayList<String> highScores;
     private boolean onLoad;
     private int buttonState;
-    private boolean useItem;
     private static final int BUTTON_UP = 0;
     private static final int BUTTON_DOWN = 1;
     //游戏状态有关变量
@@ -71,8 +70,8 @@ public class GameScreen extends GLScreen {
     public void update(float deltaTime) {
         if (onLoad) {
             ArrayList<Signal> signals = ((HuntGame)glGame).getSignals();
-            useItem = ((HuntGame)glGame).getUseItem();
-            state = new GameState(GameState.START,signals,useItem);
+            boolean useItem = ((HuntGame)glGame).getUseItem();
+            state = new GameState(GameState.START,signals,useItem,mode);
             highScores = ((HuntGame)glGame).getHighScores();
             onLoad = false;
             return;
@@ -258,7 +257,7 @@ public class GameScreen extends GLScreen {
         if(mode == RoomRule.MODE_BATTLE) {
             GameAssets.font.setScale(1.5f, 2.5f);
             GameAssets.font.drawText(batcher, highScores.get(0), 196, 1740);
-            GameAssets.font.setScale(1.5f,2.0f);
+            GameAssets.font.setScale(1.0f,2.0f);
             GameAssets.font.drawText(batcher, highScores.get(1), 196, 1566);
             GameAssets.font.drawText(batcher, highScores.get(2), 700, 1566);
         }else {

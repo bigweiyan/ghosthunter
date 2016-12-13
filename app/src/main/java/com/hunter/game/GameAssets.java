@@ -12,32 +12,32 @@ import com.wxyz.framework.impl.GLGame;
  */
 
 public class GameAssets {
-    public static Texture battle_back;
-    public static Texture team_back;
-    public static Texture font_texture;
-    public static Texture item_texture;
+    static Texture battle_back;
+    static Texture team_back;
+    static Texture font_texture;
+    static Texture item_texture;
 
-    public static TextureRegion page_region;
-    public static TextureRegion search_button_up;
-    public static TextureRegion search_button_down;
-    public static TextureRegion search_button_busy;
-    public static TextureRegion connecting;
-    public static TextureRegion frequency_pointer;
-    public static TextureRegion fox_remained;
-    public static TextureRegion fox_hunted;
-    public static TextureRegion fox_red;
-    public static TextureRegion fox_blue;
-    public static TextureRegion[] items_region;
-    public static TextureRegion[] items_descript;
-    public static TextureRegion[] toasts;
-    public static final int TOAST_SIG_GET = 0;
-    public static final int TOAST_NO_SIG_GET = 1;
-    public static final int TOAST_ITEM_GET = 2;
-    public static final int TOAST_UNDER_ITEM = 3;
-    public static Font font;
+    static TextureRegion page_region;
+    static TextureRegion search_button_up;
+    static TextureRegion search_button_down;
+    static TextureRegion search_button_busy;
+    static TextureRegion connecting;
+    static TextureRegion frequency_pointer;
+    static TextureRegion fox_remained;
+    static TextureRegion fox_hunted;
+    static TextureRegion fox_red;
+    static TextureRegion fox_blue;
+    static TextureRegion[] items_region;
+    static TextureRegion[] items_descript;
+    static TextureRegion[] toasts;
+    static final int TOAST_SIG_GET = 0;
+    static final int TOAST_NO_SIG_GET = 1;
+    static final int TOAST_ITEM_GET = 2;
+    static final int TOAST_UNDER_ITEM = 3;
+    static Font font;
     public static Sound long_sound,short_sound,empty_sound;
 
-    public static void load(GLGame game) {
+    static void load(GLGame game) {
         battle_back = new Texture(game,"gameUI1.png");
         team_back = new Texture(game, "gameUI2.png");
         font_texture = new Texture(game, "font.png");
@@ -79,7 +79,7 @@ public class GameAssets {
 
     }
 
-    public static void reload() {
+    static void reload() {
         battle_back.reload();
         team_back.reload();
         font_texture.reload();

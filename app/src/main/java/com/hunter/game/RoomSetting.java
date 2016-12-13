@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -17,7 +16,6 @@ import android.widget.TextView;
 import com.gps.Sensor_If;
 import com.hunter.game.models.Signal;
 import com.hunter.game.models.Tools;
-import com.hunter.master.foxhunter.R;
 import com.hunter.network.NetworkException;
 import com.hunter.network.NetworkImplement;
 import com.hunter.network.NetworkSupport;
@@ -25,7 +23,6 @@ import com.hunter.sensor.SensorException;
 import com.hunter.sensor.SensorSupport;
 
 import java.util.ArrayList;
-import java.util.Random;
 
 /**
  * 房间设置界面.
@@ -45,14 +42,11 @@ public class RoomSetting extends AppCompatActivity {
      */
     private int mode;
 
-    private View mContentView;
     private NetworkSupport ns;
     private TextView signalListText;
     private ArrayList<String> signalText;
     private ArrayList<Signal> signals;
     private SensorSupport ss;
-
-    private Random rand;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,12 +63,11 @@ public class RoomSetting extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_room_setting);
-        mContentView = findViewById(R.id.createRoomLabel);
+        View mContentView = findViewById(R.id.createRoomLabel);
         signalListText = (TextView)findViewById(R.id.signalListText);
         signalListText.setMovementMethod(ScrollingMovementMethod.getInstance());
         signals = new ArrayList<>();
         signalText = new ArrayList<>();
-        rand = new Random();
 
         switch (mode) {
             case MODE_BATTLE:

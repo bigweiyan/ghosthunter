@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
-import android.support.v4.util.LogWriter;
-import android.util.Log;
 
 import com.gps.Sensor_If;
 import com.hunter.game.models.Item;
@@ -106,7 +104,6 @@ public class HuntGame extends GLGame {
         StrictMode.setThreadPolicy(policy);
 
         super.onCreate(savedInstanceState);
-        Log.w("tag", "onCreate: 111");
         Intent intent =  getIntent();
         playerName = intent.getStringExtra("name");
         roomNumber = intent.getIntExtra("roomNumber",0);
@@ -118,10 +115,7 @@ public class HuntGame extends GLGame {
         ss = new Sensor_If(this);
 
         try {
-
-            Log.w("tag", "onCreate: 333");
             RoomRule rule = ns.getRoomRule(roomNumber);
-            Log.w("tag", "onCreate: 444");
             signals = rule.signals;
             useItemBoolean = rule.useItem;
             highScores = ns.getHighScores(roomNumber);
@@ -164,7 +158,7 @@ public class HuntGame extends GLGame {
 
     /**
      * 获得受影响的道具组合.
-     * @return
+     * @return 受影响的道具组合.
      */
     public ArrayList<Item> getItems() {
         return items;
@@ -188,7 +182,7 @@ public class HuntGame extends GLGame {
 
     /**
      * 传递找到信号源的消息。信号源不许为负数
-     * @param signal
+     * @param signal 信号源的序号
      */
     public void findSignal(int signal) {
         setMassage(MASSAGE_SIGNAL);
@@ -197,7 +191,7 @@ public class HuntGame extends GLGame {
 
     /**
      * 传递使用道具的消息。道具不许为空
-     * @param item
+     * @param item 使用的道具
      */
     public void useItem(Item item) {
         setMassage(MASSAGE_USE_ITEM);
