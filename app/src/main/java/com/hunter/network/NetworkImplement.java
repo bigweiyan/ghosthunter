@@ -6,28 +6,13 @@ import com.hunter.game.models.Item;
 import com.hunter.game.models.RoomRule;
 import com.hunter.game.models.Signal;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TreeMap;
-
-import static com.hunter.game.models.Item.ITEM_COMPASS_LOSS;
-import static com.hunter.game.models.Item.ITEM_DIRECT_REVERT;
-import static com.hunter.game.models.Item.ITEM_ENLARGE_FREQ;
-import static com.hunter.game.models.Item.ITEM_FREQ_LOSS;
-import static com.hunter.game.models.Item.ITEM_SHORTEN_COLD;
-import static com.hunter.game.models.RoomRule.MODE_BATTLE;
-import static com.hunter.game.models.RoomRule.MODE_TEAM;
 
 /**
  * 网络类的实现
@@ -36,48 +21,63 @@ import static com.hunter.game.models.RoomRule.MODE_TEAM;
 
 public class NetworkImplement implements NetworkSupport
 {
-    final private String SEVER = "123.206.28.100";
-    //final private String SEVER = "192.168.191.1";
-    final private String DRIVER="com.mysql.jdbc.Driver";
-    final private String URL="jdbc:mysql://"+SEVER+":3306/foxhunter?user=root&password=KHuTuiGhjfYTdGVYLKj987676RtgJhFtYf";
 
-    final private String TIME_OUT = "3000";
+    private String result;
 
-    /**
-     * 建立数据库链接
-     * @return 未连接返回null，否则返回Connection
-     */
-    private Connection getConnection()
+    private class myThread extends Thread
     {
-        try
+        private String string;
+
+        myThread(String string)
         {
-            Class.forName(DRIVER);
-            Log.d("getConnection","driver ok");
-
-            Properties properties = new Properties();
-            properties.put("connectTimeout", TIME_OUT);
-
-            // this cannot set time_out
-            //Connection connection = DriverManager.getConnection(url,username,password,properties);
-
-
-            Log.d("getConnection","SET properties ok");
-
-            //try new way to getConnection
-            Connection connection = DriverManager.getConnection(URL,properties);
-
-
-            Log.d("getConnection","Connection OK!");
-
-            return connection;
+            this.string=string;
         }
-        catch (Exception e)
+
+        public void run()
         {
-            Log.d("getConnection","Connection ERROR!"+e.toString());
-            return null;
+            HttpURLConnection connection = null;
+            try {
+                URL url = new URL("http://115.236.59.67:8080/FoxHunt/index.jsp"+string);
+                Log.i("thread", "run: "+"http://115.236.59.67:8080/FoxHunt/index.jsp"+string);
+                connection = (HttpURLConnection) url.openConnection();
+                // 设置请求方法，默认是GET
+                connection.setRequestMethod("GET");
+                connection.setConnectTimeout(3000);
+                // 设置字符集
+                connection.setRequestProperty("Charset", "UTF-8");
+                // 设置文件类型
+                connection.setRequestProperty("Content-Type", "text/xml; charset=UTF-8");
+                // 设置请求参数，可通过Servlet的getHeader()获取
+                connection.setRequestProperty("Cookie", "AppName=" + URLEncoder.encode("你好", "UTF-8"));
+                // 设置自定义参数
+                connection.setRequestProperty("MyProperty", "this is me!");
+
+                if(connection.getResponseCode() == 200){
+                    InputStream is = connection.getInputStream();
+                    ByteArrayOutputStream baos   =   new   ByteArrayOutputStream();
+                    int i=-1;
+                    while((i=is.read())!=-1){
+                        baos.write(i);
+                    }
+                    result = baos.toString().trim();
+                }
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } finally {
+                if(connection != null){
+                    connection.disconnect();
+                }
+            }
         }
+
     }
 
+
+    private String doubleToString(double f)
+    {
+        return ""+(int)(f*1000000);
+    }
 
     /**
      * 检测是否有网络.
@@ -85,12 +85,43 @@ public class NetworkImplement implements NetworkSupport
      */
     public boolean checkLink()
     {
-        if(getConnection()==null)
+        Log.i(TAG, "checkLink: ");
+        String string = "?methodid=1";
+
+        try
+        {
+            result = null;
+
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+
+            String ret = new String(result);
+            result = null;
+
+            if (ret.startsWith("error:"))
+            {
+                throw new NetworkException(ret.substring(6));
+            }
+            else
+            {
+                return ret.equals("true") ? true : false;
+            }
+        }
+        catch (NetworkException e)
+        {
             return false;
-        else
-            return true;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
     }
 
+    String TAG = "test";
 
     /**
      * 创建新的游戏.
@@ -105,69 +136,50 @@ public class NetworkImplement implements NetworkSupport
     public int createRoom(int mode, String hostName, boolean useItem,
                           boolean autoReady, ArrayList<Signal> signals) throws NetworkException
     {
-        Log.d("createRoom","hostName="+hostName);
-        Connection connection = getConnection();
-        if(connection==null)
+        Log.i(TAG, "createRoom: ");
+        String string = "?methodid=2";
+        string += "&mode=" + mode;
+        string += "&hostName=" + hostName;
+        string += "&useItem=" + useItem;
+        string += "&autoReady=" + autoReady;
+        for (int i = 0; i < signals.size(); i++)
         {
-            Log.d("createRoom", "TIME OUT");
-            throw new NetworkException(NetworkException.TIME_OUT);
+            string += "&lat" + i + "=" + doubleToString(signals.get(i).latitude);
+            string += "&lon" + i + "=" + doubleToString(signals.get(i).longitude);
+            string += "&freq" + i + "=" + signals.get(i).frequency;
         }
-
-        final int iUseItem = useItem?1:0;
-        final int iAutoReady = autoReady?1:0;
 
         try
         {
-            Statement stmt = connection.createStatement();
-            String roomCreate = "insert into room values(null," + mode + ",'" + hostName + "'," + iUseItem + "," + iAutoReady + "," + NOT_READY_YET + ");";
+            result = null;
 
-            Log.d("createRoom", roomCreate);
+            Thread thread = new myThread(string);
 
-            if (stmt.executeUpdate(roomCreate) == 1)
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+
+            if (ret.startsWith("error:"))
             {
-                String roomIDQuery = "select max(roomid) from room;";
-                ResultSet rst = stmt.executeQuery(roomIDQuery);
-                Log.d("createRoom",roomIDQuery);
-                if(rst.next())
-                {
-                    final int roomID = rst.getInt("max(roomid)");
-                    int signalId = 0;
-                    for(Signal signal:signals)
-                    {
-                        String signalInsert = "insert into signals values("+roomID+","+signal.longitude+","+signal.latitude+","+signal.frequency+",0,"+signalId+");";
-                        signalId++;
-                        //Log.d("createRoom",signalInsert);
-                        if(stmt.executeUpdate(signalInsert)!=1)
-                        {
-                            rst.close();
-                            stmt.close();
-                            connection.close();
-                            throw new NetworkException(NetworkException.UNKNOWN);
-                        }
-                    }
-                    rst.close();
-                    stmt.close();
-                    connection.close();
-                    return roomID;
-                }
-                else
-                {
-                    rst.close();
-                    stmt.close();
-                    connection.close();
-                    throw new NetworkException(NetworkException.UNKNOWN);
-                }
+                Log.i(TAG, "createRoom: "+ret);
+                throw new NetworkException(ret.substring(6));
             }
             else
             {
-                stmt.close();
-                connection.close();
-                throw new NetworkException(NetworkException.UNKNOWN);
+                Log.i(TAG, "createRoom: ok!"+ret);
+                return Integer.parseInt(ret);
             }
+        }
+        catch (NetworkException e)
+        {
+            throw e;
         }
         catch (Exception e)
         {
-            Log.d("createRoom","catch exception "+e);
+            Log.i(TAG, "createRoom: otherexcpetion"+e);
             throw new NetworkException(NetworkException.UNKNOWN);
         }
     }
@@ -184,66 +196,47 @@ public class NetworkImplement implements NetworkSupport
      */
     public boolean checkIn(int roomNumber, String playerName, boolean isBlue) throws NetworkException
     {
-        Connection connection = getConnection();
-        if(connection==null)
-        {
-            Log.d("checkIn", "TIME OUT");
-            throw new NetworkException(NetworkException.TIME_OUT);
-        }
+        Log.i(TAG, "checkIn: ");
 
-        final int iIsBlue = isBlue?1:0;
+        String string = "?methodid=3";
+        string+="&roomNumber="+roomNumber;
+        string+="&playerName="+playerName;
+        string+="&isBlue="+isBlue;
 
         try
         {
-            Statement stmt = connection.createStatement();
+            result = null;
 
-            String roomQuery = "select * from room where roomid="+roomNumber+";";
-            ResultSet roomRst = stmt.executeQuery(roomQuery);
-            if(!roomRst.next())
-            {
-                roomRst.close();
-                stmt.close();
-                connection.close();
-                throw new NetworkException(NetworkException.WRONG_NUM);
-            }
-            roomRst.close();
+            Thread thread = new myThread(string);
 
-            String userQuery = "select * from user where roomid="+roomNumber+" and username='"+playerName+"';";
-            ResultSet userRst = stmt.executeQuery(userQuery);
-            if(userRst.next())
-            {
-                userRst.close();
-                stmt.close();
-                connection.close();
-                throw new NetworkException(NetworkException.SAME_NAME);
-            }
-            userRst.close();
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
 
-            String userUpdate = "insert into user values("+roomNumber+",'"+playerName+"',"+iIsBlue+","+"0,0);";
-            if(stmt.executeUpdate(userUpdate)==1)
+            String ret = new String(result);
+            result = null;
+
+            if (ret.startsWith("error:"))
             {
-                stmt.close();
-                connection.close();
-                return true;
+                throw new NetworkException(ret.substring(6));
             }
             else
             {
-                stmt.close();
-                connection.close();
-                return false;
+                return ret.equals("true")?true:false;
             }
         }
         catch (NetworkException e)
         {
-            Log.d("checkIn","Network Exception "+e);
             throw e;
         }
         catch (Exception e)
         {
-            Log.d("checkIn","other Exception "+e);
             throw new NetworkException(NetworkException.UNKNOWN);
         }
     }
+
+
 
 
     /**
@@ -256,50 +249,39 @@ public class NetworkImplement implements NetworkSupport
      */
     public boolean checkOut(int roomNumber, String playerName) throws NetworkException
     {
-        Connection connection = getConnection();
-        if(connection==null)
-        {
-            Log.d("checkOut", "TIME OUT");
-            throw new NetworkException(NetworkException.TIME_OUT);
-        }
+        Log.i(TAG, "checkOut: ");
+
+        String string = "?methodid=4";
+        string+="&roomNumber="+roomNumber;
+        string+="&playerName="+playerName;
 
         try
         {
-            Statement stmt = connection.createStatement();
+            result = null;
 
-            String roomQuery = "select * from room where roomid="+roomNumber+";";
-            ResultSet roomRst = stmt.executeQuery(roomQuery);
-            if(!roomRst.next())
-            {
-                roomRst.close();
-                stmt.close();
-                connection.close();
-                throw new NetworkException(NetworkException.WRONG_NUM);
-            }
-            roomRst.close();
+            Thread thread = new myThread(string);
 
-            String userUpdate = "delete from user where roomid="+roomNumber+" and username='"+playerName+"';";
-            if(stmt.executeUpdate(userUpdate)==1)
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
             {
-                stmt.close();
-                connection.close();
-                return true;
+                throw new NetworkException(ret.substring(6));
             }
             else
             {
-                stmt.close();
-                connection.close();
-                return false;
+                return ret.equals("true")?true:false;
             }
         }
         catch (NetworkException e)
         {
-            Log.d("checkOut","Network Exception "+e);
             throw e;
         }
         catch (Exception e)
         {
-            Log.d("checkOut","other Exception "+e);
             throw new NetworkException(NetworkException.UNKNOWN);
         }
     }
@@ -313,49 +295,44 @@ public class NetworkImplement implements NetworkSupport
      */
     public ArrayList<String> getMembersBlue(int roomNumber) throws  NetworkException
     {
-        Connection connection = getConnection();
-        if(connection==null)
-        {
-            Log.d("getMembersBlue", "TIME OUT");
-            throw new NetworkException(NetworkException.TIME_OUT);
-        }
+        Log.i(TAG, "getMembersBlue: ");
+
+        String string = "?methodid=5";
+        string+="&roomNumber="+roomNumber;
 
         try
         {
-            Statement stmt = connection.createStatement();
+            result = null;
 
-            String roomQuery = "select * from room where roomid="+roomNumber+";";
-            ResultSet roomRst = stmt.executeQuery(roomQuery);
-            if(!roomRst.next())
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+
+            String ret = new String(result);
+            result = null;
+
+            if (ret.startsWith("error:"))
             {
-                roomRst.close();
-                stmt.close();
-                connection.close();
-                throw new NetworkException(NetworkException.WRONG_NUM);
+                Log.i(TAG, "getMembersBlue: "+ret+"");
+                throw new NetworkException(ret.substring(6));
             }
-            roomRst.close();
-
-            ArrayList<String> arrayList = new ArrayList<>();
-            String userQuery = "select * from user where roomid="+roomNumber+" and isblue=1;";
-            ResultSet rst = stmt.executeQuery(userQuery);
-
-            while(rst.next())
+            else
             {
-                arrayList.add(rst.getString("username"));
+                ArrayList<String> ret2 = new ArrayList<>();
+                for(String i:ret.split("\n"))
+                    ret2.add(i);
+                return ret2;
             }
-            rst.close();
-            stmt.close();
-            connection.close();
-            return arrayList;
         }
         catch (NetworkException e)
         {
-            Log.d("getMembersBlue","Network Exception "+e);
             throw e;
         }
         catch (Exception e)
         {
-            Log.d("getMembersBlue","other Exception "+e);
             throw new NetworkException(NetworkException.UNKNOWN);
         }
     }
@@ -369,49 +346,42 @@ public class NetworkImplement implements NetworkSupport
      */
     public ArrayList<String> getMembersRed(int roomNumber) throws  NetworkException
     {
-        Connection connection = getConnection();
-        if(connection==null)
-        {
-            Log.d("getMembersRed", "TIME OUT");
-            throw new NetworkException(NetworkException.TIME_OUT);
-        }
+        Log.i(TAG, "getMembersRed: ");
+
+        String string = "?methodid=6";
+        string+="&roomNumber="+roomNumber;
 
         try
         {
-            Statement stmt = connection.createStatement();
+            result = null;
 
-            String roomQuery = "select * from room where roomid="+roomNumber+";";
-            ResultSet roomRst = stmt.executeQuery(roomQuery);
-            if(!roomRst.next())
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
             {
-                roomRst.close();
-                stmt.close();
-                connection.close();
-                throw new NetworkException(NetworkException.WRONG_NUM);
+                Log.i(TAG, "getMembersRed: "+ret+"");
+                throw new NetworkException(ret.substring(6));
             }
-            roomRst.close();
-
-            ArrayList<String> arrayList = new ArrayList<>();
-            String userQuery = "select * from user where roomid="+roomNumber+" and isblue=0;";
-            ResultSet rst = stmt.executeQuery(userQuery);
-
-            while(rst.next())
+            else
             {
-                arrayList.add(rst.getString("username"));
+                ArrayList<String> ret2 = new ArrayList<>();
+                for(String i:ret.split("\n"))
+                    ret2.add(i);
+                return ret2;
             }
-            rst.close();
-            stmt.close();
-            connection.close();
-            return arrayList;
         }
         catch (NetworkException e)
         {
-            Log.d("getMembersRed","Network Exception "+e);
             throw e;
         }
         catch (Exception e)
         {
-            Log.d("getMembersRed","other Exception "+e);
             throw new NetworkException(NetworkException.UNKNOWN);
         }
     }
@@ -425,58 +395,45 @@ public class NetworkImplement implements NetworkSupport
      */
     public RoomRule getRoomRule(int roomNumber) throws NetworkException
     {
-        Connection connection = getConnection();
-        if(connection==null)
-        {
-            Log.d("getRoomRule", "TIME OUT");
-            throw new NetworkException(NetworkException.TIME_OUT);
-        }
+        Log.i(TAG, "getRoomRule: ");
+
+        String string = "?methodid=7";
+        string+="&roomNumber="+roomNumber;
 
         try
         {
-            Statement stmt = connection.createStatement();
+            result = null;
 
-            String roomQuery = "select * from room where roomid=" + roomNumber + ";";
-            ResultSet roomRst = stmt.executeQuery(roomQuery);
-            if (roomRst.next())
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
             {
-                RoomRule roomRule = new RoomRule(false,false, MODE_TEAM);
-                roomRule.mode=roomRst.getInt("mode");
-                roomRule.useItem=roomRst.getBoolean("useitem");
-                roomRule.autoReady=roomRst.getBoolean("autoready");
-                roomRule.signals=new ArrayList<>();
-                roomRst.close();
-
-                String signalQuery = "select * from signals where roomid="+roomNumber+";";
-                ResultSet rst = stmt.executeQuery(signalQuery);
-                while(rst.next())
-                {
-                    Signal signal = new Signal(rst.getDouble("latitude"),rst.getDouble("longitude"),rst.getInt("frequency"));
-                    roomRule.signals.add(signal);
-                }
-
-                rst.close();
-                stmt.close();
-                connection.close();
-
-                return roomRule;
+                Log.i(TAG, "getRoomRule: "+ret+"");
+                throw new NetworkException(ret.substring(6));
             }
             else
             {
-                roomRst.close();
-                stmt.close();
-                connection.close();
-                throw new NetworkException(NetworkException.WRONG_NUM);
+                RoomRule ret2 = Tools.stringToRoomRule(ret);
+                Log.i(TAG, "getRoomRule: "+ret2.mode+" "+ret2.autoReady+" "+ret2.useItem);
+                for (Signal i:ret2.signals)
+                    Log.i(TAG, "getRoomRule: "+i.latitude+" "+i.longitude+" "+i.frequency);
+                return ret2;
             }
         }
         catch (NetworkException e)
         {
-            Log.d("getRoomRule","Network Exception "+e);
+            Log.i(TAG, "getRoomRule: me "+e);
             throw e;
         }
         catch (Exception e)
         {
-            Log.d("getRoomRule","other Exception "+e);
+            Log.i(TAG, "getRoomRule: others "+e);
             throw new NetworkException(NetworkException.UNKNOWN);
         }
     }
@@ -491,61 +448,45 @@ public class NetworkImplement implements NetworkSupport
      */
     public boolean gameReady(int roomNumber, String playerName) throws NetworkException
     {
-        Connection connection = getConnection();
-        if(connection==null)
-        {
-            Log.d("gameReady", "TIME OUT");
-            throw new NetworkException(NetworkException.TIME_OUT);
-        }
+        Log.i(TAG, "gameReady: ");
+
+        String string = "?methodid=8";
+        string+="&roomNumber="+roomNumber;
+        string+="&playerName="+playerName;
 
         try
         {
-            Statement stmt = connection.createStatement();
+            result = null;
 
-            String userQuery = "select * from user where roomid=" + roomNumber + " and username='"+playerName+"';";
-            ResultSet userRst = stmt.executeQuery(userQuery);
-            if (userRst.next())
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
             {
-                int isready = userRst.getInt("isready");
-                String userUpdate = "update user set isready="+(1-isready)+" where roomid="+roomNumber+" and username='"+playerName+"';";
-                if (stmt.executeUpdate(userUpdate)==1)
-                {
-                    userRst.close();
-                    stmt.close();
-                    connection.close();
-                    if(isready == 1) {
-                        return false;
-                    } else {
-                        return true;
-                    }
-                }
-                else
-                {
-                    userRst.close();
-                    stmt.close();
-                    connection.close();
-                    throw new NetworkException(NetworkException.UNKNOWN);
-                }
+                Log.i(TAG, "gameReady: "+ret);
+                throw new NetworkException(ret.substring(6));
             }
             else
             {
-                userRst.close();
-                stmt.close();
-                connection.close();
-                throw new NetworkException(NetworkException.UNKNOWN);
+                return ret.equals("true") ? true : false;
             }
+
         }
         catch (NetworkException e)
         {
-            Log.d("gameReady","Network Exception "+e);
             throw e;
         }
         catch (Exception e)
         {
-            Log.d("gameReady","other Exception "+e);
             throw new NetworkException(NetworkException.UNKNOWN);
         }
     }
+
 
 
     /**
@@ -556,70 +497,42 @@ public class NetworkImplement implements NetworkSupport
      */
     public boolean gameStart(int roomNumber) throws NetworkException
     {
-        Connection connection = getConnection();
-        if(connection==null)
-        {
-            Log.d("gameStart", "TIME OUT");
-            throw new NetworkException(NetworkException.TIME_OUT);
-        }
+        Log.i(TAG, "gameStart: ");
+
+        String string = "?methodid=9";
+        string+="&roomNumber="+roomNumber;
 
         try
         {
-            Statement stmt = connection.createStatement();
+            result = null;
 
-            String roomQuery = "select * from room where roomid=" + roomNumber + ";";
-            ResultSet roomRst = stmt.executeQuery(roomQuery);
-            if (roomRst.next())
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
             {
-                if (roomRst.getBoolean("autoready"))
-                {
-                    roomRst.close();
-                    stmt.close();
-                    connection.close();
-                    return true;
-                }
-                else
-                {
-                    roomRst.close();
-
-                    String userQuery = "select * from user where roomid=" + roomNumber + ";";
-                    ResultSet rst = stmt.executeQuery(userQuery);
-                    while (rst.next())
-                    {
-                        if(!rst.getBoolean("isready"))
-                        {
-                            rst.close();
-                            stmt.close();
-                            connection.close();
-                            return false;
-                        }
-                    }
-
-                    rst.close();
-                    stmt.close();
-                    connection.close();
-
-                    return true;
-                }
+                Log.i(TAG, "gameStart: "+ret);
+                throw new NetworkException(ret.substring(6));
             }
             else
             {
-                roomRst.close();
-                stmt.close();
-                connection.close();
-                throw new NetworkException(NetworkException.WRONG_NUM);
+                return ret.equals("true") ? true : false;
             }
         }
         catch (NetworkException e)
         {
-            Log.d("gameStart","Network Exception "+e);
             throw e;
         }
         catch (Exception e)
         {
-            Log.d("gameStart","other Exception "+e);
             throw new NetworkException(NetworkException.UNKNOWN);
         }
+
     }
 
 
@@ -631,45 +544,39 @@ public class NetworkImplement implements NetworkSupport
      */
     public int getGameState(int roomNumber) throws NetworkException
     {
-        Connection connection = getConnection();
-        if(connection==null)
-        {
-            Log.d("getGameState", "TIME OUT");
-            throw new NetworkException(NetworkException.TIME_OUT);
-        }
+        Log.i(TAG, "getGameState: ");
+
+        String string = "?methodid=10";
+        string+="&roomNumber="+roomNumber;
 
         try
         {
-            Statement stmt = connection.createStatement();
+            result = null;
 
-            String roomQuery = "select * from room where roomid=" + roomNumber + ";";
-            ResultSet roomRst = stmt.executeQuery(roomQuery);
-            if (roomRst.next())
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
             {
-                int gameState = roomRst.getInt("gamestate");
-
-                roomRst.close();
-                stmt.close();
-                connection.close();
-
-                return gameState;
+                Log.i(TAG, "getGameState: "+ret);
+                throw new NetworkException(ret.substring(6));
             }
             else
             {
-                roomRst.close();
-                stmt.close();
-                connection.close();
-                throw new NetworkException(NetworkException.WRONG_NUM);
+                return Integer.parseInt(ret);
             }
         }
         catch (NetworkException e)
         {
-            Log.d("getGameState","Network Exception "+e);
             throw e;
         }
         catch (Exception e)
         {
-            Log.d("getGameState","other Exception "+e);
             throw new NetworkException(NetworkException.UNKNOWN);
         }
     }
@@ -683,41 +590,40 @@ public class NetworkImplement implements NetworkSupport
      */
     public boolean setGameState(int roomNumber, int gameState) throws NetworkException
     {
-        Connection connection = getConnection();
-        if(connection==null)
-        {
-            Log.d("setGameState", "TIME OUT");
-            throw new NetworkException(NetworkException.TIME_OUT);
-        }
+        Log.i(TAG, "setGameState: ");
+
+        String string = "?methodid=11";
+        string+="&roomNumber="+roomNumber;
+        string+="&gameState="+gameState;
 
         try
         {
-            Statement stmt = connection.createStatement();
+            result = null;
 
-            String roomUpdate = "update room set gamestate="+gameState+" where roomid="+roomNumber+";";
-            if (stmt.executeUpdate(roomUpdate)==1)
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
             {
-                stmt.close();
-                connection.close();
-
-                return true;
+                Log.i(TAG, "setGameState: "+ret);
+                throw new NetworkException(ret.substring(6));
             }
             else
             {
-                stmt.close();
-                connection.close();
-
-                throw new NetworkException(NetworkException.UNKNOWN);
+                return ret.equals("true") ? true : false;
             }
         }
         catch (NetworkException e)
         {
-            Log.d("setGameState","Network Exception "+e);
             throw e;
         }
         catch (Exception e)
         {
-            Log.d("setGameState","other Exception "+e);
             throw new NetworkException(NetworkException.UNKNOWN);
         }
     }
@@ -731,45 +637,40 @@ public class NetworkImplement implements NetworkSupport
      */
     public String getHostName(int roomNumber) throws NetworkException
     {
-        Connection connection = getConnection();
-        if(connection==null)
-        {
-            Log.d("getHostName", "TIME OUT");
-            throw new NetworkException(NetworkException.TIME_OUT);
-        }
+        Log.i(TAG, "getHostName: ");
+
+        String string = "?methodid=12";
+        string+="&roomNumber="+roomNumber;
 
         try
         {
-            Statement stmt = connection.createStatement();
+            result = null;
 
-            String roomQuery = "select * from room where roomid=" + roomNumber + ";";
-            ResultSet roomRst = stmt.executeQuery(roomQuery);
-            if (roomRst.next())
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
             {
-                String hostName = roomRst.getString("hostname");
-
-                roomRst.close();
-                stmt.close();
-                connection.close();
-
-                return hostName;
+                Log.i(TAG, "getHostName: "+ret);
+                throw new NetworkException(ret.substring(6));
             }
             else
             {
-                roomRst.close();
-                stmt.close();
-                connection.close();
-                throw new NetworkException(NetworkException.WRONG_NUM);
+                return ret;
             }
+
         }
         catch (NetworkException e)
         {
-            Log.d("getHostName","Network Exception "+e);
             throw e;
         }
         catch (Exception e)
         {
-            Log.d("getHostName","other Exception "+e);
             throw new NetworkException(NetworkException.UNKNOWN);
         }
     }
@@ -785,93 +686,50 @@ public class NetworkImplement implements NetworkSupport
      */
     public ArrayList<String> getHighScores(int roomNumber) throws NetworkException
     {
-        Connection connection = getConnection();
-        if(connection==null)
-        {
-            Log.d("getHighScores", "TIME OUT");
-            throw new NetworkException(NetworkException.TIME_OUT);
-        }
+        Log.i(TAG, "getHighScores: ");
+
+        String string = "?methodid=13";
+        string+="&roomNumber="+roomNumber;
 
         try
         {
-            int roomMode = getRoomRule(roomNumber).mode;
-            ArrayList<String> score = new ArrayList<>();
+            result = null;
 
-            Statement stmt = connection.createStatement();
+            Thread thread = new myThread(string);
 
-            String userQuery = "select * from user where roomid=" + roomNumber + ";";
-            ResultSet userRst = stmt.executeQuery(userQuery);
-
-            if(roomMode == MODE_TEAM)   //团队模式 得到红蓝两队分数
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
             {
-                int redScore = 0;
-                int blueScore = 0;
-                while (userRst.next())
-                {
-                    if(userRst.getBoolean("isblue"))
-                        blueScore+=userRst.getInt("score");
-                    else
-                        redScore+=userRst.getInt("score");
-                }
-
-                score.add(""+redScore);
-                score.add(""+blueScore);
+                Log.i(TAG, "getHighScores: "+ret);
+                throw new NetworkException(ret.substring(6));
             }
-            else                        //混战模式 得到前三人的分数和名字
+            else
             {
-                class User implements Comparable
+                ArrayList<String> ret2 = new ArrayList<>();
+                int player = 0;
+                for (String i : ret.split("\n"))
                 {
-                    int score;
-                    String userName;
-
-                    User(int score, String userName)
-                    {
-                        this.score=score;
-                        this.userName=userName;
-                    }
-
-                    public int compareTo(Object obj)
-                    {
-                        User B = (User) obj;
-                        return B.score-this.score;
-                    }
-                }
-
-                List<User> list = new ArrayList<User>();
-                while(userRst.next())
-                {
-                    list.add(new User(userRst.getInt("score"),userRst.getString("username")+" "+userRst.getString("score")));
-                }
-                Collections.sort(list);
-
-                int rank = 0;
-                for (User i : list)
-                {
-                    //System.out.println("score="+i.score+" name="+i.userName);
-                    score.add(i.userName);
-                    rank++;
-                    if(rank==3)
+                    ret2.add(i);
+                    player++;
+                    if(player==3)
                         break;
                 }
-                for(int i=rank; i<3; i++)
-                    score.add("");
-
+                for(int i=player;i<3;i++)
+                    ret2.add(" ");
+                return ret2;
             }
-
-            userRst.close();
-            stmt.close();
-            connection.close();
-
-            return score;
         }
         catch (NetworkException e)
         {
-            Log.d("getHighScores","Network Exception "+e);
             throw e;
         }
         catch (Exception e)
         {
-            Log.d("getHighScores","other Exception "+e);
             throw new NetworkException(NetworkException.UNKNOWN);
         }
     }
@@ -886,136 +744,37 @@ public class NetworkImplement implements NetworkSupport
      */
     public void useItem(int roomNumber, String playerName, Item item) throws NetworkException
     {
-        Log.d("useItem","begin");
-        Connection connection = getConnection();
-        if(connection==null)
-        {
-            Log.d("useItem", "TIME OUT");
-            throw new NetworkException(NetworkException.TIME_OUT);
-        }
+        Log.i(TAG, "useItem: ");
+
+        String string = "?methodid=14";
+        string+="&roomNumber="+roomNumber;
+        string+="&playerName="+playerName;
+        string+="&item="+item;
 
         try
         {
-            int roomMode = getRoomRule(roomNumber).mode;
-            HashMap<String, Boolean> team = new HashMap<String, Boolean>();
-            boolean useItemUserTeam = false;
-            ArrayList<String> effectedUser = new ArrayList<String>();
-            Statement stmt = connection.createStatement();
+            result = null;
 
-            String userQuery = "select * from user where roomid=" + roomNumber + ";";
-            ResultSet userRst = stmt.executeQuery(userQuery);
+            Thread thread = new myThread(string);
 
-            while(userRst.next())
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
             {
-                team.put(userRst.getString("username"), userRst.getBoolean("isblue"));
+                Log.i(TAG, "useItem: "+ret);
+                throw new NetworkException(ret.substring(6));
             }
-
-            useItemUserTeam = team.get(playerName);
-
-            switch (item.getItemType())
-            {
-                case ITEM_SHORTEN_COLD :
-                    if(roomMode==MODE_TEAM)
-                    {
-                        for(String i:team.keySet())
-                            if(team.get(i)==useItemUserTeam)
-                                effectedUser.add(i);
-                    }
-                    else
-                    {
-                        effectedUser.add(playerName);
-                    }
-                    break;
-
-                case ITEM_COMPASS_LOSS:
-                    if(roomMode==MODE_TEAM)
-                    {
-                        for(String i:team.keySet())
-                            if(team.get(i)!=useItemUserTeam)
-                                effectedUser.add(i);
-                    }
-                    else
-                    {
-                        for(String i:team.keySet())
-                            if(!i.equals(playerName))
-                                effectedUser.add(i);
-                    }
-                    break;
-
-                case ITEM_FREQ_LOSS:
-                    if(roomMode==MODE_TEAM)
-                    {
-                        for(String i:team.keySet())
-                            if(team.get(i)!=useItemUserTeam)
-                                effectedUser.add(i);
-                    }
-                    else
-                    {
-                        for(String i:team.keySet())
-                            if(!i.equals(playerName))
-                                effectedUser.add(i);
-                    }
-                    break;
-
-                case ITEM_ENLARGE_FREQ:
-                    if(roomMode==MODE_TEAM)
-                    {
-                        for(String i:team.keySet())
-                            if(team.get(i)==useItemUserTeam)
-                                effectedUser.add(i);
-                    }
-                    else
-                    {
-                        effectedUser.add(playerName);
-                    }
-                    break;
-
-                case ITEM_DIRECT_REVERT:
-
-                    ArrayList<String> userList = new ArrayList<>();
-
-                    if(roomMode==MODE_TEAM)
-                    {
-                        for(String i:team.keySet())
-                            if(team.get(i)!=useItemUserTeam)
-                                userList.add(i);
-                    }
-                    else
-                    {
-                        for(String i:team.keySet())
-                            if(!i.equals(playerName))
-                                userList.add(i);
-                    }
-                    effectedUser.add(userList.get((int)(Math.random()*userList.size())));
-
-                    break;
-
-                default:
-                    throw new NetworkException(NetworkException.UNKNOWN);
-            }
-
-            for(String i:effectedUser)
-            {
-                String itemUpdate = "insert into item values("+roomNumber+",'"+ i +"',"+item.getItemType()+","+item.getRemainTime()+");";
-                Log.d("useItem", "useItem: "+itemUpdate);
-                if(stmt.executeUpdate(itemUpdate)!=1)
-                {
-                    stmt.close();
-                    connection.close();
-                    throw new NetworkException(NetworkException.UNKNOWN);
-                }
-            }
-            stmt.close();
-            connection.close();
         }
         catch (NetworkException e)
         {
-            Log.d("useItem","Network Exception "+e);
             throw e;
         }
         catch (Exception e)
         {
-            Log.d("useItem","other Exception "+e);
             throw new NetworkException(NetworkException.UNKNOWN);
         }
     }
@@ -1028,40 +787,42 @@ public class NetworkImplement implements NetworkSupport
      * @return
      * @throws NetworkException
      */
-    public ArrayList<Item> getItemsEffect(int roomNumber, String playerName) throws NetworkException {
-        Connection connection = getConnection();
-        if(connection==null)
-        {
-            Log.d("getItemsEffect", "TIME OUT");
-            throw new NetworkException(NetworkException.TIME_OUT);
-        }
+    public ArrayList<Item> getItemsEffect(int roomNumber, String playerName) throws NetworkException
+    {
+        Log.i(TAG, "getItemsEffect: ");
+
+        String string = "?methodid=15";
+        string+="&roomNumber="+roomNumber;
+        string+="&playerName="+playerName;
 
         try
         {
-            ArrayList<Item> item = new ArrayList<>();
-            Statement stmt = connection.createStatement();
+            result = null;
 
-            String itemQuery = "select * from item where roomid=" + roomNumber + " and username=" + playerName +";";
-            ResultSet userRst = stmt.executeQuery(itemQuery);
+            Thread thread = new myThread(string);
 
-            while(userRst.next())
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
             {
-                Item oneItem = new Item(userRst.getInt("itemtype"));
-                oneItem.setRemainTime(userRst.getFloat("remaintime"));
-                item.add(oneItem);
+                Log.i(TAG, "getItemsEffect: "+ret);
+                throw new NetworkException(ret.substring(6));
             }
-
-            String itemUpdate = "delete from item where roomid="+roomNumber+" and username='"+playerName+"';";
-            stmt.executeUpdate(itemUpdate);
-
-            stmt.close();
-            connection.close();
-
-            return item;
+            else
+            {
+                return Tools.stringToItems(ret);
+            }
+        }
+        catch (NetworkException e)
+        {
+            throw e;
         }
         catch (Exception e)
         {
-            Log.d("getItemsEffect","other Exception "+e);
             throw new NetworkException(NetworkException.UNKNOWN);
         }
     }
@@ -1077,68 +838,42 @@ public class NetworkImplement implements NetworkSupport
      */
     public Item findSignal(int roomNumber, String playerName, int signal) throws NetworkException
     {
-        Connection connection = getConnection();
-        if(connection==null)
-        {
-            Log.d("findSignal", "TIME OUT");
-            throw new NetworkException(NetworkException.TIME_OUT);
-        }
+
+        Log.i(TAG, "findSignal: ");
+
+        String string = "?methodid=16";
+        string+="&roomNumber="+roomNumber;
+        string+="&playerName="+playerName;
+        string+="&signal="+signal;
 
         try
         {
-            int roomMode = getRoomRule(roomNumber).mode;
-            int team = 0;
+            result = null;
 
-            Statement stmt = connection.createStatement();
-            String userQuery = "select * from user where roomid=" + roomNumber + " and username='" + playerName + "';";
-            //Log.d("findSignal", userQuery);
-            ResultSet userRst = stmt.executeQuery(userQuery);
-            int score = 0;
-            if(userRst.next())
+            Thread thread = new myThread(string);
+
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
             {
-                score = userRst.getInt("score");
-                team = userRst.getInt("isblue") + 1;
+                Log.i(TAG, "findSignal: "+ret);
+                throw new NetworkException(ret.substring(6));
             }
             else
-                throw new NetworkException(NetworkException.UNKNOWN);
-
-            userRst.close();
-            score++;
-            String userUpdate = "update user set score="+score+" where roomid="+roomNumber+" and username='"+playerName+"';";
-            if(stmt.executeUpdate(userUpdate) != 1)
-                throw new NetworkException(NetworkException.UNKNOWN);
-
-            if(roomMode==MODE_TEAM)
             {
-                String signalUpdate = "update signals set belong="+team+" where roomid="+roomNumber+" and signalid='"+signal+"';";
-                if(stmt.executeUpdate(signalUpdate)!=1)
-                    throw new NetworkException(NetworkException.UNKNOWN);
+                return Tools.stringToItem(ret);
             }
-            stmt.close();
-            connection.close();
-
-            if(Math.random()<0.5)
-            {
-                Item item = new Item((int)(Math.random()*5));
-                //Log.d("findSignal",""+item.getItemType());
-                if(item.getItemType()==0)
-                    item.setRemainTime(180);                // * 用秒做时间单位
-                else
-                    item.setRemainTime(60);
-
-                return item;
-            }
-            else
-                return null;
         }
         catch (NetworkException e)
         {
-            Log.d("findSignal","Network Exception "+e);
             throw e;
         }
         catch (Exception e)
         {
-            Log.d("findSignal","other Exception "+e);
             throw new NetworkException(NetworkException.UNKNOWN);
         }
     }
@@ -1151,35 +886,44 @@ public class NetworkImplement implements NetworkSupport
      * @return
      * @throws NetworkException
      */
-    public ArrayList<Integer> getSignalBelong(int roomNumber) throws NetworkException {
-        Connection connection = getConnection();
-        if(connection==null)
-        {
-            Log.d("getSignalBelong", "TIME OUT");
-            throw new NetworkException(NetworkException.TIME_OUT);
-        }
+    public ArrayList<Integer> getSignalBelong(int roomNumber) throws NetworkException
+    {
+        Log.i(TAG, "getSignalBelong: ");
+
+        String string = "?methodid=17";
+        string += "&roomNumber=" + roomNumber;
 
         try
         {
+            result = null;
 
-            ArrayList<Integer> belong = new ArrayList<>();
+            Thread thread = new myThread(string);
 
-            Statement stmt = connection.createStatement();
-
-            String userQuery = "select * from signal where roomid=" + roomNumber + ";";
-            ResultSet signalRst = stmt.executeQuery(userQuery);
-
-
-            while (signalRst.next())
+            thread.start();
+            while (true)
+                if (result != null)
+                    break;
+            String ret = new String(result);
+            result = null;
+            if (ret.startsWith("error:"))
             {
-                belong.add(new Integer(signalRst.getInt("belong")));
+                Log.i(TAG, "getSignalBelong: "+ret);
+                throw new NetworkException(ret.substring(6));
             }
-
-            return belong;
+            else
+            {
+                ArrayList<Integer> ret2 = new ArrayList<>();
+                for (String i : ret.split("\n"))
+                    ret2.add(new Integer(i));
+                return ret2;
+            }
+        }
+        catch (NetworkException e)
+        {
+            throw e;
         }
         catch (Exception e)
         {
-            Log.d("getSignalBelong","other Exception "+e);
             throw new NetworkException(NetworkException.UNKNOWN);
         }
     }

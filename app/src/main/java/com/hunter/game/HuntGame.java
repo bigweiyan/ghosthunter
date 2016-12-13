@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
+import android.support.v4.util.LogWriter;
+import android.util.Log;
 
 import com.gps.Sensor_If;
 import com.hunter.game.models.Item;
@@ -104,7 +106,7 @@ public class HuntGame extends GLGame {
         StrictMode.setThreadPolicy(policy);
 
         super.onCreate(savedInstanceState);
-
+        Log.w("tag", "onCreate: 111");
         Intent intent =  getIntent();
         playerName = intent.getStringExtra("name");
         roomNumber = intent.getIntExtra("roomNumber",0);
@@ -116,7 +118,10 @@ public class HuntGame extends GLGame {
         ss = new Sensor_If(this);
 
         try {
+
+            Log.w("tag", "onCreate: 333");
             RoomRule rule = ns.getRoomRule(roomNumber);
+            Log.w("tag", "onCreate: 444");
             signals = rule.signals;
             useItemBoolean = rule.useItem;
             highScores = ns.getHighScores(roomNumber);
