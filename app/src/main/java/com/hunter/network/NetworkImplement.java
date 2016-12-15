@@ -394,8 +394,6 @@ public class NetworkImplement implements NetworkSupport
      */
     public RoomRule getRoomRule(int roomNumber) throws NetworkException
     {
-        Log.i(TAG, "getRoomRule: ");
-
         String string = "?methodid=7";
         string+="&roomNumber="+roomNumber;
 
@@ -413,7 +411,6 @@ public class NetworkImplement implements NetworkSupport
             result = null;
             if (ret.startsWith("error:"))
             {
-                Log.i(TAG, "getRoomRule: "+ret+"");
                 throw new NetworkException(ret.substring(6));
             }
             else
@@ -427,12 +424,10 @@ public class NetworkImplement implements NetworkSupport
         }
         catch (NetworkException e)
         {
-            Log.i(TAG, "getRoomRule: me "+e);
             throw e;
         }
         catch (Exception e)
         {
-            Log.i(TAG, "getRoomRule: others "+e);
             throw new NetworkException(NetworkException.UNKNOWN);
         }
     }
@@ -447,8 +442,6 @@ public class NetworkImplement implements NetworkSupport
      */
     public boolean gameReady(int roomNumber, String playerName) throws NetworkException
     {
-        Log.i(TAG, "gameReady: ");
-
         String string = "?methodid=8";
         string+="&roomNumber="+roomNumber;
         string+="&playerName="+playerName;
@@ -467,7 +460,6 @@ public class NetworkImplement implements NetworkSupport
             result = null;
             if (ret.startsWith("error:"))
             {
-                Log.i(TAG, "gameReady: "+ret);
                 throw new NetworkException(ret.substring(6));
             }
             else
@@ -496,8 +488,6 @@ public class NetworkImplement implements NetworkSupport
      */
     public boolean gameStart(int roomNumber) throws NetworkException
     {
-        Log.i(TAG, "gameStart: ");
-
         String string = "?methodid=9";
         string+="&roomNumber="+roomNumber;
 
@@ -515,7 +505,6 @@ public class NetworkImplement implements NetworkSupport
             result = null;
             if (ret.startsWith("error:"))
             {
-                Log.i(TAG, "gameStart: "+ret);
                 throw new NetworkException(ret.substring(6));
             }
             else
@@ -543,8 +532,6 @@ public class NetworkImplement implements NetworkSupport
      */
     public int getGameState(int roomNumber) throws NetworkException
     {
-        Log.i(TAG, "getGameState: ");
-
         String string = "?methodid=10";
         string+="&roomNumber="+roomNumber;
 
@@ -562,7 +549,6 @@ public class NetworkImplement implements NetworkSupport
             result = null;
             if (ret.startsWith("error:"))
             {
-                Log.i(TAG, "getGameState: "+ret);
                 throw new NetworkException(ret.substring(6));
             }
             else
@@ -589,8 +575,6 @@ public class NetworkImplement implements NetworkSupport
      */
     public boolean setGameState(int roomNumber, int gameState) throws NetworkException
     {
-        Log.i(TAG, "setGameState: ");
-
         String string = "?methodid=11";
         string+="&roomNumber="+roomNumber;
         string+="&gameState="+gameState;
@@ -609,7 +593,6 @@ public class NetworkImplement implements NetworkSupport
             result = null;
             if (ret.startsWith("error:"))
             {
-                Log.i(TAG, "setGameState: "+ret);
                 throw new NetworkException(ret.substring(6));
             }
             else
@@ -636,8 +619,6 @@ public class NetworkImplement implements NetworkSupport
      */
     public String getHostName(int roomNumber) throws NetworkException
     {
-        Log.i(TAG, "getHostName: ");
-
         String string = "?methodid=12";
         string+="&roomNumber="+roomNumber;
 
@@ -655,7 +636,6 @@ public class NetworkImplement implements NetworkSupport
             result = null;
             if (ret.startsWith("error:"))
             {
-                Log.i(TAG, "getHostName: "+ret);
                 throw new NetworkException(ret.substring(6));
             }
             else
@@ -685,7 +665,6 @@ public class NetworkImplement implements NetworkSupport
      */
     public ArrayList<String> getHighScores(int roomNumber) throws NetworkException
     {
-        Log.i(TAG, "getHighScores: ");
 
         String string = "?methodid=13";
         string+="&roomNumber="+roomNumber;
@@ -704,7 +683,6 @@ public class NetworkImplement implements NetworkSupport
             result = null;
             if (ret.startsWith("error:"))
             {
-                Log.i(TAG, "getHighScores: "+ret);
                 throw new NetworkException(ret.substring(6));
             }
             else
@@ -743,8 +721,6 @@ public class NetworkImplement implements NetworkSupport
      */
     public void useItem(int roomNumber, String playerName, Item item) throws NetworkException
     {
-        Log.i(TAG, "useItem: ");
-
         String string = "?methodid=14";
         string+="&roomNumber="+roomNumber;
         string+="&playerName="+playerName;
@@ -764,7 +740,6 @@ public class NetworkImplement implements NetworkSupport
             result = null;
             if (ret.startsWith("error:"))
             {
-                Log.i(TAG, "useItem: "+ret);
                 throw new NetworkException(ret.substring(6));
             }
         }
@@ -788,8 +763,6 @@ public class NetworkImplement implements NetworkSupport
      */
     public ArrayList<Item> getItemsEffect(int roomNumber, String playerName) throws NetworkException
     {
-        Log.i(TAG, "getItemsEffect: ");
-
         String string = "?methodid=15";
         string+="&roomNumber="+roomNumber;
         string+="&playerName="+playerName;
@@ -808,7 +781,6 @@ public class NetworkImplement implements NetworkSupport
             result = null;
             if (ret.startsWith("error:"))
             {
-                Log.i(TAG, "getItemsEffect: "+ret);
                 throw new NetworkException(ret.substring(6));
             }
             else
@@ -838,8 +810,6 @@ public class NetworkImplement implements NetworkSupport
     public Item findSignal(int roomNumber, String playerName, int signal) throws NetworkException
     {
 
-        Log.i(TAG, "findSignal: ");
-
         String string = "?methodid=16";
         string+="&roomNumber="+roomNumber;
         string+="&playerName="+playerName;
@@ -859,7 +829,6 @@ public class NetworkImplement implements NetworkSupport
             result = null;
             if (ret.startsWith("error:"))
             {
-                Log.i(TAG, "findSignal: "+ret);
                 throw new NetworkException(ret.substring(6));
             }
             else
@@ -887,8 +856,6 @@ public class NetworkImplement implements NetworkSupport
      */
     public ArrayList<Integer> getSignalBelong(int roomNumber) throws NetworkException
     {
-        Log.i(TAG, "getSignalBelong: ");
-
         String string = "?methodid=17";
         string += "&roomNumber=" + roomNumber;
 
@@ -906,7 +873,6 @@ public class NetworkImplement implements NetworkSupport
             result = null;
             if (ret.startsWith("error:"))
             {
-                Log.i(TAG, "getSignalBelong: "+ret);
                 throw new NetworkException(ret.substring(6));
             }
             else

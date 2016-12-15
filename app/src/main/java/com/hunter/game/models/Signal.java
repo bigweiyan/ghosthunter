@@ -46,6 +46,7 @@ public class Signal {
 
     void play(float dtime)
     {
+
         time-=dtime;
         if (time < 0)
         {
@@ -54,12 +55,13 @@ public class Signal {
             if(NowId==0)
             {
                 GameAssets.short_sound.play(volume);
+
             }
             if(NowId==1)
             {
                 GameAssets.long_sound.play(volume);
             }
-            if(NowId==0)
+            if(NowId==-1)
             {
                 GameAssets.empty_sound.play(volume);
             }

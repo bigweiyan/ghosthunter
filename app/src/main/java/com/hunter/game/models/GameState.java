@@ -160,12 +160,25 @@ public class GameState {
 
                 double len = GetDistance(aimSignal.longitude,aimSignal.latitude,longitude,latitude);
                 double dx= GetDistance(aimSignal.longitude,latitude,longitude,latitude);
-                if(latitude < aimSignal.latitude) {
-                    dx = -dx;
-                }
+
                 double dangle=Math.asin(dx/len)*180/Math.PI;
 
-                dangle = dangle - angle;
+                if(longitude < aimSignal.longitude && latitude < aimSignal.latitude) {
+                    dangle = angle - dangle;
+                    //1
+                }
+                if(longitude < aimSignal.longitude && latitude >= aimSignal.latitude) {
+                    dangle = angle + dangle + 180;
+                    //4
+                }
+                if(longitude >= aimSignal.longitude && latitude < aimSignal.latitude) {
+                    dangle = dangle + angle;
+                    //2
+                }
+                if(longitude >= aimSignal.longitude && latitude >= aimSignal.latitude) {
+                    dangle = dangle - angle + 180;
+                    //3
+                }
 
                 if (len < 10){
                     aimSignal.setVolume(1f);
@@ -179,8 +192,9 @@ public class GameState {
                     }else if ((effect >> 2) % 2 == 1){
                         dangle = 180 - dangle;
                         //效果：方向转向
+                        Log.i("dangle","转向");
                     }
-                    volume *= 0.5f + (Math.cos(rad(dangle)) * 0.5);
+                    volume *= (0.5f + (Math.cos(rad(dangle)) * 0.5));
                     aimSignal.setVolume(volume);
                 }
             }
